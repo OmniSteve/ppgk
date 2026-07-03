@@ -9,7 +9,7 @@ export default function Packages() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    apiClient.get('/packages/active').then(setPackages).catch(() => setPackages([])).finally(() => setLoading(false));
+    apiClient.get('/packages').then((data) => setPackages(data.packages ?? data ?? [])).catch(() => setPackages([])).finally(() => setLoading(false));
   }, []);
 
   const handlePurchase = async (pkg) => {

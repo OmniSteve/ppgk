@@ -14,7 +14,7 @@ export default function PurchaseHistory() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get('/purchases').then(setPurchases).catch(() => setPurchases([])).finally(() => setLoading(false));
+    apiClient.get('/credits').then((data) => setPurchases(data.purchases ?? [])).catch(() => setPurchases([])).finally(() => setLoading(false));
   }, []);
 
   return (

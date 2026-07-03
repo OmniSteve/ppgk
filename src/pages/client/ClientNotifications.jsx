@@ -18,7 +18,7 @@ export default function ClientNotifications() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get('/notifications').then(setNotifications).catch(() => setNotifications([])).finally(() => setLoading(false));
+    apiClient.get('/notifications').then((data) => setNotifications(data.notifications ?? data ?? [])).catch(() => setNotifications([])).finally(() => setLoading(false));
   }, []);
 
   return (

@@ -21,7 +21,7 @@ export default function UpcomingBookings() {
 
   useEffect(() => {
     apiClient.get(`/bookings?filter=${filter}`)
-      .then(setBookings).catch(() => setBookings([])).finally(() => setLoading(false));
+      .then((data) => setBookings(data.bookings ?? data ?? [])).catch(() => setBookings([])).finally(() => setLoading(false));
   }, [filter]);
 
   return (

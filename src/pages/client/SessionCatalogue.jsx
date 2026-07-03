@@ -75,7 +75,7 @@ export default function SessionCatalogue() {
 
   useEffect(() => {
     apiClient.get('/sessions?' + new URLSearchParams({ ...filters, search }).toString())
-      .then(setSessions).catch(() => setSessions([])).finally(() => setLoading(false));
+      .then((data) => setSessions(data.sessions ?? data ?? [])).catch(() => setSessions([])).finally(() => setLoading(false));
   }, [filters, search]);
 
   const toggleSelect = (session) => {

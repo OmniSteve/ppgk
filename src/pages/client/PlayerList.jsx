@@ -8,7 +8,7 @@ export default function PlayerList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get('/players').then(setPlayers).catch(() => setPlayers([])).finally(() => setLoading(false));
+    apiClient.get('/players').then((data) => setPlayers(data.players ?? data ?? [])).catch(() => setPlayers([])).finally(() => setLoading(false));
   }, []);
 
   return (
