@@ -4,16 +4,16 @@ import { Calendar, Users, CreditCard, AlertCircle, TrendingUp, ClipboardList, Pa
 import { apiClient } from '@/services/apiClient';
 
 const StatCard = ({ label, value, sub, icon: Icon, color, href, alert }) => (
-  <Link to={href || '#'} className={`bg-white rounded-2xl p-5 border transition-all hover:shadow-md group ${alert ? 'border-amber-300 bg-amber-50' : 'border-slate-200 hover:border-[#2563EB]/40'}`}>
+  <Link to={href || '#'} className={`rounded-2xl p-5 border transition-all hover:border-[#2563EB]/50 group ${alert ? 'border-amber-500/30 bg-amber-500/10' : 'border-white/10 bg-white/5 hover:bg-white/8'}`}>
     <div className="flex items-start justify-between mb-3">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
         <Icon size={18} />
       </div>
-      {alert && <AlertCircle size={16} className="text-amber-500" />}
+      {alert && <AlertCircle size={16} className="text-amber-400" />}
     </div>
-    <p className={`text-2xl font-black ${alert ? 'text-amber-800' : 'text-slate-900'}`}>{value}</p>
-    <p className={`text-sm font-medium mt-0.5 ${alert ? 'text-amber-700' : 'text-slate-500'}`}>{label}</p>
-    {sub && <p className={`text-xs mt-1 ${alert ? 'text-amber-600' : 'text-slate-400'}`}>{sub}</p>}
+    <p className={`text-2xl font-black ${alert ? 'text-amber-300' : 'text-white'}`}>{value}</p>
+    <p className={`text-sm font-medium mt-0.5 ${alert ? 'text-amber-400' : 'text-slate-400'}`}>{label}</p>
+    {sub && <p className={`text-xs mt-1 ${alert ? 'text-amber-500' : 'text-slate-500'}`}>{sub}</p>}
   </Link>
 );
 
