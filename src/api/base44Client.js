@@ -1,14 +1,5 @@
-import { createClient } from '@base44/sdk';
-import { appParams } from '@/lib/app-params';
-
-const { appId, token, functionsVersion, appBaseUrl } = appParams;
-
-//Create a client with authentication required
-export const base44 = createClient({
-  appId,
-  token,
-  functionsVersion,
-  serverUrl: '',
-  requiresAuth: false,
-  appBaseUrl
-});
+// This file is intentionally left as a stub.
+// All authentication is handled by src/contexts/AuthContext.jsx via /api/auth/* routes.
+// All API calls are handled by src/services/apiClient.js via /api/* routes.
+// No Base44 SDK is used at runtime.
+export const base44 = null;
