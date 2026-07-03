@@ -3,19 +3,20 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
+const inputCls = 'w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors';
+const labelCls = 'block text-sm font-medium text-slate-300 mb-1.5';
+
 const Field = ({ label, required, children, hint }) => (
   <div>
-    <label className="block text-sm font-medium text-slate-700 mb-1.5">{label}{required && <span className="text-red-500 ml-1">*</span>}</label>
+    <label className={labelCls}>{label}{required && <span className="text-red-400 ml-1">*</span>}</label>
     {children}
-    {hint && <p className="text-slate-400 text-xs mt-1">{hint}</p>}
+    {hint && <p className="text-slate-500 text-xs mt-1">{hint}</p>}
   </div>
 );
 
-const Input = (props) => <input className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2563EB] transition-colors" {...props} />;
-const Select = ({ children, ...props }) => (
-  <select className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2563EB] transition-colors bg-white" {...props}>{children}</select>
-);
-const Textarea = (props) => <textarea className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-[#2563EB] transition-colors resize-none" rows={3} {...props} />;
+const Input = (props) => <input className={inputCls} {...props} />;
+const Select = ({ children, ...props }) => <select className={inputCls} {...props}>{children}</select>;
+const Textarea = (props) => <textarea className={`${inputCls} resize-none`} rows={3} {...props} />;
 
 export default function EditPlayer() {
   const { id } = useParams();
@@ -33,8 +34,7 @@ export default function EditPlayer() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSaving(true);
+    setError(''); setSaving(true);
     try {
       await apiClient.put(`/players/${id}`, form);
       navigate('/players');
@@ -45,22 +45,23 @@ export default function EditPlayer() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-slate-200 border-t-[#2563EB] rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" /></div>;
   if (!form) return null;
+
+  const sectionCls = 'bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4';
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <Link to="/players" className="flex items-center gap-2 text-slate-500 hover:text-slate-700 text-sm font-medium transition-colors">
-        <ChevronLeft size={16} />
-        Back to Players
+      <Link to="/players" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
+        <ChevronLeft size={16} />Back to Players
       </Link>
 
-      <h1 className="text-2xl font-black text-slate-900">Edit Player: {form.firstName} {form.lastName}</h1>
+      <h1 className="text-2xl font-black text-white">Edit Player: {form.firstName} {form.lastName}</h1>
 
-      {error && <div className="bg-red-50 border border-red-200 rounded-xl p-4 text-red-700 text-sm">{error}</div>}
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+        <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Personal Details</h2>
           <div className="grid grid-cols-2 gap-4">
             <Field label="First name" required><Input required value={form.firstName || ''} onChange={set('firstName')} /></Field>
@@ -90,13 +91,13 @@ export default function EditPlayer() {
           </Field>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+        <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Health & Safety</h2>
           <Field label="Medical information"><Textarea value={form.medicalInfo || ''} onChange={set('medicalInfo')} /></Field>
           <Field label="Allergies"><Textarea value={form.allergies || ''} onChange={set('allergies')} rows={2} /></Field>
         </div>
 
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
+        <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Emergency Contact</h2>
           <Field label="Name"><Input value={form.emergencyContactName || ''} onChange={set('emergencyContactName')} /></Field>
           <div className="grid grid-cols-2 gap-4">
@@ -106,7 +107,7 @@ export default function EditPlayer() {
         </div>
 
         <div className="flex gap-3">
-          <Link to="/players" className="flex-1 border border-slate-200 text-slate-700 font-semibold py-3 rounded-xl text-center text-sm hover:bg-slate-50 transition-colors">Cancel</Link>
+          <Link to="/players" className="flex-1 border border-white/20 text-slate-300 font-semibold py-3 rounded-xl text-center text-sm hover:bg-white/5 transition-colors">Cancel</Link>
           <button type="submit" disabled={saving} className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
             {saving ? <><Loader2 size={16} className="animate-spin" /> Saving…</> : 'Save Changes'}
           </button>
