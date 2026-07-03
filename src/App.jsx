@@ -12,7 +12,7 @@ import React from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClientInstance } from '@/lib/query-client';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import PageNotFound from '@/lib/PageNotFound';
 
 // Base44 preview compatibility only — not used for auth logic.
@@ -57,6 +57,9 @@ import CoachDashboard from '@/pages/coach/CoachDashboard';
 import CoachSessions from '@/pages/coach/CoachSessions';
 import SessionAttendees from '@/pages/coach/SessionAttendees';
 import AttendanceRecording from '@/pages/coach/AttendanceRecording';
+
+// Admin layout
+import AdminLayout from '@/components/layouts/AdminLayout';
 
 // Admin pages
 import AdminDashboard from '@/pages/admin/AdminDashboard';
@@ -128,24 +131,26 @@ const AppRoutes = () => {
       </Route>
 
       <Route element={<AppProtectedRoute allowedRoles={['admin']} />}>
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/clients" element={<ClientManagement />} />
-        <Route path="/admin/players" element={<PlayerManagement />} />
-        <Route path="/admin/coaches" element={<CoachManagement />} />
-        <Route path="/admin/sessions" element={<SessionManagement />} />
-        <Route path="/admin/sessions/new" element={<CreateSession />} />
-        <Route path="/admin/sessions/:id/edit" element={<EditSession />} />
-        <Route path="/admin/locations" element={<LocationManagement />} />
-        <Route path="/admin/session-types" element={<SessionTypeManagement />} />
-        <Route path="/admin/bookings" element={<BookingManagement />} />
-        <Route path="/admin/attendance" element={<AttendanceManagement />} />
-        <Route path="/admin/packages" element={<PackageManagement />} />
-        <Route path="/admin/payments" element={<PaymentManagement />} />
-        <Route path="/admin/credits" element={<CreditManagement />} />
-        <Route path="/admin/notifications" element={<NotificationManagement />} />
-        <Route path="/admin/reports" element={<Reports />} />
-        <Route path="/admin/audit" element={<AuditLog />} />
-        <Route path="/admin/settings" element={<AppSettings />} />
+        <Route element={<AdminLayout><Outlet /></AdminLayout>}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/clients" element={<ClientManagement />} />
+          <Route path="/admin/players" element={<PlayerManagement />} />
+          <Route path="/admin/coaches" element={<CoachManagement />} />
+          <Route path="/admin/sessions" element={<SessionManagement />} />
+          <Route path="/admin/sessions/new" element={<CreateSession />} />
+          <Route path="/admin/sessions/:id/edit" element={<EditSession />} />
+          <Route path="/admin/locations" element={<LocationManagement />} />
+          <Route path="/admin/session-types" element={<SessionTypeManagement />} />
+          <Route path="/admin/bookings" element={<BookingManagement />} />
+          <Route path="/admin/attendance" element={<AttendanceManagement />} />
+          <Route path="/admin/packages" element={<PackageManagement />} />
+          <Route path="/admin/payments" element={<PaymentManagement />} />
+          <Route path="/admin/credits" element={<CreditManagement />} />
+          <Route path="/admin/notifications" element={<NotificationManagement />} />
+          <Route path="/admin/reports" element={<Reports />} />
+          <Route path="/admin/audit" element={<AuditLog />} />
+          <Route path="/admin/settings" element={<AppSettings />} />
+        </Route>
       </Route>
 
       <Route path="*" element={<PageNotFound />} />

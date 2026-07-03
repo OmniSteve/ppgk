@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -61,7 +62,7 @@ const navGroups = [
   },
 ];
 
-export default function AdminLayout({ children }) {
+export default function AdminLayout({ children = <Outlet /> }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
