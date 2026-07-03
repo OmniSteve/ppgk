@@ -1,77 +1,80 @@
 /**
  * POST /api/auth/register
- *
  * Body: { email, password, firstName, lastName, phone? }
  *
- * Creates a new user with role='client', sends email verification.
- * Returns: { message: 'Verification email sent' }
+ * - PBKDF2 password hashing (100,000 iterations, SHA-256)
+ * - Sends email verification via Resend
+ * - Does NOT log the user in (must verify email first)
  */
 import { queryOne, execute, audit } from '../../lib/db.js';
-import { signJwt } from '../../lib/auth.js';
+import { sendTemplatedEmail }       from '../../lib/email.js';
+import { err, ok, requireFields }   from '../../lib/validate.js';
+
+async function hashPassword(password) {
+  const encoder = new TextEncoder();
+  const salt    = crypto.getRandomValues(new Uint8Array(16));
+  const km      = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
+  const derived = await crypto.subtle.deriveBits(
+    { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
+    km, 256
+  );
+  const saltHex    = Array.from(salt).map(b => b.toString(16).padStart(2,'0')).join('');
+  const derivedHex = Array.from(new Uint8Array(derived)).map(b => b.toString(16).padStart(2,'0')).join('');
+  return `pbkdf2:${saltHex}:${derivedHex}`;
+}
 
 export async function handleRegister(request, env) {
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return err('Request body must be valid JSON'); }
+
+  const missing = requireFields(body, ['email', 'password', 'firstName', 'lastName']);
+  if (missing) return err(missing);
+
   const { email, password, firstName, lastName, phone } = body;
 
-  if (!email || !password || !firstName || !lastName) {
-    return Response.json({ message: 'email, password, firstName and lastName are required' }, { status: 400 });
-  }
+  if (password.length < 8) return err('Password must be at least 8 characters');
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('Invalid email address');
 
-  if (password.length < 8) {
-    return Response.json({ message: 'Password must be at least 8 characters' }, { status: 400 });
-  }
-
-  // Check for existing email
   const existing = await queryOne(env, 'SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
+  // Anti-enumeration: return same message regardless
   if (existing) {
-    return Response.json({ message: 'An account with this email already exists' }, { status: 409 });
+    return ok({ message: 'If that email is new, a verification link has been sent.' }, 201);
   }
 
-  // Hash password using Web Crypto (PBKDF2)
-  const passwordHash = await hashPassword(password);
-
-  // Generate email verification token
-  const verifyToken = crypto.randomUUID();
-
-  const userId = crypto.randomUUID();
+  const passwordHash  = await hashPassword(password);
+  const verifyToken   = crypto.randomUUID();
+  const userId        = crypto.randomUUID();
 
   await execute(env,
-    `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, email_verify_token)
-     VALUES (?, ?, ?, ?, ?, ?, 'client', ?)`,
-    [userId, email.toLowerCase(), passwordHash, firstName, lastName, phone || null, verifyToken]
+    `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, email_verify_token, active)
+     VALUES (?, ?, ?, ?, ?, ?, 'client', ?, 1)`,
+    [userId, email.toLowerCase(), passwordHash, firstName, lastName, phone ?? null, verifyToken]
   );
-
-  // Create client profile
   await execute(env,
     `INSERT INTO client_profiles (id, user_id) VALUES (?, ?)`,
     [crypto.randomUUID(), userId]
   );
 
-  // TODO: Send verification email via Resend / email worker
-  // await sendEmail(env, { to: email, subject: 'Verify your email', ... })
+  const appUrl    = env.APP_URL || 'https://premierperformancegk.com';
+  const verifyUrl = `${appUrl}/verify-email?token=${verifyToken}`;
 
-  await audit(env, {
-    actorId: userId,
-    actorName: `${firstName} ${lastName}`,
-    action: 'create',
-    recordType: 'user',
-    recordId: userId,
-    description: `New client registered: ${email}`,
+  await sendTemplatedEmail(env, {
+    eventTrigger:  'verify_email',
+    to:             email,
+    userId,
+    idempotencyRef: `verify_email_${userId}`,
+    variables:      { first_name: firstName, verify_url: verifyUrl },
   });
 
-  return Response.json({ message: 'Registration successful. Please check your email to verify your account.' }, { status: 201 });
-}
+  await audit(env, {
+    actorId:     userId,
+    actorName:   `${firstName} ${lastName}`,
+    action:      'create',
+    recordType:  'user',
+    recordId:    userId,
+    description: `New client registered: ${email}`,
+    ipAddress:   request.headers.get('CF-Connecting-IP'),
+  });
 
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-    keyMaterial,
-    256
-  );
-  const saltHex    = Array.from(salt).map((b) => b.toString(16).padStart(2, '0')).join('');
-  const derivedHex = Array.from(new Uint8Array(derived)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  return `pbkdf2:${saltHex}:${derivedHex}`;
+  return ok({ message: 'If that email is new, a verification link has been sent.' }, 201);
 }

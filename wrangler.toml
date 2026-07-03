@@ -1,35 +1,37 @@
 # Premier Performance GK — Cloudflare Worker configuration
-# Deploy: npx wrangler deploy
+# Deploy:   npx wrangler deploy
 # Local dev: npx wrangler dev --local
 
-name = "ppgk-api"
-main = "worker/src/index.js"
+name              = "ppgk-api"
+main              = "worker/src/index.js"
 compatibility_date = "2024-01-01"
 compatibility_flags = ["nodejs_compat"]
 
-[site]
-# Uncomment when deploying via Cloudflare Pages + Workers integration
-# bucket = "./dist"
+[triggers]
+# Credit expiry + expiry reminders: daily at 03:00 UTC
+# Session reminders: daily at 07:00 UTC
+crons = ["0 3 * * *", "0 7 * * *"]
 
 [[d1_databases]]
-binding      = "DB"
+binding       = "DB"
 database_name = "ppgk"
-database_id  = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+database_id   = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
 
 [vars]
 APP_ENV = "development"
+# APP_URL must be set as a secret or var per environment:
+# npx wrangler secret put APP_URL
 
-# Secrets — set via: npx wrangler secret put SECRET_NAME
+# ── Secrets — NEVER commit values here ───────────────────────────────────────
+# Set via: npx wrangler secret put <SECRET_NAME>
+#
 # Required secrets:
-#   JWT_SECRET              — random 32-byte string for signing JWTs
-#   STRIPE_SECRET           — Stripe secret key (sk_live_... or sk_test_...)
-#   STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (whsec_...)
-#   RESEND_API_KEY          — Resend API key for transactional email
-
-[[routes]]
-pattern = "/api/*"
-zone_name = "your-domain.com"   # Replace with your Cloudflare zone
+#   JWT_SECRET              — random 32+ char string (openssl rand -hex 32)
+#   STRIPE_SECRET           — sk_live_... or sk_test_...
+#   STRIPE_WEBHOOK_SECRET   — whsec_... (from Stripe dashboard webhook config)
+#   RESEND_API_KEY          — re_...
+#   APP_URL                 — https://premierperformancegk.com
 
 [dev]
-port = 8787
+port           = 8787
 local_protocol = "http"
