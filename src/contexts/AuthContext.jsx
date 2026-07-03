@@ -22,16 +22,16 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const signIn = async (email, password) => {
-    const response = await fetch('/api/auth/signin', {
+    const response = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
     });
+    const text = await response.text();
+    const data = text ? JSON.parse(text) : {};
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || 'Invalid credentials');
+      throw new Error(data.error || data.message || 'Invalid credentials');
     }
-    const data = await response.json();
     localStorage.setItem('ppgk_token', data.token);
     localStorage.setItem('ppgk_user', JSON.stringify(data.user));
     setUser(data.user);

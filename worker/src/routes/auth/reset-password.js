@@ -4,19 +4,7 @@
  * Body: { token, newPassword }
  */
 import { queryOne, execute, audit } from '../../lib/db.js';
-
-async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const salt = crypto.getRandomValues(new Uint8Array(16));
-  const keyMaterial = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-  const derived = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-    keyMaterial, 256
-  );
-  const saltHex    = Array.from(salt).map((b) => b.toString(16).padStart(2, '0')).join('');
-  const derivedHex = Array.from(new Uint8Array(derived)).map((b) => b.toString(16).padStart(2, '0')).join('');
-  return `pbkdf2:${saltHex}:${derivedHex}`;
-}
+import { hashPassword }             from '../../lib/password.js';
 
 export async function handleResetPassword(request, env) {
   const body = await request.json();

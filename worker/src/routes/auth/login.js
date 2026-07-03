@@ -10,26 +10,10 @@
  * - Token: JWT HS256, 15-minute access token
  *   (upgrade path: HttpOnly cookie + refresh token)
  */
-import { queryOne, execute, audit } from '../../lib/db.js';
-import { signJwt }                  from '../../lib/auth.js';
-import { err, ok }                  from '../../lib/validate.js';
-
-async function verifyPassword(password, storedHash) {
-  try {
-    const [, saltHex, derivedHex] = storedHash.split(':');
-    const salt      = new Uint8Array(saltHex.match(/.{2}/g).map(b => parseInt(b, 16)));
-    const encoder   = new TextEncoder();
-    const km        = await crypto.subtle.importKey('raw', encoder.encode(password), 'PBKDF2', false, ['deriveBits']);
-    const derived   = await crypto.subtle.deriveBits(
-      { name: 'PBKDF2', salt, iterations: 100_000, hash: 'SHA-256' },
-      km, 256
-    );
-    const candidate = Array.from(new Uint8Array(derived)).map(b => b.toString(16).padStart(2,'0')).join('');
-    return candidate === derivedHex;
-  } catch {
-    return false;
-  }
-}
+import { queryOne, execute, audit }      from '../../lib/db.js';
+import { signJwt }                        from '../../lib/auth.js';
+import { err, ok }                        from '../../lib/validate.js';
+import { verifyPassword, dummyVerify }    from '../../lib/password.js';
 
 // Simple in-memory rate limit using CF KV or falling back to no-op
 async function checkRateLimit(env, ip) {
@@ -71,9 +55,10 @@ export async function handleLogin(request, env) {
     [email.toLowerCase()]
   );
 
-  // Constant-time path: always hash even if user not found (prevents timing attacks)
-  const dummyHash = 'pbkdf2:' + '00'.repeat(16) + ':' + '00'.repeat(32);
-  const valid = user ? await verifyPassword(password, user.password_hash) : await verifyPassword(password, dummyHash).then(() => false);
+  // Constant-time path: always run PBKDF2 even for unknown users (prevents timing attacks)
+  const valid = user
+    ? await verifyPassword(password, user.password_hash)
+    : await dummyVerify(password);
 
   if (!user || !valid) {
     await recordFailure(env, ip);
