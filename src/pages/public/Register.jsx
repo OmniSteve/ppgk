@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Eye, EyeOff, Loader2, CheckCircle } from 'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function Register() {
   const { register } = useAuth();
@@ -16,6 +16,9 @@ export default function Register() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [emailFailed, setEmailFailed] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendDone, setResendDone] = useState(false);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
@@ -27,7 +30,10 @@ export default function Register() {
     if (!form.consentTerms || !form.consentPrivacy) return setError('You must accept the terms and privacy notice.');
     setLoading(true);
     try {
-      await register(form);
+      const res = await register(form);
+      if (res && res.emailSent === false) {
+        setEmailFailed(true);
+      }
       setSuccess(true);
     } catch (err) {
       setError(err.message || 'Registration failed.');
@@ -36,17 +42,60 @@ export default function Register() {
     }
   };
 
+  const handleResend = async () => {
+    setResendLoading(true);
+    try {
+      await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: form.email }),
+      });
+      setResendDone(true);
+    } catch {
+      setResendDone(true); // generic message still applies
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   if (success) {
     return (
       <div className="min-h-screen bg-[#0D1B2A] flex items-center justify-center p-4">
         <div className="w-full max-w-md text-center">
-          <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={32} className="text-green-400" />
-          </div>
-          <h2 className="text-white font-black text-2xl mb-3">Account created!</h2>
-          <p className="text-slate-400 mb-6">Please check your email to verify your account, then sign in.</p>
-          <Link to="/signin" className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-8 py-3 rounded-xl transition-colors inline-block">
-            Sign In
+          {emailFailed ? (
+            <>
+              <div className="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle size={32} className="text-yellow-400" />
+              </div>
+              <h2 className="text-white font-black text-2xl mb-3">Account created!</h2>
+              <p className="text-slate-400 mb-4">
+                Your account was created, but we could not send the verification email. Please use the button below to resend it.
+              </p>
+              {resendDone ? (
+                <p className="text-green-400 text-sm mb-6">
+                  If that account exists and is unverified, a new verification email has been sent.
+                </p>
+              ) : (
+                <button
+                  onClick={handleResend}
+                  disabled={resendLoading}
+                  className="bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black font-bold px-8 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mx-auto mb-4"
+                >
+                  {resendLoading ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : 'Resend Verification Email'}
+                </button>
+              )}
+            </>
+          ) : (
+            <>
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+                <CheckCircle size={32} className="text-green-400" />
+              </div>
+              <h2 className="text-white font-black text-2xl mb-3">Account created!</h2>
+              <p className="text-slate-400 mb-6">Please check your email to verify your account, then sign in.</p>
+            </>
+          )}
+          <Link to="/signin" className="text-[#2563EB] font-medium hover:underline text-sm">
+            Go to Sign In
           </Link>
         </div>
       </div>

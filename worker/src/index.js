@@ -25,8 +25,9 @@ import { handleLogout }         from './routes/auth/logout.js';
 import { handleMe }             from './routes/auth/me.js';
 import { handleForgotPassword } from './routes/auth/forgot-password.js';
 import { handleResetPassword }  from './routes/auth/reset-password.js';
-import { handleVerifyEmail }    from './routes/auth/verify-email.js';
-import { handleRefreshToken }   from './routes/auth/refresh.js';
+import { handleVerifyEmail }          from './routes/auth/verify-email.js';
+import { handleResendVerification }   from './routes/auth/resend-verification.js';
+import { handleRefreshToken }         from './routes/auth/refresh.js';
 
 // Admin routes
 import { handleAdminDashboard }             from './routes/admin/dashboard.js';
@@ -92,8 +93,9 @@ export default {
       router.get ('/api/auth/me',              handleMe);
       router.post('/api/auth/forgot-password', handleForgotPassword);
       router.post('/api/auth/reset-password',  handleResetPassword);
-      router.post('/api/auth/verify-email',    handleVerifyEmail);
-      router.post('/api/auth/refresh',         handleRefreshToken);
+      router.post('/api/auth/verify-email',           handleVerifyEmail);
+      router.post('/api/auth/resend-verification',    handleResendVerification);
+      router.post('/api/auth/refresh',                handleRefreshToken);
 
       // ── Admin ────────────────────────────────────────────────────────────
       router.get  ('/api/admin/dashboard',                            handleAdminDashboard);

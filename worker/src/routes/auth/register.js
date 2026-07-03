@@ -5,6 +5,11 @@
  * - PBKDF2 password hashing (100,000 iterations, SHA-256)
  * - Sends email verification via Resend
  * - Does NOT log the user in (must verify email first)
+ *
+ * Source file: worker/src/routes/auth/register.js
+ * Email send: line ~67 via sendTemplatedEmail (worker/src/lib/email.js)
+ * Sender address: 'Premier Performance GK <no-reply@premierperformancegk.com>'
+ *   ↑ Must match a verified domain in your Resend account.
  */
 import { queryOne, execute, audit } from '../../lib/db.js';
 import { sendTemplatedEmail }       from '../../lib/email.js';
@@ -55,17 +60,6 @@ export async function handleRegister(request, env) {
     [crypto.randomUUID(), userId]
   );
 
-  const appUrl    = env.APP_URL || 'https://premierperformancegk.com';
-  const verifyUrl = `${appUrl}/verify-email?token=${verifyToken}`;
-
-  await sendTemplatedEmail(env, {
-    eventTrigger:  'verify_email',
-    to:             email,
-    userId,
-    idempotencyRef: `verify_email_${userId}`,
-    variables:      { first_name: firstName, verify_url: verifyUrl },
-  });
-
   await audit(env, {
     actorId:     userId,
     actorName:   `${firstName} ${lastName}`,
@@ -76,5 +70,42 @@ export async function handleRegister(request, env) {
     ipAddress:   request.headers.get('CF-Connecting-IP'),
   });
 
-  return ok({ message: 'If that email is new, a verification link has been sent.' }, 201);
+  const appUrl    = env.APP_URL || 'https://ppgk.app';
+  const verifyUrl = `${appUrl}/verify-email?token=${verifyToken}`;
+
+  // Send verification email and capture the result
+  let emailResult;
+  try {
+    emailResult = await sendTemplatedEmail(env, {
+      eventTrigger:  'verify_email',
+      to:             email,
+      userId,
+      idempotencyRef: `verify_email_${userId}`,
+      variables:      { first_name: firstName, verify_url: verifyUrl },
+    });
+  } catch (e) {
+    emailResult = { success: false, error: e.message };
+  }
+
+  // Log outcome (no secrets logged)
+  if (emailResult.success) {
+    console.log(`[register] Verification email sent to ${email} (resendId: ${emailResult.resendId ?? 'n/a'})`);
+  } else {
+    console.error(`[register] Verification email FAILED for ${email}: ${emailResult.error ?? 'unknown'}`);
+  }
+
+  if (!emailResult.success) {
+    return Response.json({
+      accountCreated: true,
+      emailSent: false,
+      message: 'Your account was created, but we could not send the verification email. Please use Resend Verification Email.',
+      error: emailResult.error ?? 'Email delivery failed',
+    }, { status: 201 });
+  }
+
+  return ok({
+    accountCreated: true,
+    emailSent: true,
+    message: 'Account created. Please check your email to verify your account, then sign in.',
+  }, 201);
 }

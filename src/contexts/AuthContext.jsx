@@ -44,11 +44,12 @@ export const AuthProvider = ({ children }) => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-    if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.message || 'Registration failed');
+    const data = await response.json().catch(() => ({}));
+    // 201 with accountCreated=true but emailSent=false is still a partial success
+    if (!response.ok && !data.accountCreated) {
+      throw new Error(data.message || 'Registration failed');
     }
-    return response.json();
+    return data;
   };
 
   const signOut = () => {
