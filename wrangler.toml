@@ -18,9 +18,13 @@ database_name = "ppgk"
 database_id   = "8a8d6008-cc41-48fb-b635-0b7d6a86ce82"
 
 [vars]
-APP_ENV = "development"
-# APP_URL must be set as a secret or var per environment:
-# npx wrangler secret put APP_URL
+APP_ENV = "production"
+APP_URL = "https://ppgk.app"
+
+# ── Custom domain routing ─────────────────────────────────────────────────────
+[[routes]]
+pattern = "ppgk.app/api/*"
+zone_name = "ppgk.app"
 
 # ── Secrets — NEVER commit values here ───────────────────────────────────────
 # Set via: npx wrangler secret put <SECRET_NAME>
@@ -30,7 +34,7 @@ APP_ENV = "development"
 #   STRIPE_SECRET           — sk_live_... or sk_test_...
 #   STRIPE_WEBHOOK_SECRET   — whsec_... (from Stripe dashboard webhook config)
 #   RESEND_API_KEY          — re_...
-#   APP_URL                 — https://premierperformancegk.com
+#   APP_URL                 — https://ppgk.app  (already set in [vars] above)
 
 [dev]
 port           = 8787
