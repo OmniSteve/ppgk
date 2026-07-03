@@ -2,10 +2,11 @@
  * POST /api/admin/emergency-reset
  * TEMPORARY — remove after admin account is recovered.
  *
- * Body: { secret, userId, newPassword }
+ * Body: { secret, email, newPassword }
+ *   OR: { secret, userId, newPassword }
  *
- * `secret` must match env.EMERGENCY_RESET_SECRET (set in wrangler.toml or dashboard).
- * Resets the password_hash AND marks email_verified = 1 for the given user.
+ * `secret` must match env.EMERGENCY_RESET_SECRET (set in Cloudflare dashboard env vars).
+ * Resets the password_hash AND marks email_verified = 1 for the matched user.
  */
 import { execute, queryOne } from '../../lib/db.js';
 import { hashPassword }      from '../../lib/password.js';
@@ -14,7 +15,7 @@ import { corsHeaders }       from '../../lib/cors.js';
 export async function handleEmergencyReset(request, env) {
   // Only active when the env var is explicitly set
   if (!env.EMERGENCY_RESET_SECRET) {
-    return Response.json({ error: 'Not enabled' }, { status: 404 });
+    return Response.json({ error: 'Not enabled — set EMERGENCY_RESET_SECRET env var' }, { status: 404 });
   }
 
   let body;
@@ -22,19 +23,23 @@ export async function handleEmergencyReset(request, env) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { secret, userId, newPassword } = body;
+  const { secret, userId, email, newPassword } = body;
 
   if (!secret || secret !== env.EMERGENCY_RESET_SECRET) {
-    return Response.json({ error: 'Forbidden' }, { status: 403 });
+    return Response.json({ error: 'Forbidden — wrong secret' }, { status: 403 });
   }
-  if (!userId || !newPassword) {
-    return Response.json({ error: 'userId and newPassword required' }, { status: 400 });
+  if (!newPassword || newPassword.length < 8) {
+    return Response.json({ error: 'newPassword must be at least 8 characters' }, { status: 400 });
   }
-  if (newPassword.length < 8) {
-    return Response.json({ error: 'Password must be at least 8 characters' }, { status: 400 });
+  if (!userId && !email) {
+    return Response.json({ error: 'Provide either userId or email' }, { status: 400 });
   }
 
-  const user = await queryOne(env, 'SELECT id, email, role FROM users WHERE id = ?', [userId]);
+  // Look up by email OR userId
+  const user = email
+    ? await queryOne(env, 'SELECT id, email, role, password_hash, email_verified FROM users WHERE email = ?', [email.toLowerCase()])
+    : await queryOne(env, 'SELECT id, email, role, password_hash, email_verified FROM users WHERE id = ?', [userId]);
+
   if (!user) {
     return Response.json({ error: 'User not found' }, { status: 404 });
   }
@@ -43,7 +48,7 @@ export async function handleEmergencyReset(request, env) {
 
   await execute(env,
     'UPDATE users SET password_hash = ?, email_verified = 1, email_verify_token = NULL WHERE id = ?',
-    [passwordHash, userId]
+    [passwordHash, user.id]
   );
 
   return Response.json({
@@ -51,6 +56,8 @@ export async function handleEmergencyReset(request, env) {
     userId: user.id,
     email: user.email,
     role: user.role,
-    message: 'Password reset and email verified. Remove this endpoint now.',
+    wasVerified: user.email_verified === 1,
+    oldHashPrefix: user.password_hash ? user.password_hash.substring(0, 12) + '...' : null,
+    message: 'Password reset and email verified. You can now sign in. Remove EMERGENCY_RESET_SECRET when done.',
   }, { status: 200, headers: corsHeaders(request) });
 }

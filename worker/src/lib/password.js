@@ -13,7 +13,7 @@ const ITERATIONS  = 100_000;
 const HASH_ALG    = 'SHA-256';
 const SALT_BYTES  = 16; // 32 hex chars
 const KEY_BITS    = 256; // 64 hex chars
-const DEV_LOGGING = false; // set true temporarily in dev to diagnose; never log secrets
+const DEV_LOGGING = true; // TEMPORARY — disable after debugging login issue
 
 /** Encode a Uint8Array to a lowercase hex string */
 function toHex(bytes) {
