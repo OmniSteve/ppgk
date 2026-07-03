@@ -24,7 +24,7 @@ APP_URL = "https://ppgk.app"
 # ── Custom domain routing ─────────────────────────────────────────────────────
 [[routes]]
 pattern = "ppgk.app/api/*"
-zone_name = "ppgk.app"
+zone_name = "alpha.ppgk.app"
 
 # ── Secrets — NEVER commit values here ───────────────────────────────────────
 # Set via: npx wrangler secret put <SECRET_NAME>
