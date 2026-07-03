@@ -48,6 +48,7 @@ import { handleAdminReports }               from './routes/admin/reports.js';
 import { handleAdminAuditLog }              from './routes/admin/audit.js';
 import { handleAdminSettings }              from './routes/admin/settings.js';
 import { handleDebugEmail }                from './routes/admin/debug-email.js';
+import { handleEmergencyReset }           from './routes/admin/emergency-reset.js';
 
 // Client routes
 import { handleClientSessions }      from './routes/client/sessions.js';
@@ -141,6 +142,7 @@ export default {
       router.get  ('/api/admin/audit',                                handleAdminAuditLog);
       router.get  ('/api/admin/settings',                             handleAdminSettings);
       router.get  ('/api/admin/debug-email',                          handleDebugEmail);
+      router.post ('/api/admin/emergency-reset',                      handleEmergencyReset);
       router.put  ('/api/admin/settings',                             handleAdminSettings);
 
       // ── Client ───────────────────────────────────────────────────────────
