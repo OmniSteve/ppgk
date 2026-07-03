@@ -14,7 +14,7 @@ export async function sendEmail(env, { to, subject, html, notificationId }) {
     return { success: false, error: 'RESEND_API_KEY not configured' };
   }
 
-  const fromAddress = 'Premier Performance GK <no-reply@premierperformancegk.com>';
+  const fromAddress = 'Premier Performance GK <no-reply@ppgk.app>';
 
   try {
     const res = await fetch('https://api.resend.com/emails', {
