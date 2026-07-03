@@ -58,7 +58,9 @@ import CoachSessions from '@/pages/coach/CoachSessions';
 import SessionAttendees from '@/pages/coach/SessionAttendees';
 import AttendanceRecording from '@/pages/coach/AttendanceRecording';
 
-// Admin layout
+// Layouts
+import ClientLayout from '@/components/layouts/ClientLayout';
+import CoachLayout from '@/components/layouts/CoachLayout';
 import AdminLayout from '@/components/layouts/AdminLayout';
 
 // Admin pages
@@ -104,30 +106,34 @@ const AppRoutes = () => {
       <Route path="/privacy" element={<PrivacyPage />} />
 
       <Route element={<AppProtectedRoute allowedRoles={['client', 'coach', 'head_coach', 'admin']} />}>
-        <Route path="/dashboard" element={<ClientDashboard />} />
-        <Route path="/sessions" element={<SessionCatalogue />} />
-        <Route path="/sessions/:id" element={<SessionDetails />} />
-        <Route path="/checkout" element={<Checkout />} />
-        <Route path="/bookings" element={<UpcomingBookings />} />
-        <Route path="/bookings/:id" element={<BookingDetails />} />
-        <Route path="/bookings/:id/reschedule" element={<RescheduleBooking />} />
-        <Route path="/bookings/:id/cancel" element={<CancelBooking />} />
-        <Route path="/payment/result" element={<PaymentResult />} />
-        <Route path="/players" element={<PlayerList />} />
-        <Route path="/players/new" element={<CreatePlayer />} />
-        <Route path="/players/:id/edit" element={<EditPlayer />} />
-        <Route path="/packages" element={<Packages />} />
-        <Route path="/credits" element={<CreditBalance />} />
-        <Route path="/purchases" element={<PurchaseHistory />} />
-        <Route path="/notifications" element={<ClientNotifications />} />
-        <Route path="/account" element={<AccountDetails />} />
+        <Route element={<ClientLayout><Outlet /></ClientLayout>}>
+          <Route path="/dashboard" element={<ClientDashboard />} />
+          <Route path="/sessions" element={<SessionCatalogue />} />
+          <Route path="/sessions/:id" element={<SessionDetails />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/bookings" element={<UpcomingBookings />} />
+          <Route path="/bookings/:id" element={<BookingDetails />} />
+          <Route path="/bookings/:id/reschedule" element={<RescheduleBooking />} />
+          <Route path="/bookings/:id/cancel" element={<CancelBooking />} />
+          <Route path="/payment/result" element={<PaymentResult />} />
+          <Route path="/players" element={<PlayerList />} />
+          <Route path="/players/new" element={<CreatePlayer />} />
+          <Route path="/players/:id/edit" element={<EditPlayer />} />
+          <Route path="/packages" element={<Packages />} />
+          <Route path="/credits" element={<CreditBalance />} />
+          <Route path="/purchases" element={<PurchaseHistory />} />
+          <Route path="/notifications" element={<ClientNotifications />} />
+          <Route path="/account" element={<AccountDetails />} />
+        </Route>
       </Route>
 
       <Route element={<AppProtectedRoute allowedRoles={['coach', 'head_coach', 'admin']} />}>
-        <Route path="/coach" element={<CoachDashboard />} />
-        <Route path="/coach/sessions" element={<CoachSessions />} />
-        <Route path="/coach/sessions/:id/attendees" element={<SessionAttendees />} />
-        <Route path="/coach/sessions/:id/attendance" element={<AttendanceRecording />} />
+        <Route element={<CoachLayout><Outlet /></CoachLayout>}>
+          <Route path="/coach" element={<CoachDashboard />} />
+          <Route path="/coach/sessions" element={<CoachSessions />} />
+          <Route path="/coach/sessions/:id/attendees" element={<SessionAttendees />} />
+          <Route path="/coach/sessions/:id/attendance" element={<AttendanceRecording />} />
+        </Route>
       </Route>
 
       <Route element={<AppProtectedRoute allowedRoles={['admin']} />}>

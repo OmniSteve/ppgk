@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Outlet } from 'react-router-dom';
 import { LayoutDashboard, Calendar, ClipboardList, LogOut, Menu, X, Briefcase } from 'lucide-react';
 
 const navItems = [
@@ -68,7 +69,7 @@ export default function CoachLayout({ children }) {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen bg-[#0F172A] flex">
       <aside className="hidden lg:flex flex-col w-64 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30">
         <SidebarContent />
       </aside>
@@ -89,7 +90,7 @@ export default function CoachLayout({ children }) {
           </div>
           <button onClick={() => setSidebarOpen(true)} className="text-slate-300 hover:text-white"><Menu size={22} /></button>
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+        <main className="flex-1 p-4 md:p-6 lg:p-8">{children ?? <Outlet />}</main>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
@@ -143,7 +144,7 @@ export default function ClientLayout({ children }) {
         </header>
 
         <main className="flex-1 p-4 md:p-6 lg:p-8">
-          {children}
+          {children ?? <Outlet />}
         </main>
       </div>
     </div>
