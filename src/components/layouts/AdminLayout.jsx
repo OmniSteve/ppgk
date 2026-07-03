@@ -5,15 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell, MapPin, Tag,
   Package, BookOpen, ClipboardList, CreditCard, Bell, BarChart2,
-  FileText, Settings, LogOut, Menu, X, ChevronDown, Shield, Calendar
+  FileText, Settings, LogOut, Menu, X, Shield, Calendar
 } from 'lucide-react';
 
 const navGroups = [
   {
     label: 'Overview',
-    items: [
-      { label: 'Dashboard', icon: LayoutDashboard, href: '/admin' },
-    ],
+    items: [{ label: 'Dashboard', icon: LayoutDashboard, href: '/admin' }],
   },
   {
     label: 'People',
@@ -56,26 +54,15 @@ const navGroups = [
   },
   {
     label: 'System',
-    items: [
-      { label: 'Settings', icon: Settings, href: '/admin/settings' },
-    ],
+    items: [{ label: 'Settings', icon: Settings, href: '/admin/settings' }],
   },
 ];
 
-export default function AdminLayout({ children = <Outlet /> }) {
-  const { user, signOut } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+function SidebarNav({ user, location, onLinkClick, onSignOut }) {
+  const isActive = (href) =>
+    location.pathname === href || (href !== '/admin' && location.pathname.startsWith(href + '/'));
 
-  const handleSignOut = () => {
-    signOut();
-    navigate('/signin');
-  };
-
-  const isActive = (href) => location.pathname === href || (href !== '/admin' && location.pathname.startsWith(href + '/'));
-
-  const SidebarContent = () => (
+  return (
     <div className="flex flex-col h-full">
       <div className="p-5 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -99,7 +86,7 @@ export default function AdminLayout({ children = <Outlet /> }) {
                 <Link
                   key={item.href}
                   to={item.href}
-                  onClick={() => setSidebarOpen(false)}
+                  onClick={onLinkClick}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 ${
                     active ? 'bg-[#2563EB] text-white' : 'text-slate-400 hover:bg-white/10 hover:text-white'
                   }`}
@@ -114,12 +101,12 @@ export default function AdminLayout({ children = <Outlet /> }) {
       </nav>
 
       <div className="p-4 border-t border-white/10 space-y-2">
-        <Link to="/dashboard" className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all">
+        <Link to="/dashboard" onClick={onLinkClick} className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all">
           <LayoutDashboard size={14} />
           Client View
         </Link>
         <button
-          onClick={handleSignOut}
+          onClick={onSignOut}
           className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all"
         >
           <LogOut size={14} />
@@ -139,33 +126,48 @@ export default function AdminLayout({ children = <Outlet /> }) {
       </div>
     </div>
   );
+}
+
+export default function AdminLayout({ children = <Outlet /> }) {
+  const { user, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/signin');
+  };
 
   return (
     <div className="min-h-screen bg-[#0F172A] flex">
+      {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-56 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30 border-r border-white/5">
-        <SidebarContent />
+        <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
+      {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-black/70" onClick={() => setSidebarOpen(false)} />
           <aside className="relative z-50 flex flex-col w-64 bg-[#0D1B2A]">
-            <button onClick={() => setSidebarOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+            <button onClick={() => setSidebarOpen(false)} className="absolute top-4 right-4 text-slate-400 hover:text-white z-10">
               <X size={20} />
             </button>
-            <SidebarContent />
+            <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
           </aside>
         </div>
       )}
 
       <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+        {/* Mobile header */}
         <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-2">
             <Shield size={16} className="text-[#2563EB]" />
             <span className="text-white font-semibold text-sm">Admin Panel</span>
           </div>
-          <button onClick={() => setSidebarOpen(true)} className="text-slate-400 hover:text-white">
-            <Menu size={20} />
+          <button onClick={() => setSidebarOpen(true)} className="text-slate-400 hover:text-white p-1">
+            <Menu size={22} />
           </button>
         </header>
         <main className="flex-1 p-4 md:p-6">
