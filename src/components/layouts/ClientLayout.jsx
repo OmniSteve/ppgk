@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Calendar, Users, CreditCard, ShoppingBag,
-  Bell, User, LogOut, Menu, X, ChevronRight, Shield, Briefcase
+  Bell, User, LogOut, Menu, X, Shield, Briefcase
 } from 'lucide-react';
 
 const navItems = [
@@ -19,18 +19,9 @@ const navItems = [
   { label: 'Account', icon: User, href: '/account' },
 ];
 
-export default function ClientLayout({ children }) {
-  const { user, signOut } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  const handleSignOut = () => {
-    signOut();
-    navigate('/signin');
-  };
-
-  const SidebarContent = () => (
+// Defined outside the layout component so it never remounts on navigation
+function SidebarNav({ user, location, onLinkClick, onSignOut }) {
+  return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-white/10">
         <div className="flex items-center gap-3">
@@ -51,11 +42,9 @@ export default function ClientLayout({ children }) {
             <Link
               key={item.href}
               to={item.href}
-              onClick={() => setSidebarOpen(false)}
+              onClick={onLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                active
-                  ? 'bg-[#2563EB] text-white'
-                  : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                active ? 'bg-[#2563EB] text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'
               }`}
             >
               <item.icon size={18} />
@@ -64,16 +53,16 @@ export default function ClientLayout({ children }) {
           );
         })}
 
-        {(user?.role === 'admin' || user?.role === 'coach') && (
+        {(user?.role === 'admin' || user?.role === 'coach' || user?.role === 'head_coach') && (
           <div className="pt-4 mt-4 border-t border-white/10">
-            {user?.role === 'coach' && (
-              <Link to="/coach" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+            {(user?.role === 'coach' || user?.role === 'head_coach') && (
+              <Link to="/coach" onClick={onLinkClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all">
                 <Briefcase size={18} />
                 Coach Area
               </Link>
             )}
             {user?.role === 'admin' && (
-              <Link to="/admin" onClick={() => setSidebarOpen(false)} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+              <Link to="/admin" onClick={onLinkClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all">
                 <Shield size={18} />
                 Admin Area
               </Link>
@@ -95,7 +84,7 @@ export default function ClientLayout({ children }) {
           </div>
         </div>
         <button
-          onClick={handleSignOut}
+          onClick={onSignOut}
           className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all"
         >
           <LogOut size={16} />
@@ -104,12 +93,24 @@ export default function ClientLayout({ children }) {
       </div>
     </div>
   );
+}
+
+export default function ClientLayout({ children }) {
+  const { user, signOut } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const handleSignOut = () => {
+    signOut();
+    navigate('/signin');
+  };
 
   return (
     <div className="min-h-screen bg-[#0F172A] flex">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30">
-        <SidebarContent />
+        <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
       {/* Mobile Sidebar Overlay */}
@@ -123,7 +124,7 @@ export default function ClientLayout({ children }) {
             >
               <X size={20} />
             </button>
-            <SidebarContent />
+            <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
           </aside>
         </div>
       )}
@@ -131,7 +132,7 @@ export default function ClientLayout({ children }) {
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+        <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-20 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center">
               <span className="text-white font-bold text-xs">GK</span>

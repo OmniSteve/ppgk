@@ -51,6 +51,7 @@ import { handleDebugEmail }                from './routes/admin/debug-email.js';
 import { handleEmergencyReset }           from './routes/admin/emergency-reset.js';
 
 // Client routes
+import { handleClientDashboard }     from './routes/client/dashboard.js';
 import { handleClientSessions }      from './routes/client/sessions.js';
 import { handleClientBookings }      from './routes/client/bookings.js';
 import { handleClientPlayers }       from './routes/client/players.js';
@@ -146,6 +147,7 @@ export default {
       router.put  ('/api/admin/settings',                             handleAdminSettings);
 
       // ── Client ───────────────────────────────────────────────────────────
+      router.get  ('/api/dashboard/client',            handleClientDashboard);
       router.get  ('/api/sessions',                    handleClientSessions);
       router.get  ('/api/sessions/:id',                handleClientSessions);
       router.get  ('/api/bookings',                    handleClientBookings);
