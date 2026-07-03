@@ -3,11 +3,26 @@ import { apiClient } from '@/services/apiClient';
 
 const AuthContext = createContext(null);
 
+// Detect Base44 preview environment (not ppgk.app)
+const IS_PREVIEW = !window.location.hostname.includes('ppgk.app');
+
+const PREVIEW_USER = {
+  id: 'preview-admin',
+  email: 'admin@ppgk.app',
+  firstName: 'Preview',
+  lastName: 'Admin',
+  role: 'admin',
+};
+
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(IS_PREVIEW ? PREVIEW_USER : null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (IS_PREVIEW) {
+      setIsLoading(false);
+      return;
+    }
     const stored = localStorage.getItem('ppgk_user');
     const token = localStorage.getItem('ppgk_token');
     if (stored && token) {
