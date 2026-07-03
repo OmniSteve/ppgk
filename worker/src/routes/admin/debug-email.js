@@ -3,14 +3,13 @@
  * Temporary diagnostic — checks Resend key + verify_email template, then sends a test email.
  * Remove this route after debugging.
  */
-import { requireAdmin } from '../../lib/auth.js';
+import { requireRole } from '../../lib/auth.js';
 import { queryOne } from '../../lib/db.js';
 import { sendEmail } from '../../lib/email.js';
 import { corsHeaders } from '../../lib/cors.js';
 
 export async function handleDebugEmail(request, env) {
-  const authResult = await requireAdmin(request, env);
-  if (authResult instanceof Response) return authResult;
+  const authResult = await requireRole(request, env, 'admin');
 
   const checks = {};
 
