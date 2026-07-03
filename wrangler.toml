@@ -13,9 +13,10 @@ compatibility_flags = ["nodejs_compat"]
 crons = ["0 3 * * *", "0 7 * * *"]
 
 [[d1_databases]]
-binding       = "DB"
-database_name = "ppgk"
-database_id   = "8a8d6008-cc41-48fb-b635-0b7d6a86ce82"
+binding = "DB"
+database_name = "ppgk-production"
+database_id = "8a8d6008-cc41-48fb-b635-0b7d6a86ce82"
+migrations_dir = "migrations"
 
 [vars]
 APP_ENV = "production"
