@@ -60,9 +60,14 @@ export async function handleLogin(request, env) {
     ? await verifyPassword(password, user.password_hash)
     : await dummyVerify(password);
 
-  if (!user || !valid) {
+  if (!user) {
     await recordFailure(env, ip);
-    return err(INVALID, 401);
+    return err('No account found with that email', 401);
+  }
+
+  if (!valid) {
+    await recordFailure(env, ip);
+    return err('Password incorrect', 401);
   }
 
   if (!user.email_verified) {
