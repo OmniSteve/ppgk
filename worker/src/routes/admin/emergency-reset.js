@@ -51,6 +51,9 @@ export async function handleEmergencyReset(request, env) {
     [passwordHash, user.id]
   );
 
+  // Re-fetch to confirm the write landed
+  const updated = await queryOne(env, 'SELECT password_hash, email_verified FROM users WHERE id = ?', [user.id]);
+
   return Response.json({
     success: true,
     userId: user.id,
@@ -58,6 +61,9 @@ export async function handleEmergencyReset(request, env) {
     role: user.role,
     wasVerified: user.email_verified === 1,
     oldHashPrefix: user.password_hash ? user.password_hash.substring(0, 12) + '...' : null,
+    newHashPrefix: updated?.password_hash ? updated.password_hash.substring(0, 12) + '...' : null,
+    newHashVerified: updated?.email_verified === 1,
+    hashesMatch: updated?.password_hash === passwordHash,
     message: 'Password reset and email verified. You can now sign in. Remove EMERGENCY_RESET_SECRET when done.',
   }, { status: 200, headers: corsHeaders(request) });
 }
