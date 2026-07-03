@@ -30,6 +30,7 @@ import Register from '@/pages/public/Register';
 import ForgotPassword from '@/pages/public/ForgotPassword';
 import ResetPassword from '@/pages/public/ResetPassword';
 import TermsPage from '@/pages/public/TermsPage';
+import VerifyEmail from '@/pages/public/VerifyEmail';
 import PrivacyPage from '@/pages/public/PrivacyPage';
 
 // Client pages
@@ -96,6 +97,7 @@ const AppRoutes = () => {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/terms" element={<TermsPage />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/privacy" element={<PrivacyPage />} />
 
       <Route element={<AppProtectedRoute allowedRoles={['client', 'coach', 'head_coach', 'admin']} />}>
