@@ -1,0 +1,71 @@
+/** Admin payment management */
+import { requireRole } from '../../lib/auth.js';
+import { query, queryOne, execute, audit } from '../../lib/db.js';
+
+export async function handleAdminPayments(request, env, ctx, params) {
+  const actor  = await requireRole(request, env, 'admin');
+  const url    = new URL(request.url);
+  const method = request.method;
+
+  if (method === 'GET' && !params?.id) {
+    const search = url.searchParams.get('search') || '';
+    const status = url.searchParams.get('status') || '';
+    const page   = parseInt(url.searchParams.get('page') || '1');
+    const limit  = parseInt(url.searchParams.get('limit') || '25');
+    const offset = (page - 1) * limit;
+    const like   = `%${search}%`;
+
+    const conditions = ['1=1'];
+    const bindings   = [];
+    if (search) { conditions.push('(u.first_name LIKE ? OR u.last_name LIKE ? OR p.reference LIKE ?)'); bindings.push(like, like, like); }
+    if (status) { conditions.push('p.status = ?'); bindings.push(status); }
+    const where = conditions.join(' AND ');
+
+    const [payments, countRow, totals] = await Promise.all([
+      query(env,
+        `SELECT p.id, p.amount, p.status, p.reference, p.description, p.created_at, p.stripe_payment_intent,
+                u.first_name || ' ' || u.last_name as client_name
+         FROM payments p JOIN users u ON u.id = p.client_id
+         WHERE ${where}
+         ORDER BY p.created_at DESC LIMIT ? OFFSET ?`,
+        [...bindings, limit, offset]
+      ),
+      queryOne(env, `SELECT COUNT(*) as count FROM payments p JOIN users u ON u.id = p.client_id WHERE ${where}`, bindings),
+      queryOne(env,
+        `SELECT COALESCE(SUM(CASE WHEN status='paid' THEN amount ELSE 0 END),0) as total_paid,
+                COALESCE(SUM(CASE WHEN status='refunded' THEN amount ELSE 0 END),0) as total_refunded,
+                COALESCE(SUM(CASE WHEN status='pending' THEN amount ELSE 0 END),0) as total_pending
+         FROM payments`, []
+      ),
+    ]);
+
+    return Response.json({ payments, total: countRow?.count ?? 0, totals });
+  }
+
+  if (method === 'POST' && params?.id) {
+    // POST /api/admin/payments/:id/refund
+    const url2 = new URL(request.url);
+    if (!url2.pathname.endsWith('/refund')) return Response.json({ message: 'Not found' }, { status: 404 });
+
+    const payment = await queryOne(env, 'SELECT * FROM payments WHERE id = ?', [params.id]);
+    if (!payment) return Response.json({ message: 'Payment not found' }, { status: 404 });
+    if (payment.status !== 'paid') return Response.json({ message: 'Payment cannot be refunded (not in paid status)' }, { status: 400 });
+
+    // TODO: Call Stripe refund API here
+    // const refund = await stripe.refunds.create({ payment_intent: payment.stripe_payment_intent });
+
+    const refundId = crypto.randomUUID();
+    await execute(env,
+      `INSERT INTO refunds (id, payment_id, amount, reason, status, performed_by) VALUES (?,?,?,?,?,?)`,
+      [refundId, payment.id, payment.amount, 'admin_requested', 'pending', actor.sub]
+    );
+    await execute(env,
+      'UPDATE payments SET status = ?, updated_at = ? WHERE id = ?',
+      ['refunded', new Date().toISOString(), payment.id]
+    );
+    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'payment', recordType: 'payment', recordId: payment.id, description: `Refund initiated for payment ${payment.reference}` });
+    return Response.json({ message: 'Refund initiated' });
+  }
+
+  return Response.json({ message: 'Method not allowed' }, { status: 405 });
+}

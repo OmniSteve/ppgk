@@ -1,0 +1,35 @@
+# Premier Performance GK — Cloudflare Worker configuration
+# Deploy: npx wrangler deploy
+# Local dev: npx wrangler dev --local
+
+name = "ppgk-api"
+main = "worker/src/index.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[site]
+# Uncomment when deploying via Cloudflare Pages + Workers integration
+# bucket = "./dist"
+
+[[d1_databases]]
+binding      = "DB"
+database_name = "ppgk"
+database_id  = "REPLACE_WITH_YOUR_D1_DATABASE_ID"
+
+[vars]
+APP_ENV = "development"
+
+# Secrets — set via: npx wrangler secret put SECRET_NAME
+# Required secrets:
+#   JWT_SECRET              — random 32-byte string for signing JWTs
+#   STRIPE_SECRET           — Stripe secret key (sk_live_... or sk_test_...)
+#   STRIPE_WEBHOOK_SECRET   — Stripe webhook signing secret (whsec_...)
+#   RESEND_API_KEY          — Resend API key for transactional email
+
+[[routes]]
+pattern = "/api/*"
+zone_name = "your-domain.com"   # Replace with your Cloudflare zone
+
+[dev]
+port = 8787
+local_protocol = "http"
