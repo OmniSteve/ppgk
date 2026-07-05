@@ -31,6 +31,7 @@ const BookingCard = ({ booking }) => (
         {booking.startTime} – {booking.endTime}
         {booking.locationName && <><span className="text-slate-600">·</span><MapPin size={11} />{booking.locationName}</>}
       </p>
+      {booking.playerName && <p className="text-slate-500 text-xs mt-0.5">{booking.playerName}</p>}
     </div>
     <span className={`text-xs font-semibold px-2 py-1 rounded-full flex-shrink-0 ${
       booking.status === 'confirmed' ? 'bg-green-500/20 text-green-400' :
@@ -44,11 +45,12 @@ export default function ClientDashboard() {
   const { user } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     apiClient.get('/dashboard/client')
       .then(setData)
-      .catch(() => setData({ upcomingBookings: [], creditBalance: 0, expiringCredits: 0, notifications: 0, players: 0 }))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -56,6 +58,18 @@ export default function ClientDashboard() {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <AlertCircle size={36} className="text-red-400 mx-auto mb-3" />
+          <p className="text-red-400 font-semibold">Unable to load dashboard data</p>
+          <p className="text-slate-500 text-sm mt-1">Please refresh the page to try again.</p>
+        </div>
       </div>
     );
   }
