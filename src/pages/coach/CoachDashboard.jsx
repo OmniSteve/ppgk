@@ -44,14 +44,14 @@ export default function CoachDashboard() {
               <div key={s.id} className="bg-white/5 rounded-2xl border border-white/10 p-5">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <p className="font-bold text-white">{s.name}</p>
+                    <p className="font-bold text-white">{s.title}</p>
                     <p className="text-slate-400 text-sm flex items-center gap-2 mt-1">
                       <Clock size={13} />{s.startTime} – {s.endTime}
                       <MapPin size={13} />{s.locationName}
                     </p>
                   </div>
                   <span className="text-sm font-bold text-slate-300 bg-white/10 px-3 py-1 rounded-full">
-                    {s.bookingCount} / {s.capacity}
+                    {s.bookedCount} / {s.capacity}
                   </span>
                 </div>
                 <div className="flex gap-2">
@@ -83,12 +83,12 @@ export default function CoachDashboard() {
             {data.upcomingSessions.slice(0, 5).map((s) => (
               <Link key={s.id} to={`/coach/sessions/${s.id}/attendees`} className="flex items-center gap-4 p-4 bg-white/5 rounded-xl border border-white/10 hover:border-[#2563EB]/40 transition-all">
                 <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex flex-col items-center justify-center flex-shrink-0">
-                  <span className="text-white text-xs font-bold leading-none">{new Date(s.date).getDate()}</span>
-                  <span className="text-[#2563EB] text-[9px] font-bold uppercase">{new Date(s.date).toLocaleString('en', { month: 'short' })}</span>
+                  <span className="text-white text-xs font-bold leading-none">{new Date(s.sessionDate).getDate()}</span>
+                  <span className="text-[#2563EB] text-[9px] font-bold uppercase">{new Date(s.sessionDate).toLocaleString('en', { month: 'short' })}</span>
                 </div>
                 <div className="flex-1">
-                  <p className="font-semibold text-white text-sm">{s.name}</p>
-                  <p className="text-slate-400 text-xs">{s.startTime} · {s.locationName} · {s.bookingCount} players</p>
+                  <p className="font-semibold text-white text-sm">{s.title}</p>
+                  <p className="text-slate-400 text-xs">{s.startTime} · {s.locationName} · {s.bookedCount} players</p>
                 </div>
               </Link>
             ))}
