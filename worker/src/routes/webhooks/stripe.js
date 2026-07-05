@@ -46,77 +46,82 @@ export async function handleStripeWebhook(request, env) {
     return new Response('Invalid JSON', { status: 400 });
   }
 
-  if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const orderId = session.metadata?.orderId;
-    if (!orderId) {
-      console.error('Stripe webhook: no orderId in metadata', session.id);
-      return new Response(JSON.stringify({ received: true }), { status: 200 });
-    }
+  try {
+    if (event.type === 'checkout.session.completed') {
+      const session = event.data.object;
+      const orderId = session.metadata?.orderId;
+      if (!orderId) {
+        console.error('Stripe webhook: no orderId in metadata', session.id);
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+      }
 
-    // Idempotency — skip if already paid
-    const order = await queryOne(env, 'SELECT * FROM orders WHERE id = ?', [orderId]);
-    if (!order) {
-      console.error('Stripe webhook: order not found', orderId);
-      return new Response(JSON.stringify({ received: true }), { status: 200 });
-    }
-    if (order.status === 'paid') {
-      return new Response(JSON.stringify({ received: true, skipped: true }), { status: 200 });
-    }
+      // Idempotency — skip if already paid
+      const order = await queryOne(env, 'SELECT * FROM orders WHERE id = ?', [orderId]);
+      if (!order) {
+        console.error('Stripe webhook: order not found', orderId);
+        return new Response(JSON.stringify({ received: true }), { status: 200 });
+      }
+      if (order.status === 'paid') {
+        return new Response(JSON.stringify({ received: true, skipped: true }), { status: 200 });
+      }
 
-    const now = new Date().toISOString();
+      const now = new Date().toISOString();
 
-    // Mark order paid
-    await execute(env,
-      `UPDATE orders SET status = 'paid', stripe_payment_intent_id = ?, updated_at = ? WHERE id = ?`,
-      [session.payment_intent ?? null, now, orderId]
-    );
-
-    // Confirm any session bookings on this order
-    await execute(env,
-      `UPDATE bookings SET status = 'confirmed', confirmed_at = ?, updated_at = ? WHERE order_id = ? AND status = 'pending_payment'`,
-      [now, now, orderId]
-    );
-
-    // Handle package purchases — issue credits
-    const items = await query(env,
-      `SELECT oi.*, pd.credits, pd.validity_months, pd.name
-       FROM order_items oi
-       JOIN package_definitions pd ON pd.id = oi.package_definition_id
-       WHERE oi.order_id = ? AND oi.item_type = 'package_purchase'`,
-      [orderId]
-    );
-
-    for (const item of items) {
-      // Create or find the package_purchase record
-      let pkgPurchase = await queryOne(env,
-        'SELECT id FROM package_purchases WHERE order_id = ? AND package_definition_id = ?',
-        [orderId, item.package_definition_id]
+      // Mark order paid — column is stripe_payment_intent (not stripe_payment_intent_id)
+      await execute(env,
+        `UPDATE orders SET status = 'paid', stripe_payment_intent = ?, updated_at = ? WHERE id = ?`,
+        [session.payment_intent ?? null, now, orderId]
       );
 
-      if (!pkgPurchase) {
-        const pkgPurchaseId = crypto.randomUUID();
-        const expiresAt = item.validity_months
-          ? new Date(Date.now() + item.validity_months * 30 * 24 * 60 * 60 * 1000).toISOString()
-          : null;
-        await execute(env,
-          `INSERT INTO package_purchases (id, client_id, package_definition_id, order_id, credits_granted, credits_remaining, price_paid, status, expires_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)`,
-          [pkgPurchaseId, order.client_id, item.package_definition_id, orderId, item.credits, item.credits, item.unit_price ?? 0, expiresAt]
+      // Confirm any session bookings on this order
+      await execute(env,
+        `UPDATE bookings SET status = 'confirmed', confirmed_at = ?, updated_at = ? WHERE order_id = ? AND status = 'pending_payment'`,
+        [now, now, orderId]
+      );
+
+      // Handle package purchases — issue credits
+      const items = await query(env,
+        `SELECT oi.*, pd.credits, pd.validity_months, pd.name, pd.price AS pkg_price
+         FROM order_items oi
+         JOIN package_definitions pd ON pd.id = oi.package_definition_id
+         WHERE oi.order_id = ? AND oi.item_type = 'package_purchase'`,
+        [orderId]
+      );
+
+      for (const item of items) {
+        // Idempotency — skip if already created
+        let pkgPurchase = await queryOne(env,
+          'SELECT id FROM package_purchases WHERE order_id = ? AND package_definition_id = ?',
+          [orderId, item.package_definition_id]
         );
-        pkgPurchase = { id: pkgPurchaseId };
 
-        await issuePackageCredits(env, {
-          clientId:         order.client_id,
-          packagePurchaseId: pkgPurchaseId,
-          credits:          item.credits,
-          expiresAt,
-          description:      `Credits from ${item.name}`,
-        });
+        if (!pkgPurchase) {
+          const pkgPurchaseId = crypto.randomUUID();
+          const expiresAt = item.validity_months
+            ? new Date(Date.now() + item.validity_months * 30 * 24 * 60 * 60 * 1000).toISOString()
+            : new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString();
+          await execute(env,
+            `INSERT INTO package_purchases (id, client_id, package_definition_id, order_id, credits_granted, credits_remaining, price_paid, status, expires_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)`,
+            [pkgPurchaseId, order.client_id, item.package_definition_id, orderId, item.credits, item.credits, item.pkg_price ?? item.unit_price ?? 0, expiresAt]
+          );
+          pkgPurchase = { id: pkgPurchaseId };
+
+          await issuePackageCredits(env, {
+            clientId:          order.client_id,
+            packagePurchaseId: pkgPurchaseId,
+            credits:           item.credits,
+            expiresAt,
+            description:       `Credits from ${item.name}`,
+          });
+        }
       }
-    }
 
-    console.log('Stripe webhook: order fulfilled', orderId);
+      console.log('Stripe webhook: order fulfilled', orderId);
+    }
+  } catch (err) {
+    console.error('Stripe webhook processing error:', err);
+    return new Response(JSON.stringify({ error: 'Webhook processing failed' }), { status: 500 });
   }
 
   return new Response(JSON.stringify({ received: true }), {
