@@ -1,6 +1,7 @@
 /** GET /api/admin/notifications */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminNotifications(request, env, ctx, params) {
   await requireRole(request, env, 'admin');
@@ -20,5 +21,5 @@ export async function handleAdminNotifications(request, env, ctx, params) {
     queryOne(env, 'SELECT COUNT(*) as count FROM notifications', []),
   ]);
 
-  return Response.json({ notifications, total: countRow?.count ?? 0 });
+  return Response.json({ notifications: toCamelArray(notifications), total: countRow?.count ?? 0 });
 }

@@ -1,6 +1,7 @@
 /** GET /api/admin/players */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminPlayers(request, env, ctx, params) {
   await requireRole(request, env, 'admin', 'head_coach', 'coach');
@@ -26,22 +27,5 @@ export async function handleAdminPlayers(request, env, ctx, params) {
     ),
   ]);
 
-  return Response.json({
-    players: players.map((p) => ({
-      id:              p.id,
-      firstName:       p.first_name,
-      lastName:        p.last_name,
-      dateOfBirth:     p.date_of_birth,
-      ageGroup:        p.age_group,
-      experienceLevel: p.experience_level,
-      currentClub:     p.current_club,
-      school:          p.school,
-      medicalInfo:     p.medical_info,
-      allergies:       p.allergies,
-      status:          p.status,
-      notes:           p.notes,
-      parentName:      p.parent_name,
-    })),
-    total: countRow?.count ?? 0,
-  });
+  return Response.json({ players: toCamelArray(players), total: countRow?.count ?? 0 });
 }

@@ -1,6 +1,7 @@
 /** Admin attendance management */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne, execute, audit } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminAttendance(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin', 'head_coach');
@@ -48,7 +49,7 @@ export async function handleAdminAttendance(request, env, ctx, params) {
       ),
     ]);
 
-    return Response.json({ records, total: countRow?.count ?? 0 });
+    return Response.json({ records: toCamelArray(records), total: countRow?.count ?? 0 });
   }
 
   if (method === 'PATCH' && params?.id) {

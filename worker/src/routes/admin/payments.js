@@ -40,7 +40,7 @@ export async function handleAdminPayments(request, env, ctx, params) {
       ),
     ]);
 
-    return Response.json({ payments, total: countRow?.count ?? 0, totals });
+    return Response.json({ payments: toCamelArray(payments), total: countRow?.count ?? 0, totals: toCamel(totals) });
   }
 
   if (method === 'POST' && params?.id) {

@@ -1,6 +1,7 @@
 /** Admin credit management */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne, execute, audit } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminCredits(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');
@@ -36,7 +37,7 @@ export async function handleAdminCredits(request, env, ctx, params) {
       ),
     ]);
 
-    return Response.json({ entries, total: countRow?.count ?? 0 });
+    return Response.json({ entries: toCamelArray(entries), total: countRow?.count ?? 0 });
   }
 
   if (method === 'POST') {

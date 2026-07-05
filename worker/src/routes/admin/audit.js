@@ -1,6 +1,7 @@
 /** GET /api/admin/audit */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminAuditLog(request, env) {
   await requireRole(request, env, 'admin');
@@ -28,7 +29,5 @@ export async function handleAdminAuditLog(request, env) {
     queryOne(env, `SELECT COUNT(*) as count FROM audit_log a WHERE ${where}`, bindings),
   ]);
 
-  // Camelcase the recordType for the frontend
-  const mapped = logs.map((l) => ({ ...l, recordType: l.record_type, actorName: l.actor_name, createdAt: l.created_at }));
-  return Response.json({ logs: mapped, total: countRow?.count ?? 0 });
+  return Response.json({ logs: toCamelArray(logs), total: countRow?.count ?? 0 });
 }
