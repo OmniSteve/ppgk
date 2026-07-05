@@ -1,6 +1,7 @@
 /** CRUD /api/admin/packages */
 import { requireRole } from '../../lib/auth.js';
 import { query, execute, audit } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminPackages(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');
@@ -8,7 +9,7 @@ export async function handleAdminPackages(request, env, ctx, params) {
 
   if (method === 'GET') {
     const packages = await query(env, 'SELECT * FROM package_definitions ORDER BY name', []);
-    return Response.json(packages);
+    return Response.json({ packages: toCamelArray(packages) });
   }
 
   if (method === 'POST') {

@@ -1,6 +1,7 @@
 /** GET /api/credits */
 import { requireAuth } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleClientCredits(request, env) {
   const payload = await requireAuth(request, env);
@@ -21,7 +22,7 @@ export async function handleClientCredits(request, env) {
 
   return Response.json({
     balance:   balRow?.balance ?? 0,
-    entries,
-    purchases,
+    entries:   toCamelArray(entries),
+    purchases: toCamelArray(purchases),
   });
 }

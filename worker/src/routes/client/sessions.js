@@ -1,6 +1,7 @@
 /** GET /api/sessions, GET /api/sessions/:id */
 import { requireAuth } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { toCamel, toCamelArray } from '../../lib/serializers.js';
 
 export async function handleClientSessions(request, env, ctx, params) {
   await requireAuth(request, env);
@@ -19,7 +20,7 @@ export async function handleClientSessions(request, env, ctx, params) {
       [params.id]
     );
     if (!session) return Response.json({ message: 'Session not found' }, { status: 404 });
-    return Response.json(session);
+    return Response.json(toCamel(session));
   }
 
   const today   = new Date().toISOString().slice(0, 10);
@@ -52,5 +53,5 @@ export async function handleClientSessions(request, env, ctx, params) {
     bindings
   );
 
-  return Response.json({ sessions });
+  return Response.json({ sessions: toCamelArray(sessions) });
 }

@@ -1,6 +1,7 @@
 /** CRUD /api/admin/session-types */
 import { requireRole } from '../../lib/auth.js';
 import { query, execute, audit } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminSessionTypes(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');
@@ -8,7 +9,7 @@ export async function handleAdminSessionTypes(request, env, ctx, params) {
 
   if (method === 'GET') {
     const sessionTypes = await query(env, 'SELECT * FROM session_types ORDER BY name', []);
-    return Response.json({ sessionTypes });
+    return Response.json({ sessionTypes: toCamelArray(sessionTypes) });
   }
 
   if (method === 'POST') {

@@ -1,6 +1,7 @@
 /** CRUD /api/admin/locations */
 import { requireRole } from '../../lib/auth.js';
 import { query, execute, audit } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminLocations(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');
@@ -8,7 +9,7 @@ export async function handleAdminLocations(request, env, ctx, params) {
 
   if (method === 'GET') {
     const locations = await query(env, 'SELECT * FROM locations ORDER BY name', []);
-    return Response.json({ locations });
+    return Response.json({ locations: toCamelArray(locations) });
   }
 
   if (method === 'POST') {

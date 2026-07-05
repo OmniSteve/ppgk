@@ -1,6 +1,7 @@
 /** Client player management */
 import { requireAuth } from '../../lib/auth.js';
 import { query, queryOne, execute } from '../../lib/db.js';
+import { toCamel, toCamelArray } from '../../lib/serializers.js';
 
 export async function handleClientPlayers(request, env, ctx, params) {
   const payload = await requireAuth(request, env);
@@ -8,13 +9,13 @@ export async function handleClientPlayers(request, env, ctx, params) {
 
   if (method === 'GET' && !params?.id) {
     const players = await query(env, 'SELECT * FROM players WHERE client_id = ? ORDER BY first_name', [payload.sub]);
-    return Response.json({ players });
+    return Response.json({ players: toCamelArray(players) });
   }
 
   if (method === 'GET' && params?.id) {
     const player = await queryOne(env, 'SELECT * FROM players WHERE id = ? AND client_id = ?', [params.id, payload.sub]);
     if (!player) return Response.json({ message: 'Player not found' }, { status: 404 });
-    return Response.json(player);
+    return Response.json(toCamel(player));
   }
 
   if (method === 'POST') {

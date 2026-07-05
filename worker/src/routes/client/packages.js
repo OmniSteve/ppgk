@@ -6,13 +6,14 @@
 import { requireAuth }              from '../../lib/auth.js';
 import { query, queryOne, execute } from '../../lib/db.js';
 import { err, ok }                  from '../../lib/validate.js';
+import { toCamelArray }             from '../../lib/serializers.js';
 
 export async function handleClientPackages(request, env, ctx, params) {
   const payload = await requireAuth(request, env);
 
   if (request.method === 'GET') {
     const packages = await query(env, "SELECT * FROM package_definitions WHERE active = 1 ORDER BY price", []);
-    return ok({ packages });
+    return ok({ packages: toCamelArray(packages) });
   }
 
   if (request.method === 'POST' && params?.id) {

@@ -5,6 +5,7 @@
  */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne, execute, audit } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminBookings(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin', 'head_coach');
@@ -54,7 +55,7 @@ export async function handleAdminBookings(request, env, ctx, params) {
       ),
     ]);
 
-    return Response.json({ bookings, total: countRow?.count ?? 0 });
+    return Response.json({ bookings: toCamelArray(bookings), total: countRow?.count ?? 0 });
   }
 
   if (method === 'PATCH' && params?.id) {

@@ -1,6 +1,7 @@
 /** CRUD /api/admin/coaches */
 import { requireRole } from '../../lib/auth.js';
 import { query, execute, audit } from '../../lib/db.js';
+import { toCamel, toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminCoaches(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');
@@ -13,13 +14,7 @@ export async function handleAdminCoaches(request, env, ctx, params) {
       `SELECT * FROM coach_profiles WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? ORDER BY first_name`,
       [`%${search}%`, `%${search}%`, `%${search}%`]
     );
-    const coaches = rows.map((r) => ({
-      ...r,
-      firstName: r.first_name,
-      lastName: r.last_name,
-      active: r.active === 1 || r.active === true,
-    }));
-    return Response.json({ coaches });
+    return Response.json({ coaches: toCamelArray(rows) });
   }
 
   if (method === 'POST') {

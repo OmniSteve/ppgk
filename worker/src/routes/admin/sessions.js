@@ -8,6 +8,7 @@
  */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne, execute, audit } from '../../lib/db.js';
+import { toCamel, toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminSessions(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin', 'head_coach');
@@ -48,7 +49,7 @@ export async function handleAdminSessions(request, env, ctx, params) {
       queryOne(env, `SELECT COUNT(*) as count FROM sessions s WHERE ${where}`, bindings),
     ]);
 
-    return Response.json({ sessions, total: countRow?.count ?? 0 });
+    return Response.json({ sessions: toCamelArray(sessions), total: countRow?.count ?? 0 });
   }
 
   if (method === 'GET' && params?.id) {
@@ -64,7 +65,7 @@ export async function handleAdminSessions(request, env, ctx, params) {
       [params.id]
     );
     if (!session) return Response.json({ message: 'Session not found' }, { status: 404 });
-    return Response.json(session);
+    return Response.json(toCamel(session));
   }
 
   if (method === 'POST') {

@@ -1,6 +1,7 @@
 /** Client notification endpoints */
 import { requireAuth } from '../../lib/auth.js';
 import { query, execute } from '../../lib/db.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleClientNotifications(request, env, ctx, params) {
   const payload = await requireAuth(request, env);
@@ -10,7 +11,7 @@ export async function handleClientNotifications(request, env, ctx, params) {
       'SELECT id, subject, status, sent_at, created_at FROM notifications WHERE user_id = ? ORDER BY created_at DESC LIMIT 50',
       [payload.sub]
     );
-    return Response.json({ notifications });
+    return Response.json({ notifications: toCamelArray(notifications) });
   }
 
   if (request.method === 'PATCH' && params?.id) {

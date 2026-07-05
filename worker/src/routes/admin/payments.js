@@ -1,6 +1,7 @@
 /** Admin payment management */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne, execute, audit } from '../../lib/db.js';
+import { toCamel, toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminPayments(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');

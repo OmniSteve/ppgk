@@ -7,6 +7,7 @@
  */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne, execute, audit } from '../../lib/db.js';
+import { toCamel, toCamelArray } from '../../lib/serializers.js';
 
 export async function handleAdminClients(request, env, ctx, params) {
   const actor = await requireRole(request, env, 'admin', 'head_coach');
@@ -39,7 +40,7 @@ export async function handleAdminClients(request, env, ctx, params) {
       ),
     ]);
 
-    return Response.json({ clients, total: countRow?.count ?? 0 });
+    return Response.json({ clients: toCamelArray(clients), total: countRow?.count ?? 0 });
   }
 
   if (method === 'GET' && params?.id) {
@@ -48,7 +49,7 @@ export async function handleAdminClients(request, env, ctx, params) {
       [params.id]
     );
     if (!user) return Response.json({ message: 'Client not found' }, { status: 404 });
-    return Response.json(user);
+    return Response.json(toCamel(user));
   }
 
   if ((method === 'PUT' || method === 'PATCH') && params?.id) {
