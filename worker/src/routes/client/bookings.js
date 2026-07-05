@@ -127,7 +127,9 @@ export async function handleClientBookings(request, env, ctx, params) {
     let body;
     try { body = await request.json(); } catch { return err('Invalid JSON'); }
 
+    let step = 'start';
     try {
+      step = 'parse body fields';
       const { sessionIds, playerId, paymentMethod, idempotencyKey } = body;
       if (!sessionIds?.length || !playerId || !paymentMethod || !idempotencyKey) {
         return err('sessionIds, playerId, paymentMethod and idempotencyKey are required');
@@ -136,7 +138,7 @@ export async function handleClientBookings(request, env, ctx, params) {
         return err('paymentMethod must be credits or card');
       }
 
-      // Idempotency
+      step = 'check idempotency';
       const existingOrder = await queryOne(env,
         'SELECT id FROM orders WHERE idempotency_key = ? AND client_id = ?',
         [idempotencyKey, payload.sub]
@@ -146,9 +148,7 @@ export async function handleClientBookings(request, env, ctx, params) {
         return ok({ orderId: existingOrder.id, bookingIds: existingBookings.map(b => b.id), idempotent: true });
       }
 
-      console.log('CHECKOUT STEP 1 validate input', { sessionIds, playerId, paymentMethod });
-
-      // Verify player
+      step = 'validate player';
       const player = await queryOne(env,
         'SELECT id, client_id, status FROM players WHERE id = ? AND client_id = ?',
         [playerId, payload.sub]
@@ -156,9 +156,7 @@ export async function handleClientBookings(request, env, ctx, params) {
       if (!player) return err('Player not found', 404);
       if (player.status !== 'active') return err('Player is not active');
 
-      console.log('CHECKOUT STEP 2 player verified', player.id);
-
-      // Pre-validate all sessions
+      step = 'validate sessions';
       const sessions = [];
       const errors   = [];
       for (const sessionId of sessionIds) {
@@ -171,8 +169,12 @@ export async function handleClientBookings(request, env, ctx, params) {
         if (!session) { errors.push({ sessionId, reason: 'Session not found' }); continue; }
         const eligErr = await checkEligibility(env, { player, session, clientId: payload.sub });
         if (eligErr) { errors.push({ sessionId, reason: eligErr }); continue; }
+
+        step = 'check session capacity';
         const confirmed = await liveConfirmedCount(env, sessionId);
         if (confirmed >= session.capacity) { errors.push({ sessionId, reason: 'Session is full' }); continue; }
+
+        step = 'check duplicate booking';
         const dup = await queryOne(env,
           `SELECT id FROM bookings WHERE player_id = ? AND session_id = ?
            AND status NOT IN ('cancelled_by_client','cancelled_by_admin','payment_failed','rescheduled')`,
@@ -183,19 +185,16 @@ export async function handleClientBookings(request, env, ctx, params) {
       }
       if (errors.length > 0) return err('One or more sessions cannot be booked', 422, { errors });
 
-      console.log('CHECKOUT STEP 3 sessions validated', sessions.map(s => s.id));
-
-      // Credits check upfront
+      step = 'check credit balance';
       const totalCredits = sessions.reduce((sum, s) => sum + (s.credit_cost ?? 1), 0);
       if (paymentMethod === 'credits') {
         const balance = await getBalance(env, payload.sub);
-        console.log('CHECKOUT STEP 3b balance check', { balance, totalCredits });
         if (balance < totalCredits) {
           return err(`Insufficient credits. Required: ${totalCredits}, available: ${balance}`, 402);
         }
       }
 
-      // Create order
+      step = 'insert order';
       const orderId  = crypto.randomUUID();
       const totalAmt = paymentMethod === 'card' ? sessions.reduce((sum, s) => sum + (s.price ?? 0), 0) : 0;
       await execute(env,
@@ -203,9 +202,7 @@ export async function handleClientBookings(request, env, ctx, params) {
         [orderId, payload.sub, idempotencyKey, totalAmt]
       );
 
-      console.log('CHECKOUT STEP 4 order created', orderId);
-
-      // Create one booking per session
+      step = 'insert bookings';
       const bookingIds = [];
       for (const session of sessions) {
         const bookingId = crypto.randomUUID();
@@ -219,22 +216,17 @@ export async function handleClientBookings(request, env, ctx, params) {
         bookingIds.push({ bookingId, sessionId: session.id });
       }
 
-      console.log('CHECKOUT STEP 5 bookings inserted', bookingIds.map(b => b.bookingId));
-
-      // Credits payment: deduct and confirm
       if (paymentMethod === 'credits') {
         for (const { bookingId, sessionId } of bookingIds) {
           const session = sessions.find(s => s.id === sessionId);
-          console.log('CHECKOUT STEP 6 deduct credits start', { bookingId, amount: session.credit_cost ?? 1 });
 
+          step = 'deduct credits';
           const deduction = await deductCredits(env, {
             clientId: payload.sub,
             bookingId,
             amount:   session.credit_cost ?? 1,
             description: `Credit booking: ${session.title} on ${session.session_date}`,
           });
-
-          console.log('CHECKOUT STEP 7 deduct credits result', deduction);
 
           if (!deduction.success) {
             for (const { bookingId: bid, sessionId: sid } of bookingIds) {
@@ -245,12 +237,13 @@ export async function handleClientBookings(request, env, ctx, params) {
             return err(deduction.error, 402);
           }
 
+          step = 'confirm booking';
           await execute(env,
             "UPDATE bookings SET status='confirmed', confirmed_at=? WHERE id=?",
             [new Date().toISOString(), bookingId]
           );
 
-          // Email is non-fatal — don't let it crash the booking
+          step = 'send notification email';
           try {
             await sendTemplatedEmail(env, {
               eventTrigger:  'booking_confirmed',
@@ -271,17 +264,25 @@ export async function handleClientBookings(request, env, ctx, params) {
           }
         }
 
+        step = 'mark order paid';
         await execute(env, "UPDATE orders SET status='paid' WHERE id=?", [orderId]);
-        console.log('CHECKOUT STEP 8 complete', orderId);
+
+        step = 'return success';
         return ok({ orderId, bookingIds: bookingIds.map(b => b.bookingId), status: 'confirmed' }, 201);
       }
 
       // Card payment
+      step = 'return pending payment';
       return ok({ orderId, bookingIds: bookingIds.map(b => b.bookingId), status: 'pending_payment' }, 201);
 
     } catch (e) {
-      console.error('CHECKOUT ERROR', e.message, e.stack);
-      return err(`Booking failed: ${e.message}`, 500);
+      console.error('CHECKOUT_CONFIRM_FAILED', { step, message: e?.message, name: e?.name, stack: e?.stack });
+      return new Response(JSON.stringify({
+        error: 'Checkout failed',
+        step,
+        message: e?.message,
+        name: e?.name,
+      }), { status: 500, headers: { 'Content-Type': 'application/json' } });
     }
   }
 

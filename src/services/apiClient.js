@@ -37,8 +37,13 @@ async function request(path, options = {}) {
     credentials: 'include',
   });
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.message || `Request failed: ${response.status}`);
+    const body = await response.json().catch(() => ({}));
+    const msg = body.step
+      ? `${body.error || 'Request failed'} at ${body.step}: ${body.message || response.status}`
+      : body.message || body.error || `Request failed: ${response.status}`;
+    const error = new Error(msg);
+    error.responseBody = body;
+    throw error;
   }
   return response.json();
 }
