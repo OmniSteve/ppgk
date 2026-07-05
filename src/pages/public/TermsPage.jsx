@@ -35,7 +35,7 @@ export default function TermsPage() {
           </section>
           <section>
             <h2 className="text-xl font-bold text-white mb-3">7. Contact</h2>
-            <p>For any queries, please contact us through the application or email us at info@premierperformancegk.com.</p>
+            <p>For any queries, please contact us through the application or email us at info@ppgk.app.</p>
           </section>
         </div>
       </div>
