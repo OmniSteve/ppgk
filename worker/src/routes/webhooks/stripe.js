@@ -100,9 +100,9 @@ export async function handleStripeWebhook(request, env) {
           ? new Date(Date.now() + item.validity_months * 30 * 24 * 60 * 60 * 1000).toISOString()
           : null;
         await execute(env,
-          `INSERT INTO package_purchases (id, client_id, package_definition_id, order_id, credits_total, credits_used, status, expires_at, purchased_at)
-           VALUES (?, ?, ?, ?, ?, 0, 'active', ?, ?)`,
-          [pkgPurchaseId, order.client_id, item.package_definition_id, orderId, item.credits, expiresAt, now]
+          `INSERT INTO package_purchases (id, client_id, package_definition_id, order_id, credits_granted, credits_remaining, price_paid, status, expires_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?)`,
+          [pkgPurchaseId, order.client_id, item.package_definition_id, orderId, item.credits, item.credits, item.unit_price ?? 0, expiresAt]
         );
         pkgPurchase = { id: pkgPurchaseId };
 
