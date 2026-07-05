@@ -87,18 +87,23 @@ export async function handleAdminSessions(request, env, ctx, params) {
 
   if (method === 'PUT' && params?.id) {
     const body = await request.json();
-    const { title, locationId, coachId, sessionDate, startTime, endTime, capacity, creditCost, price, description, notes, status } = body;
+    const { title, sessionTypeId, locationId, coachId, sessionDate, startTime, endTime,
+            capacity, creditCost, price, description, notes, status, ageGroup, abilityLevel } = body;
     await execute(env,
-      `UPDATE sessions SET title = COALESCE(?, title), location_id = COALESCE(?, location_id),
-       coach_id = COALESCE(?, coach_id), session_date = COALESCE(?, session_date),
-       start_time = COALESCE(?, start_time), end_time = COALESCE(?, end_time),
-       capacity = COALESCE(?, capacity), credit_cost = COALESCE(?, credit_cost),
-       price = COALESCE(?, price), description = COALESCE(?, description),
-       notes = COALESCE(?, notes), status = COALESCE(?, status), updated_at = ?
+      `UPDATE sessions SET
+       title = ?, session_type_id = ?, location_id = ?, coach_id = ?,
+       session_date = ?, start_time = ?, end_time = ?,
+       capacity = ?, credit_cost = ?, price = ?,
+       description = ?, notes = ?, status = ?,
+       age_group = ?, ability_level = ?,
+       updated_at = ?
        WHERE id = ?`,
-      [title ?? null, locationId ?? null, coachId ?? null, sessionDate ?? null, startTime ?? null, endTime ?? null,
-       capacity ?? null, creditCost ?? null, price ?? null, description ?? null, notes ?? null,
-       status ?? null, new Date().toISOString(), params.id]
+      [title ?? null, sessionTypeId ?? null, locationId ?? null, coachId ?? null,
+       sessionDate || null, startTime ?? null, endTime ?? null,
+       capacity ?? null, creditCost ?? null, price ?? null,
+       description ?? null, notes ?? null, status ?? null,
+       ageGroup ?? null, abilityLevel ?? null,
+       new Date().toISOString(), params.id]
     );
     await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'update', recordType: 'session', recordId: params.id, description: `Session updated: ${params.id}` });
     return Response.json({ message: 'Session updated' });

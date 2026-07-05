@@ -35,16 +35,21 @@ export default function EditSession() {
     ]).then(([s, c, l, st]) => {
       // Normalise session snake_case → camelCase form fields
       setForm({
-        ...s,
-        name: s.title ?? s.name ?? '',
-        date: s.session_date ?? s.date ?? '',
-        startTime: s.start_time ?? s.startTime ?? '',
-        endTime: s.end_time ?? s.endTime ?? '',
-        locationId: s.location_id ?? s.locationId ?? '',
-        coachId: s.coach_id ?? s.coachId ?? '',
-        sessionTypeId: s.session_type_id ?? s.sessionTypeId ?? '',
-        credits: s.credit_cost ?? s.credits ?? '',
-        internalNotes: s.notes ?? s.internalNotes ?? '',
+        name: s.title ?? '',
+        date: s.sessionDate ?? '',
+        startTime: s.startTime ?? '',
+        endTime: s.endTime ?? '',
+        locationId: s.locationId ?? '',
+        coachId: s.coachId ?? '',
+        sessionTypeId: s.sessionTypeId ?? '',
+        credits: s.creditCost ?? '',
+        price: s.price ?? '',
+        capacity: s.capacity ?? '',
+        description: s.description ?? '',
+        ageGroup: s.ageGroup ?? '',
+        abilityLevel: s.abilityLevel ?? '',
+        status: s.status ?? 'draft',
+        internalNotes: s.notes ?? '',
       });
       setCoaches(Array.isArray(c) ? c : (c.coaches || []));
       setLocations(Array.isArray(l) ? l : (l.locations || []));
@@ -65,15 +70,17 @@ export default function EditSession() {
         sessionTypeId: form.sessionTypeId || null,
         locationId: form.locationId || null,
         coachId: form.coachId || null,
-        sessionDate: form.date,
-        startTime: form.startTime,
-        endTime: form.endTime,
-        capacity: form.capacity || null,
-        creditCost: form.credits || null,
-        price: form.price || null,
+        sessionDate: form.date || null,
+        startTime: form.startTime || null,
+        endTime: form.endTime || null,
+        capacity: form.capacity ? Number(form.capacity) : null,
+        creditCost: form.credits ? Number(form.credits) : null,
+        price: form.price ? Number(form.price) : null,
         description: form.description || null,
         notes: form.internalNotes || null,
-        status: form.status || null,
+        status: form.status || 'draft',
+        ageGroup: form.ageGroup || null,
+        abilityLevel: form.abilityLevel || null,
       });
       navigate('/admin/sessions');
     } catch (err) {
