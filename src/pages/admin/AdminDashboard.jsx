@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, Users, CreditCard, AlertCircle, TrendingUp, ClipboardList, Package, XCircle, UserPlus, CheckSquare } from 'lucide-react';
+import { Calendar, TrendingUp, ClipboardList, UserPlus, AlertCircle } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
 const StatCard = ({ label, value, sub, icon: Icon, color, href, alert }) => (
@@ -22,7 +22,10 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get('/admin/dashboard').then(setData).catch(() => setData({})).finally(() => setLoading(false));
+    apiClient.get('/admin/dashboard')
+      .then((d) => setData(d?.stats ? d : { stats: d }))
+      .catch(() => setData({}))
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-white/20 border-t-[#2563EB] rounded-full animate-spin" /></div>;
@@ -38,43 +41,25 @@ export default function AdminDashboard() {
       <div>
         <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">Today</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Sessions Today" value={data?.sessionsToday ?? 0} icon={Calendar} color="bg-[#2563EB]/20 text-[#2563EB]" href="/admin/sessions" />
-          <StatCard label="Total Bookings" value={data?.totalBookings ?? 0} icon={ClipboardList} color="bg-green-500/20 text-green-400" href="/admin/bookings" />
-          <StatCard label="Attendance Pending" value={data?.attendancePending ?? 0} icon={CheckSquare} color="bg-amber-500/20 text-amber-400" href="/admin/attendance" alert={data?.attendancePending > 0} />
-          <StatCard label="New Registrations" value={data?.newRegistrations ?? 0} sub="This week" icon={UserPlus} color="bg-purple-500/20 text-purple-400" href="/admin/clients" />
+          <StatCard label="Sessions Today" value={data?.stats?.upcomingSessions ?? 0} icon={Calendar} color="bg-[#2563EB]/20 text-[#2563EB]" href="/admin/sessions" />
+          <StatCard label="Bookings Today" value={data?.stats?.todayBookings ?? 0} icon={ClipboardList} color="bg-green-500/20 text-green-400" href="/admin/bookings" />
+          <StatCard label="Total Clients" value={data?.stats?.totalClients ?? 0} icon={UserPlus} color="bg-purple-500/20 text-purple-400" href="/admin/clients" />
+          <StatCard label="Total Revenue" value={`€${data?.stats?.totalRevenue ?? 0}`} sub="All time" icon={TrendingUp} color="bg-amber-500/20 text-amber-400" href="/admin/payments" />
         </div>
       </div>
 
-      {/* Sessions */}
-      <div>
-        <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">Sessions</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <StatCard label="Upcoming Sessions" value={data?.upcomingSessions ?? 0} icon={Calendar} color="bg-[#2563EB]/20 text-[#2563EB]" href="/admin/sessions" />
-          <StatCard label="Fully Booked" value={data?.fullyBooked ?? 0} icon={Users} color="bg-red-500/20 text-red-400" href="/admin/sessions" />
-          <StatCard label="Recent Cancellations" value={data?.recentCancellations ?? 0} icon={XCircle} color="bg-slate-500/20 text-slate-400" href="/admin/bookings" />
-        </div>
-      </div>
-
-      {/* Finance */}
-      <div>
-        <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">Finance</p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Revenue (month)" value={`€${data?.monthlyRevenue ?? 0}`} icon={TrendingUp} color="bg-green-500/20 text-green-400" href="/admin/payments" />
-          <StatCard label="Outstanding Payments" value={data?.outstandingPayments ?? 0} icon={CreditCard} color="bg-amber-500/20 text-amber-400" href="/admin/payments" alert={data?.outstandingPayments > 0} />
-          <StatCard label="Credits Issued" value={data?.creditsIssued ?? 0} icon={Package} color="bg-blue-500/20 text-blue-400" href="/admin/credits" />
-          <StatCard label="Credits Expiring" value={data?.creditsExpiring ?? 0} sub="Next 14 days" icon={AlertCircle} color="bg-orange-500/20 text-orange-400" href="/admin/credits" alert={data?.creditsExpiring > 0} />
-        </div>
-      </div>
-
-      {/* Recent activity */}
-      {data?.recentActivity?.length > 0 && (
+      {/* Upcoming sessions list */}
+      {Array.isArray(data?.upcomingSessions) && data.upcomingSessions.length > 0 && (
         <div>
-          <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">Recent Activity</p>
-          <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/10">
-            {data.recentActivity.map((a, i) => (
-              <div key={i} className="flex items-center justify-between px-5 py-3">
-                <p className="text-slate-300 text-sm">{a.description}</p>
-                <p className="text-slate-500 text-xs">{new Date(a.timestamp).toLocaleString('en-MT')}</p>
+          <p className="text-slate-400 text-xs font-semibold uppercase tracking-wide mb-3">Upcoming Sessions</p>
+          <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/5">
+            {data.upcomingSessions.map((s) => (
+              <div key={s.id} className="flex items-center justify-between px-5 py-3">
+                <div>
+                  <p className="text-white text-sm font-semibold">{s.title}</p>
+                  <p className="text-slate-400 text-xs">{s.session_date} · {s.start_time} · {s.location_name || 'No location'}</p>
+                </div>
+                <p className="text-slate-400 text-xs">{s.booked_count ?? 0}/{s.capacity ?? '–'} booked</p>
               </div>
             ))}
           </div>

@@ -12,10 +12,22 @@ export default function SessionTypeManagement() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
 
+  const normalise = (t) => ({
+    id: t.id,
+    name: t.name ?? '',
+    description: t.description ?? '',
+    durationMinutes: t.duration_minutes ?? t.durationMinutes ?? 60,
+    defaultCapacity: t.default_capacity ?? t.defaultCapacity ?? 10,
+    creditCost: t.credit_cost ?? t.creditCost ?? 1,
+    price: t.price ?? '',
+    colour: t.colour ?? '#2563EB',
+    active: Boolean(t.active),
+  });
+
   const load = () => {
     setLoading(true);
     apiClient.get('/admin/session-types')
-      .then((d) => setTypes(d.sessionTypes || []))
+      .then((d) => setTypes((d.sessionTypes || []).map(normalise)))
       .catch(() => setTypes([]))
       .finally(() => setLoading(false));
   };
