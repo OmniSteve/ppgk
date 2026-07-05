@@ -18,7 +18,7 @@ import { buildIcsEvent, icsResponse } from '../../lib/calendar.js';
 async function checkEligibility(env, { player, session, clientId }) {
   if (!player || player.client_id !== clientId) return 'Player not found or not owned by this account';
   if (player.status !== 'active') return 'Player is not active';
-  if (session.status !== 'scheduled') return 'Session is not open for booking';
+  if (!['scheduled', 'published'].includes(session.status)) return 'Session is not open for booking';
   if (session.booking_open_at  && new Date(session.booking_open_at)  > new Date()) return 'Booking window has not opened yet';
   if (session.booking_close_at && new Date(session.booking_close_at) < new Date()) return 'Booking window has closed';
   return null;
