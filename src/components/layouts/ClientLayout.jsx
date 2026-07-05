@@ -133,7 +133,7 @@ export default function ClientLayout({ children }) {
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-20 border-b border-white/10">
+        <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center">
               <span className="text-white font-bold text-xs">GK</span>
