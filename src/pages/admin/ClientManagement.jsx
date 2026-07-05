@@ -13,7 +13,11 @@ export default function ClientManagement() {
   useEffect(() => {
     setLoading(true);
     apiClient.get(`/admin/clients?search=${search}&page=${page}&limit=20`)
-      .then((d) => { setClients(d.clients || []); setTotal(d.total || 0); })
+      .then((d) => {
+        const raw = d.clients || [];
+        setClients(raw.map((c) => ({ ...c, firstName: c.first_name ?? c.firstName ?? '', lastName: c.last_name ?? c.lastName ?? '', createdAt: c.created_at ?? c.createdAt ?? '' })));
+        setTotal(d.total || 0);
+      })
       .catch(() => setClients([]))
       .finally(() => setLoading(false));
   }, [search, page]);

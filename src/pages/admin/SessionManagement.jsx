@@ -64,18 +64,18 @@ export default function SessionManagement() {
         <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/5">
           {sessions.map((s) => (
             <div key={s.id} className="flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex flex-col items-center justify-center flex-shrink-0">
-                <span className="text-white text-xs font-bold leading-none">{new Date(s.date).getDate()}</span>
-                <span className="text-[#2563EB] text-[9px] font-bold uppercase">{new Date(s.date).toLocaleString('en', { month: 'short' })}</span>
+            <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex flex-col items-center justify-center flex-shrink-0">
+              <span className="text-white text-xs font-bold leading-none">{new Date(s.session_date).getDate()}</span>
+              <span className="text-[#2563EB] text-[9px] font-bold uppercase">{new Date(s.session_date).toLocaleString('en', { month: 'short' })}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-white text-sm truncate">{s.title}</p>
+              <div className="flex items-center gap-3 text-slate-400 text-xs mt-0.5">
+                <span className="flex items-center gap-1"><Clock size={11} />{s.start_time}</span>
+                <span className="flex items-center gap-1"><MapPin size={11} />{s.location_name}</span>
+                <span className="flex items-center gap-1"><Users size={11} />{s.booked_count}/{s.capacity}</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-white text-sm truncate">{s.name}</p>
-                <div className="flex items-center gap-3 text-slate-400 text-xs mt-0.5">
-                  <span className="flex items-center gap-1"><Clock size={11} />{s.startTime}</span>
-                  <span className="flex items-center gap-1"><MapPin size={11} />{s.locationName}</span>
-                  <span className="flex items-center gap-1"><Users size={11} />{s.bookingCount}/{s.capacity}</span>
-                </div>
-              </div>
+            </div>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[s.status] || 'bg-slate-100 text-slate-600'}`}>
                 {s.status?.replace(/_/g, ' ')}
               </span>

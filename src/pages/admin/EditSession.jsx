@@ -32,7 +32,24 @@ export default function EditSession() {
       apiClient.get('/admin/coaches'),
       apiClient.get('/admin/locations'),
       apiClient.get('/admin/session-types'),
-    ]).then(([s, c, l, st]) => { setForm(s); setCoaches(c); setLocations(l); setSessionTypes(st); })
+    ]).then(([s, c, l, st]) => {
+      // Normalise session snake_case → camelCase form fields
+      setForm({
+        ...s,
+        name: s.title ?? s.name ?? '',
+        date: s.session_date ?? s.date ?? '',
+        startTime: s.start_time ?? s.startTime ?? '',
+        endTime: s.end_time ?? s.endTime ?? '',
+        locationId: s.location_id ?? s.locationId ?? '',
+        coachId: s.coach_id ?? s.coachId ?? '',
+        sessionTypeId: s.session_type_id ?? s.sessionTypeId ?? '',
+        credits: s.credit_cost ?? s.credits ?? '',
+        internalNotes: s.notes ?? s.internalNotes ?? '',
+      });
+      setCoaches(Array.isArray(c) ? c : (c.coaches || []));
+      setLocations(Array.isArray(l) ? l : (l.locations || []));
+      setSessionTypes(Array.isArray(st) ? st : (st.sessionTypes || []));
+    })
       .catch(() => navigate('/admin/sessions'))
       .finally(() => setLoading(false));
   }, [id, navigate]);
@@ -43,7 +60,21 @@ export default function EditSession() {
     e.preventDefault();
     setError(''); setSaving(true);
     try {
-      await apiClient.put(`/admin/sessions/${id}`, form);
+      await apiClient.put(`/admin/sessions/${id}`, {
+        title: form.name,
+        sessionTypeId: form.sessionTypeId || null,
+        locationId: form.locationId || null,
+        coachId: form.coachId || null,
+        sessionDate: form.date,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        capacity: form.capacity || null,
+        creditCost: form.credits || null,
+        price: form.price || null,
+        description: form.description || null,
+        notes: form.internalNotes || null,
+        status: form.status || null,
+      });
       navigate('/admin/sessions');
     } catch (err) {
       setError(err.message || 'Failed to save.');
