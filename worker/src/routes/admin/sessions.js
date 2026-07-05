@@ -118,6 +118,10 @@ export async function handleAdminSessions(request, env, ctx, params) {
   }
 
   if (method === 'DELETE' && params?.id) {
+    // Remove dependent records before deleting the session to avoid FK constraint errors
+    await execute(env, 'DELETE FROM attendance WHERE session_id = ?', [params.id]);
+    await execute(env, 'DELETE FROM booking_amendments WHERE booking_id IN (SELECT id FROM bookings WHERE session_id = ?)', [params.id]);
+    await execute(env, 'DELETE FROM bookings WHERE session_id = ?', [params.id]);
     await execute(env, 'DELETE FROM sessions WHERE id = ?', [params.id]);
     await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'delete', recordType: 'session', recordId: params.id, description: `Session deleted: ${params.id}` });
     return Response.json({ message: 'Session deleted' });
