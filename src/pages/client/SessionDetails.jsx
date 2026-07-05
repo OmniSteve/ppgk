@@ -5,20 +5,23 @@ import { apiClient } from '@/services/apiClient';
 
 function normaliseSession(s) {
   if (!s) return null;
+  const capacity = s.capacity ?? null;
+  const bookedCount = s.bookedCount ?? s.booked_count ?? null;
   return {
     ...s,
     name: s.name ?? s.title ?? '',
-    date: s.date ?? s.session_date ?? '',
+    date: s.date ?? s.sessionDate ?? s.session_date ?? '',
     startTime: s.startTime ?? s.start_time ?? '',
     endTime: s.endTime ?? s.end_time ?? '',
-    credits: s.credits ?? s.credit_cost ?? null,
+    credits: s.credits ?? s.creditCost ?? s.credit_cost ?? null,
+    price: s.price ?? null,
     locationName: s.locationName ?? s.location_name ?? '',
-    locationAddress: s.locationAddress ?? s.address_line1 ?? '',
-    sessionType: s.sessionType ?? s.session_type_name ?? '',
+    locationAddress: s.locationAddress ?? s.addressLine1 ?? s.address_line1 ?? '',
+    sessionType: s.sessionType ?? s.sessionTypeName ?? s.session_type_name ?? '',
     coachName: s.coachName ?? s.coach_name ?? '',
     ageGroup: s.ageGroup ?? s.age_group ?? '',
     abilityLevel: s.abilityLevel ?? s.ability_level ?? '',
-    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.booked_count != null ? s.capacity - s.booked_count : null) ?? 0,
+    spotsRemaining: s.spotsRemaining ?? (capacity != null && bookedCount != null ? capacity - bookedCount : null),
   };
 }
 
@@ -71,7 +74,7 @@ export default function SessionDetails() {
               session.spotsRemaining <= 3 ? 'bg-amber-500/20 text-amber-400' :
               'bg-green-500/20 text-green-400'
             }`}>
-              {session.spotsRemaining === 0 ? 'Fully Booked' : `${session.spotsRemaining} spots`}
+              {session.spotsRemaining === 0 ? 'Fully Booked' : session.spotsRemaining != null ? `${session.spotsRemaining} spots` : 'Available'}
             </span>
           </div>
         </div>
@@ -118,10 +121,10 @@ export default function SessionDetails() {
             </div>
             <button
               onClick={handleBookNow}
-              disabled={session.spotsRemaining === 0}
+              disabled={session.spotsRemaining === 0 && session.spotsRemaining != null}
               className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 rounded-xl text-base transition-colors"
             >
-              {session.spotsRemaining === 0 ? 'Fully Booked' : 'Book This Session'}
+              {session.spotsRemaining === 0 && session.spotsRemaining != null ? 'Fully Booked' : 'Book This Session'}
             </button>
           </div>
         </div>

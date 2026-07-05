@@ -6,23 +6,26 @@ import { apiClient, unwrap } from '@/services/apiClient';
 // Normalise a session from the API (snake_case) to the shape this page expects
 function normaliseSession(s) {
   if (!s) return s;
+  const capacity = s.capacity ?? null;
+  const bookedCount = s.bookedCount ?? s.booked_count ?? null;
   return {
     ...s,
     name: s.name ?? s.title ?? '',
-    date: s.date ?? s.session_date ?? '',
+    date: s.date ?? s.sessionDate ?? s.session_date ?? '',
     startTime: s.startTime ?? s.start_time ?? '',
     endTime: s.endTime ?? s.end_time ?? '',
-    credits: s.credits ?? s.credit_cost ?? null,
+    credits: s.credits ?? s.creditCost ?? s.credit_cost ?? null,
     price: s.price ?? null,
     locationName: s.locationName ?? s.location_name ?? '',
-    sessionType: s.sessionType ?? s.session_type_name ?? '',
-    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.booked_count != null ? s.capacity - s.booked_count : null) ?? 0,
+    sessionType: s.sessionType ?? s.sessionTypeName ?? s.session_type_name ?? '',
+    spotsRemaining: s.spotsRemaining ?? (capacity != null && bookedCount != null ? capacity - bookedCount : null),
     ageGroup: s.ageGroup ?? s.age_group ?? '',
     abilityLevel: s.abilityLevel ?? s.ability_level ?? '',
   };
 }
 
 const StatusBadge = ({ spots }) => {
+  if (spots == null) return <span className="bg-green-500/20 text-green-400 text-xs font-semibold px-2 py-0.5 rounded-full">Available</span>;
   if (spots === 0) return <span className="bg-red-500/20 text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">Full</span>;
   if (spots <= 3) return <span className="bg-amber-500/20 text-amber-400 text-xs font-semibold px-2 py-0.5 rounded-full">{spots} left</span>;
   return <span className="bg-green-500/20 text-green-400 text-xs font-semibold px-2 py-0.5 rounded-full">{spots} spots</span>;

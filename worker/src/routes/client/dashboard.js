@@ -2,6 +2,7 @@
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
 import { getBalance } from '../../lib/credits.js';
+import { toCamelArray } from '../../lib/serializers.js';
 
 export async function handleClientDashboard(request, env) {
   const payload = await requireRole(request, env, 'client', 'coach', 'head_coach', 'admin');
@@ -25,10 +26,10 @@ export async function handleClientDashboard(request, env) {
 
   // Upcoming bookings — bookings are stored with client_id directly
   const upcomingBookings = await query(env,
-    `SELECT b.id, s.title AS sessionName, s.session_date AS sessionDate,
-            s.start_time AS startTime, s.end_time AS endTime,
-            l.name AS locationName, b.status,
-            p.first_name || ' ' || p.last_name AS playerName
+    `SELECT b.id, s.title AS session_name, s.session_date,
+            s.start_time, s.end_time,
+            l.name AS location_name, b.status,
+            p.first_name || ' ' || p.last_name AS player_name
      FROM bookings b
      JOIN sessions s ON s.id = b.session_id
      JOIN players p ON p.id = b.player_id
@@ -65,7 +66,7 @@ export async function handleClientDashboard(request, env) {
   return Response.json({
     creditBalance,
     expiringCredits: expiringRow?.expiring ?? 0,
-    upcomingBookings: upcomingBookings ?? [],
+    upcomingBookings: toCamelArray(upcomingBookings ?? []),
     players: playerRow?.cnt ?? 0,
     unreadNotifications: notifRow?.cnt ?? 0,
   });
