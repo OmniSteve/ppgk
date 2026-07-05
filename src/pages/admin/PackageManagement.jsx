@@ -13,7 +13,7 @@ export default function PackageManagement() {
   const [error, setError] = useState('');
 
   const load = () => {
-    apiClient.get('/admin/packages').then(setPackages).catch(() => setPackages([])).finally(() => setLoading(false));
+    apiClient.get('/admin/packages').then((d) => setPackages(Array.isArray(d) ? d : (d.packages || []))).catch(() => setPackages([])).finally(() => setLoading(false));
   };
 
   useEffect(() => { load(); }, []);

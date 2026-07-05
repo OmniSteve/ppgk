@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, Component } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -128,6 +128,22 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
   );
 }
 
+class AdminErrorBoundary extends Component {
+  state = { error: null };
+  static getDerivedStateFromError(error) { return { error }; }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex flex-col items-center justify-center h-64 gap-4">
+          <p className="text-red-400 font-semibold">Page crashed: {this.state.error.message}</p>
+          <button onClick={() => this.setState({ error: null })} className="text-[#2563EB] text-sm hover:underline">Try again</button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 export default function AdminLayout({ children = <Outlet /> }) {
   const { user, signOut } = useAuth();
   const location = useLocation();
@@ -171,7 +187,9 @@ export default function AdminLayout({ children = <Outlet /> }) {
           </button>
         </header>
         <main className="flex-1 p-4 md:p-6">
-          {children}
+          <AdminErrorBoundary>
+            {children}
+          </AdminErrorBoundary>
         </main>
       </div>
     </div>
