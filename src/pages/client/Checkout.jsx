@@ -94,7 +94,13 @@ export default function Checkout() {
       const bookingIds = Array.isArray(res.bookingIds) ? res.bookingIds : [];
       navigate(`/payment/result?status=success&bookingIds=${bookingIds.join(',')}`);
     } catch (err) {
-      setError(err.message || 'Booking failed. Please try again.');
+      const body = err.responseBody;
+      if (body?.step && body?.message) {
+        // Debug-visible structured error from worker
+        setError(`Booking failed at "${body.step}": ${body.message}`);
+      } else {
+        setError(err.message || 'Booking failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }

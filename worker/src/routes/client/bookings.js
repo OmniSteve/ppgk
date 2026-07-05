@@ -205,15 +205,39 @@ export async function handleClientBookings(request, env, ctx, params) {
       step = 'insert bookings';
       const bookingIds = [];
       for (const session of sessions) {
-        const bookingId = crypto.randomUUID();
-        await execute(env,
-          `INSERT INTO bookings (id, order_id, client_id, player_id, session_id, status, payment_method, credits_used)
-           VALUES (?, ?, ?, ?, ?, 'pending_payment', ?, ?)`,
-          [bookingId, orderId, payload.sub, playerId, session.id, paymentMethod,
-           paymentMethod === 'credits' ? (session.credit_cost ?? 1) : 0]
+        // Check for an existing failed/abandoned booking for this player+session.
+        // The UNIQUE constraint on (player_id, session_id) means we must reuse it
+        // rather than inserting a duplicate row.
+        const existingFailed = await queryOne(env,
+          `SELECT id FROM bookings WHERE player_id = ? AND session_id = ?
+           AND status IN ('payment_failed', 'pending_payment')`,
+          [playerId, session.id]
         );
-        await execute(env, 'UPDATE sessions SET booked_count = booked_count + 1 WHERE id = ?', [session.id]);
-        bookingIds.push({ bookingId, sessionId: session.id });
+
+        let bookingId;
+        if (existingFailed) {
+          // Reuse the existing row — update it to a fresh pending_payment state
+          bookingId = existingFailed.id;
+          await execute(env,
+            `UPDATE bookings SET order_id=?, status='pending_payment', payment_method=?,
+             credits_used=?, confirmed_at=NULL, updated_at=?
+             WHERE id=?`,
+            [orderId, paymentMethod,
+             paymentMethod === 'credits' ? (session.credit_cost ?? 1) : 0,
+             new Date().toISOString(), bookingId]
+          );
+          // Don't increment booked_count — this slot was already counted when the original booking was created
+        } else {
+          bookingId = crypto.randomUUID();
+          await execute(env,
+            `INSERT INTO bookings (id, order_id, client_id, player_id, session_id, status, payment_method, credits_used)
+             VALUES (?, ?, ?, ?, ?, 'pending_payment', ?, ?)`,
+            [bookingId, orderId, payload.sub, playerId, session.id, paymentMethod,
+             paymentMethod === 'credits' ? (session.credit_cost ?? 1) : 0]
+          );
+          await execute(env, 'UPDATE sessions SET booked_count = booked_count + 1 WHERE id = ?', [session.id]);
+        }
+        bookingIds.push({ bookingId, sessionId: session.id, isNew: !existingFailed });
       }
 
       if (paymentMethod === 'credits') {
@@ -229,9 +253,12 @@ export async function handleClientBookings(request, env, ctx, params) {
           });
 
           if (!deduction.success) {
-            for (const { bookingId: bid, sessionId: sid } of bookingIds) {
+            for (const { bookingId: bid, sessionId: sid, isNew } of bookingIds) {
               await execute(env, "UPDATE bookings SET status='payment_failed' WHERE id=?", [bid]);
-              await execute(env, 'UPDATE sessions SET booked_count = booked_count - 1 WHERE id = ? AND booked_count > 0', [sid]);
+              // Only decrement booked_count for newly inserted bookings, not reused ones
+              if (isNew) {
+                await execute(env, 'UPDATE sessions SET booked_count = booked_count - 1 WHERE id = ? AND booked_count > 0', [sid]);
+              }
             }
             await execute(env, "UPDATE orders SET status='failed' WHERE id=?", [orderId]);
             return err(deduction.error, 402);
