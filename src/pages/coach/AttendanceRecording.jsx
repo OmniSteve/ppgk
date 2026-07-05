@@ -25,7 +25,8 @@ export default function AttendanceRecording() {
       apiClient.get(`/coach/sessions/${id}/attendees`),
     ]).then(([s, a]) => {
       setSession(s);
-      setAttendance(a.map((att) => ({ ...att, attendanceStatus: att.attendanceStatus || 'not_recorded', notes: att.notes || '' })));
+      const list = a.attendees || a || [];
+      setAttendance(list.map((att) => ({ ...att, attendanceStatus: att.attendanceStatus || 'not_recorded', notes: att.notes || '' })));
     }).finally(() => setLoading(false));
   }, [id]);
 

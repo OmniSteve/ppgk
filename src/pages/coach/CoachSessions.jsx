@@ -9,7 +9,7 @@ export default function CoachSessions() {
   const [filter, setFilter] = useState('upcoming');
 
   useEffect(() => {
-    apiClient.get(`/coach/sessions?filter=${filter}`).then(setSessions).catch(() => setSessions([])).finally(() => setLoading(false));
+    apiClient.get(`/coach/sessions?filter=${filter}`).then((d) => setSessions(d.sessions || d || [])).catch(() => setSessions([])).finally(() => setLoading(false));
   }, [filter]);
 
   return (
@@ -39,13 +39,13 @@ export default function CoachSessions() {
             <div key={s.id} className="bg-white/5 rounded-2xl border border-white/10 p-5 hover:border-[#2563EB]/40 transition-all">
               <div className="flex items-start justify-between mb-3">
                 <div>
-                  <p className="font-bold text-white">{s.name}</p>
-                  <p className="text-slate-400 text-xs mt-1">{s.sessionType}</p>
+                  <p className="font-bold text-white">{s.title}</p>
+                  <p className="text-slate-400 text-xs mt-1">{s.sessionTypeName}</p>
                 </div>
-                <span className="font-bold text-sm bg-white/10 text-slate-300 px-3 py-1 rounded-full">{s.bookingCount}/{s.capacity}</span>
+                <span className="font-bold text-sm bg-white/10 text-slate-300 px-3 py-1 rounded-full">{s.bookedCount}/{s.capacity}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 mb-4 text-slate-400 text-xs">
-                <span className="flex items-center gap-1.5"><Calendar size={12} />{new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                <span className="flex items-center gap-1.5"><Calendar size={12} />{new Date(s.sessionDate).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
                 <span className="flex items-center gap-1.5"><Clock size={12} />{s.startTime} – {s.endTime}</span>
                 <span className="flex items-center gap-1.5"><MapPin size={12} />{s.locationName}</span>
                 <span className="flex items-center gap-1.5"><Users size={12} />{s.ageGroup}</span>
