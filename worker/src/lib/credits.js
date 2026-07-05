@@ -36,7 +36,7 @@ export async function deductCredits(env, { clientId, bookingId, amount, descript
      WHERE cl.client_id = ?
        AND cl.type = 'purchase'
        AND (cl.expires_at IS NULL OR cl.expires_at > ?)
-     ORDER BY cl.expires_at ASC NULLS LAST`,
+     ORDER BY CASE WHEN cl.expires_at IS NULL THEN 1 ELSE 0 END, cl.expires_at ASC`,
     [clientId, new Date().toISOString()]
   );
 
