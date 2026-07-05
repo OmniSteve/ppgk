@@ -44,18 +44,20 @@ export default function CreditBalance() {
           <h2 className="font-bold text-white mb-4">Active Packages</h2>
           <div className="space-y-3">
             {data.purchases.map((pkg) => {
-              const daysLeft = Math.ceil((new Date(pkg.expires_at) - new Date()) / 86400000);
-              const expiringSoon = daysLeft <= 14;
+              const expiryDate = pkg.expiresAt ? new Date(pkg.expiresAt) : null;
+              const purchaseDate = pkg.createdAt ? new Date(pkg.createdAt) : null;
+              const daysLeft = expiryDate ? Math.ceil((expiryDate - new Date()) / 86400000) : null;
+              const expiringSoon = daysLeft !== null && daysLeft <= 14;
               return (
                 <div key={pkg.id} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
                   <div>
-                    <p className="font-semibold text-white text-sm">{pkg.package_name}</p>
-                    <p className="text-slate-500 text-xs">Purchased {new Date(pkg.created_at).toLocaleDateString('en-MT')}</p>
+                    <p className="font-semibold text-white text-sm">{pkg.packageName || 'Credit Package'}</p>
+                    <p className="text-slate-500 text-xs">Purchased {purchaseDate ? purchaseDate.toLocaleDateString('en-GB') : '—'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-white">{pkg.credits_remaining} <span className="text-slate-400 font-normal text-xs">credits</span></p>
+                    <p className="font-black text-white">{pkg.creditsRemaining ?? pkg.creditsGranted ?? '?'} <span className="text-slate-400 font-normal text-xs">credits</span></p>
                     <p className={`text-xs font-semibold ${expiringSoon ? 'text-red-400' : 'text-slate-500'}`}>
-                      Expires {new Date(pkg.expires_at).toLocaleDateString('en-MT')}{expiringSoon && ` (${daysLeft} days)`}
+                      {expiryDate ? `Expires ${expiryDate.toLocaleDateString('en-GB')}${expiringSoon ? ` (${daysLeft} days)` : ''}` : 'No expiry'}
                     </p>
                   </div>
                 </div>
@@ -79,7 +81,7 @@ export default function CreditBalance() {
                   </div>
                   <div>
                     <p className="font-medium text-white text-sm">{tx.description}</p>
-                    <p className="text-slate-500 text-xs">{new Date(tx.created_at).toLocaleString('en-MT')}</p>
+                    <p className="text-slate-500 text-xs">{tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-GB') : '—'}</p>
                   </div>
                 </div>
                 <span className={`font-bold text-sm ${tx.amount > 0 ? 'text-green-400' : 'text-red-400'}`}>
