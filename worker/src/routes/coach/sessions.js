@@ -9,6 +9,7 @@ export async function handleCoachSessions(request, env, ctx, params) {
 
   const coach = await queryOne(env, 'SELECT id FROM coach_profiles WHERE user_id = ?', [payload.sub]);
   const coachId = coach?.id;
+  const isAdmin = payload.role === 'admin';
 
   if (params?.id && url.pathname.endsWith('/attendees')) {
     const attendees = await query(env,
@@ -33,15 +34,15 @@ export async function handleCoachSessions(request, env, ctx, params) {
     return Response.json(session);
   }
 
-  if (!coachId) return Response.json({ sessions: [] });
+  if (!coachId && !isAdmin) return Response.json({ sessions: [] });
 
   const sessions = await query(env,
     `SELECT s.id, s.title, s.session_date, s.start_time, s.end_time, s.capacity, s.booked_count, s.status,
             l.name as location_name
      FROM sessions s LEFT JOIN locations l ON l.id = s.location_id
-     WHERE s.coach_id = ? AND s.session_date >= ?
+     WHERE ${isAdmin ? '1=1' : 's.coach_id = ?'} AND s.session_date >= ?
      ORDER BY s.session_date, s.start_time LIMIT 50`,
-    [coachId, today]
+    isAdmin ? [today] : [coachId, today]
   );
 
   return Response.json({ sessions });
