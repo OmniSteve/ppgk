@@ -29,14 +29,14 @@ export async function deductCredits(env, { clientId, bookingId, amount, descript
   );
   if (already) return { success: true, skipped: true };
 
-  // Get valid purchase packages ordered by earliest expiry
+  // Get valid purchase packages ordered by earliest expiry (NULL expiry = never expires)
   const purchases = await query(env,
     `SELECT cl.id, cl.amount, cl.expires_at, cl.package_purchase_id
      FROM credit_ledger cl
      WHERE cl.client_id = ?
        AND cl.type = 'purchase'
-       AND cl.expires_at > ?
-     ORDER BY cl.expires_at ASC`,
+       AND (cl.expires_at IS NULL OR cl.expires_at > ?)
+     ORDER BY cl.expires_at ASC NULLS LAST`,
     [clientId, new Date().toISOString()]
   );
 
