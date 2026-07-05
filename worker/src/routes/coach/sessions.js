@@ -13,7 +13,7 @@ export async function handleCoachSessions(request, env, ctx, params) {
 
   if (params?.id && url.pathname.endsWith('/attendees')) {
     const attendees = await query(env,
-      `SELECT b.id as booking_id, b.status as booking_status, p.first_name, p.last_name, p.medical_info, p.allergies,
+      `SELECT b.id as booking_id, b.status as booking_status, p.id as player_id, p.first_name, p.last_name, p.medical_info, p.allergies,
               a.id as attendance_id, a.status as attendance_status, a.notes
        FROM bookings b
        JOIN players p ON p.id = b.player_id
