@@ -121,7 +121,8 @@ export default {
       router.post ('/api/admin/sessions',                             handleAdminSessions);
       router.get  ('/api/admin/sessions/:id',                         handleAdminSessions);
       router.put  ('/api/admin/sessions/:id',                         handleAdminSessions);
-      router.patch('/api/admin/sessions/:id',                         handleAdminSessions);
+      router.patch ('/api/admin/sessions/:id',                        handleAdminSessions);
+      router.delete('/api/admin/sessions/:id',                        handleAdminSessions);
       router.get  ('/api/admin/bookings',                             handleAdminBookings);
       router.patch('/api/admin/bookings/:id',                         handleAdminBookings);
       router.get  ('/api/admin/attendance',                           handleAdminAttendance);

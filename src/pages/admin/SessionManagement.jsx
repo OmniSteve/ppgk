@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Filter, Edit2, Eye, Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Calendar, Clock, MapPin, Users } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
 const statusColors = {
@@ -18,6 +18,20 @@ export default function SessionManagement() {
   const [statusFilter, setStatusFilter] = useState('');
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
+  const [deleting, setDeleting] = useState(null);
+
+  const handleDelete = async (s) => {
+    if (!confirm(`Delete "${s.title}"? This cannot be undone.`)) return;
+    setDeleting(s.id);
+    try {
+      await apiClient.delete(`/admin/sessions/${s.id}`);
+      fetchSessions();
+    } catch (e) {
+      alert(e.message || 'Failed to delete session');
+    } finally {
+      setDeleting(null);
+    }
+  };
 
   const fetchSessions = () => {
     setLoading(true);
@@ -87,6 +101,9 @@ export default function SessionManagement() {
                 <Link to={`/admin/sessions/${s.id}/edit`} className="w-8 h-8 rounded-lg bg-white/10 hover:bg-[#2563EB] flex items-center justify-center text-slate-400 hover:text-white transition-all">
                   <Edit2 size={14} />
                 </Link>
+                <button onClick={() => handleDelete(s)} disabled={deleting === s.id} className="w-8 h-8 rounded-lg bg-white/10 hover:bg-red-600 flex items-center justify-center text-slate-400 hover:text-white transition-all disabled:opacity-50">
+                  <Trash2 size={14} />
+                </button>
               </div>
             </div>
           ))}

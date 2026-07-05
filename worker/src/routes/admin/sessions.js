@@ -117,5 +117,11 @@ export async function handleAdminSessions(request, env, ctx, params) {
     return Response.json({ message: 'Session updated' });
   }
 
+  if (method === 'DELETE' && params?.id) {
+    await execute(env, 'DELETE FROM sessions WHERE id = ?', [params.id]);
+    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'delete', recordType: 'session', recordId: params.id, description: `Session deleted: ${params.id}` });
+    return Response.json({ message: 'Session deleted' });
+  }
+
   return Response.json({ message: 'Method not allowed' }, { status: 405 });
 }
