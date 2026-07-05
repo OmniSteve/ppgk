@@ -107,6 +107,7 @@ export default {
       router.put  ('/api/admin/clients/:id',                          handleAdminClients);
       router.patch('/api/admin/clients/:id',                          handleAdminClients);
       router.get  ('/api/admin/players',                              handleAdminPlayers);
+      router.patch('/api/admin/players/:id',                          handleAdminPlayers);
       router.get  ('/api/admin/coaches',                              handleAdminCoaches);
       router.post ('/api/admin/coaches',                              handleAdminCoaches);
       router.put  ('/api/admin/coaches/:id',                          handleAdminCoaches);
