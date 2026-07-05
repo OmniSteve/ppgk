@@ -40,15 +40,15 @@ export default function CoachSessions() {
               <div className="flex items-start justify-between mb-3">
                 <div>
                   <p className="font-bold text-white">{s.title}</p>
-                  <p className="text-slate-400 text-xs mt-1">{s.sessionTypeName}</p>
+                  <p className="text-slate-400 text-xs mt-1">{s.session_type_name}</p>
                 </div>
-                <span className="font-bold text-sm bg-white/10 text-slate-300 px-3 py-1 rounded-full">{s.bookedCount}/{s.capacity}</span>
+                <span className="font-bold text-sm bg-white/10 text-slate-300 px-3 py-1 rounded-full">{s.booked_count}/{s.capacity}</span>
               </div>
               <div className="grid grid-cols-2 gap-2 mb-4 text-slate-400 text-xs">
-                <span className="flex items-center gap-1.5"><Calendar size={12} />{new Date(s.sessionDate).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
-                <span className="flex items-center gap-1.5"><Clock size={12} />{s.startTime} – {s.endTime}</span>
-                <span className="flex items-center gap-1.5"><MapPin size={12} />{s.locationName}</span>
-                <span className="flex items-center gap-1.5"><Users size={12} />{s.ageGroup}</span>
+                <span className="flex items-center gap-1.5"><Calendar size={12} />{s.session_date ? new Date(s.session_date).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '—'}</span>
+                <span className="flex items-center gap-1.5"><Clock size={12} />{s.start_time} – {s.end_time}</span>
+                <span className="flex items-center gap-1.5"><MapPin size={12} />{s.location_name}</span>
+                <span className="flex items-center gap-1.5"><Users size={12} />{s.age_group}</span>
               </div>
               <div className="flex gap-2">
                 <Link to={`/coach/sessions/${s.id}/attendees`} className="flex-1 text-center text-sm font-semibold py-2.5 border border-white/20 rounded-xl text-slate-300 hover:border-[#2563EB]/40 hover:text-white transition-all flex items-center justify-center gap-2">
