@@ -59,6 +59,7 @@ export default function CreateSession() {
         price: form.price || null,
         description: form.description || null,
         notes: form.internalNotes || null,
+        status: form.status || 'draft',
       });
       navigate('/admin/sessions');
     } catch (err) {

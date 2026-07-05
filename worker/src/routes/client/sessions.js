@@ -16,7 +16,7 @@ export async function handleClientSessions(request, env, ctx, params) {
        LEFT JOIN locations l ON l.id = s.location_id
        LEFT JOIN session_types st ON st.id = s.session_type_id
        LEFT JOIN coach_profiles c ON c.id = s.coach_id
-       WHERE s.id = ? AND s.status IN ('scheduled', 'published')`,
+       WHERE s.id = ? AND s.status = 'published'`,
       [params.id]
     );
     if (!session) return Response.json({ message: 'Session not found' }, { status: 404 });
@@ -30,7 +30,7 @@ export async function handleClientSessions(request, env, ctx, params) {
   const dateFrom = url.searchParams.get('dateFrom') || today;
   const dateTo   = url.searchParams.get('dateTo') || '';
 
-  const conditions = ["s.status IN ('scheduled', 'published')", 's.session_date >= ?'];
+  const conditions = ["s.status = 'published'", 's.session_date >= ?'];
   const bindings   = [dateFrom];
 
   if (search) { conditions.push('s.title LIKE ?'); bindings.push(`%${search}%`); }
