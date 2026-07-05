@@ -9,10 +9,16 @@ export async function handleAdminCoaches(request, env, ctx, params) {
 
   if (method === 'GET') {
     const search = url.searchParams.get('search') || '';
-    const coaches = await query(env,
+    const rows = await query(env,
       `SELECT * FROM coach_profiles WHERE first_name LIKE ? OR last_name LIKE ? OR email LIKE ? ORDER BY first_name`,
       [`%${search}%`, `%${search}%`, `%${search}%`]
     );
+    const coaches = rows.map((r) => ({
+      ...r,
+      firstName: r.first_name,
+      lastName: r.last_name,
+      active: r.active === 1 || r.active === true,
+    }));
     return Response.json({ coaches });
   }
 
