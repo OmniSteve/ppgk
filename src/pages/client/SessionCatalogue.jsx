@@ -1,7 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Users, Filter, Search, ChevronDown, X } from 'lucide-react';
-import { apiClient } from '@/services/apiClient';
+import { apiClient, unwrap } from '@/services/apiClient';
+
+// Normalise a session from the API (snake_case) to the shape this page expects
+function normaliseSession(s) {
+  if (!s) return s;
+  return {
+    ...s,
+    name: s.name ?? s.title ?? '',
+    date: s.date ?? s.session_date ?? '',
+    startTime: s.startTime ?? s.start_time ?? '',
+    endTime: s.endTime ?? s.end_time ?? '',
+    credits: s.credits ?? s.credit_cost ?? null,
+    price: s.price ?? null,
+    locationName: s.locationName ?? s.location_name ?? '',
+    sessionType: s.sessionType ?? s.session_type_name ?? '',
+    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.booked_count != null ? s.capacity - s.booked_count : null) ?? 0,
+    ageGroup: s.ageGroup ?? s.age_group ?? '',
+    abilityLevel: s.abilityLevel ?? s.ability_level ?? '',
+  };
+}
 
 const StatusBadge = ({ spots }) => {
   if (spots === 0) return <span className="bg-red-500/20 text-red-400 text-xs font-semibold px-2 py-0.5 rounded-full">Full</span>;
@@ -34,13 +53,13 @@ const SessionCard = ({ session, onSelect, selected }) => (
       <div className="space-y-1.5 mb-4">
         <div className="flex items-center gap-2 text-slate-400 text-xs"><Clock size={12} />{session.startTime} – {session.endTime}</div>
         <div className="flex items-center gap-2 text-slate-400 text-xs"><MapPin size={12} />{session.locationName}</div>
-        <div className="flex items-center gap-2 text-slate-400 text-xs"><Users size={12} />Age: {session.ageGroup} · {session.abilityLevel}</div>
+        <div className="flex items-center gap-2 text-slate-400 text-xs"><Users size={12} />{session.ageGroup}{session.abilityLevel ? ` · ${session.abilityLevel}` : ''}</div>
       </div>
 
       <div className="flex items-center justify-between">
         <div>
           <span className="text-lg font-black text-white">
-            {session.credits ? `${session.credits} credit${session.credits > 1 ? 's' : ''}` : `€${session.price}`}
+            {session.credits ? `${session.credits} credit${session.credits > 1 ? 's' : ''}` : `€${session.price ?? '—'}`}
           </span>
           {session.price && session.credits && (
             <span className="text-slate-500 text-xs ml-2">or €{session.price}</span>
@@ -68,14 +87,24 @@ export default function SessionCatalogue() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selected, setSelected] = useState([]);
   const [search, setSearch] = useState('');
-  const [filters, setFilters] = useState({ ageGroup: '', location: '', abilityLevel: '', sessionType: '' });
+  const [filters, setFilters] = useState({ ageGroup: '', locationId: '', abilityLevel: '', typeId: '' });
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    apiClient.get('/sessions?' + new URLSearchParams({ ...filters, search }).toString())
-      .then((data) => setSessions(data.sessions ?? data ?? [])).catch(() => setSessions([])).finally(() => setLoading(false));
+    setLoading(true);
+    setError('');
+    const params = new URLSearchParams();
+    if (search) params.set('search', search);
+    if (filters.typeId) params.set('typeId', filters.typeId);
+    if (filters.locationId) params.set('locationId', filters.locationId);
+    const qs = params.toString();
+    apiClient.get(`/sessions${qs ? '?' + qs : ''}`)
+      .then((data) => setSessions(unwrap(data, 'sessions').map(normaliseSession)))
+      .catch((err) => { console.error('Sessions fetch error:', err); setError('Could not load sessions.'); setSessions([]); })
+      .finally(() => setLoading(false));
   }, [filters, search]);
 
   const toggleSelect = (session) => {
@@ -113,16 +142,18 @@ export default function SessionCatalogue() {
 
         {showFilters && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-2 border-t border-white/10">
-            {['ageGroup', 'abilityLevel', 'location', 'sessionType'].map((key) => (
+            {[
+              { key: 'ageGroup', label: 'All ages', options: ['U8','U10','U12','U14','U16','U18','Senior'] },
+              { key: 'abilityLevel', label: 'All levels', options: ['Beginner','Intermediate','Advanced','Elite'] },
+            ].map(({ key, label, options }) => (
               <div key={key} className="relative">
                 <select
                   value={filters[key]}
                   onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
                   className={`w-full ${inputCls} appearance-none pr-8`}
                 >
-                  <option value="">{key === 'ageGroup' ? 'All ages' : key === 'abilityLevel' ? 'All levels' : key === 'location' ? 'All locations' : 'All types'}</option>
-                  {key === 'ageGroup' && ['U8', 'U10', 'U12', 'U14', 'U16', 'U18', 'Senior'].map((v) => <option key={v}>{v}</option>)}
-                  {key === 'abilityLevel' && ['Beginner', 'Intermediate', 'Advanced', 'Elite'].map((v) => <option key={v}>{v}</option>)}
+                  <option value="">{label}</option>
+                  {options.map((v) => <option key={v}>{v}</option>)}
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
@@ -130,6 +161,10 @@ export default function SessionCatalogue() {
           </div>
         )}
       </div>
+
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>
+      )}
 
       {loading ? (
         <div className="flex items-center justify-center h-48">

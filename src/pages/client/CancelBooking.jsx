@@ -3,11 +3,22 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, AlertTriangle, Loader2, CheckCircle } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
+function normaliseBooking(b) {
+  if (!b) return null;
+  return {
+    ...b,
+    sessionName: b.sessionName ?? b.session_name ?? '',
+    sessionDate: b.sessionDate ?? b.session_date ?? '',
+    startTime: b.startTime ?? b.start_time ?? '',
+    playerName: b.playerName ?? b.player_name ?? '',
+    paymentMethod: b.paymentMethod ?? b.payment_method ?? '',
+  };
+}
+
 export default function CancelBooking() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
-  const [cancellationPolicy, setCancellationPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -15,12 +26,10 @@ export default function CancelBooking() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      apiClient.get(`/bookings/${id}`),
-      apiClient.get(`/bookings/${id}/cancellation-preview`),
-    ]).then(([b, policy]) => {
-      setBooking(b); setCancellationPolicy(policy);
-    }).catch(() => navigate(`/bookings/${id}`)).finally(() => setLoading(false));
+    apiClient.get(`/bookings/${id}`)
+      .then((data) => setBooking(normaliseBooking(data)))
+      .catch(() => navigate(`/bookings/${id}`))
+      .finally(() => setLoading(false));
   }, [id, navigate]);
 
   const handleCancel = async () => {
@@ -47,6 +56,8 @@ export default function CancelBooking() {
     </div>
   );
 
+  const usedCredits = booking?.paymentMethod === 'credits';
+
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <Link to={`/bookings/${id}`} className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
@@ -58,29 +69,26 @@ export default function CancelBooking() {
       {booking && (
         <div className="bg-white/5 rounded-2xl border border-white/10 p-5">
           <p className="font-bold text-white">{booking.sessionName}</p>
-          <p className="text-slate-400 text-sm">{new Date(booking.sessionDate).toLocaleDateString('en-MT', { weekday: 'long', day: 'numeric', month: 'long' })} · {booking.startTime}</p>
+          <p className="text-slate-400 text-sm">{booking.sessionDate ? new Date(booking.sessionDate).toLocaleDateString('en-MT', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {booking.startTime}</p>
           <p className="text-slate-400 text-sm">Player: {booking.playerName}</p>
         </div>
       )}
 
-      {cancellationPolicy && (
-        <div className={`rounded-xl p-4 border ${cancellationPolicy.refundCredits ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
-          <div className="flex items-start gap-3">
-            <AlertTriangle size={18} className={`flex-shrink-0 ${cancellationPolicy.refundCredits ? 'text-green-400' : 'text-red-400'}`} />
-            <div>
-              <p className={`font-bold text-sm ${cancellationPolicy.refundCredits ? 'text-green-300' : 'text-red-300'}`}>
-                {cancellationPolicy.refundCredits ? 'Credits will be refunded' : 'No credit refund'}
-              </p>
-              <p className={`text-xs mt-1 ${cancellationPolicy.refundCredits ? 'text-green-400/70' : 'text-red-400/70'}`}>
-                {cancellationPolicy.reason}
-              </p>
-              {cancellationPolicy.refundCredits && (
-                <p className="text-green-400 text-xs mt-0.5 font-semibold">{cancellationPolicy.creditsToRefund} credit{cancellationPolicy.creditsToRefund > 1 ? 's' : ''} will be returned to your balance.</p>
-              )}
-            </div>
+      <div className={`rounded-xl p-4 border ${usedCredits ? 'bg-green-500/10 border-green-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+        <div className="flex items-start gap-3">
+          <AlertTriangle size={18} className={`flex-shrink-0 ${usedCredits ? 'text-green-400' : 'text-red-400'}`} />
+          <div>
+            <p className={`font-bold text-sm ${usedCredits ? 'text-green-300' : 'text-red-300'}`}>
+              {usedCredits ? 'Credits may be refunded' : 'No credit refund'}
+            </p>
+            <p className={`text-xs mt-1 ${usedCredits ? 'text-green-400/70' : 'text-red-400/70'}`}>
+              {usedCredits
+                ? 'If cancelled within the deadline, your credits will be returned to your balance.'
+                : 'This booking was paid by card. Refunds are handled separately.'}
+            </p>
           </div>
         </div>
-      )}
+      </div>
 
       {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>}
 
@@ -88,7 +96,7 @@ export default function CancelBooking() {
         <label className="flex items-start gap-3 cursor-pointer">
           <input type="checkbox" checked={confirmed} onChange={(e) => setConfirmed(e.target.checked)} className="mt-0.5 accent-[#2563EB]" />
           <span className="text-slate-300 text-sm">
-            I understand this cancellation {cancellationPolicy?.refundCredits ? 'will refund my credits' : 'will not refund credits'} and I wish to proceed.
+            I understand this cancellation {usedCredits ? 'may refund my credits depending on timing' : 'will not automatically refund card payments'} and I wish to proceed.
           </span>
         </label>
 

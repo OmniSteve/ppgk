@@ -3,14 +3,40 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, User, CreditCard, ChevronLeft, ArrowRight, AlertCircle, Edit2, X } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
+function normaliseBooking(b) {
+  if (!b) return null;
+  return {
+    ...b,
+    sessionName: b.sessionName ?? b.session_name ?? '',
+    sessionDate: b.sessionDate ?? b.session_date ?? '',
+    startTime: b.startTime ?? b.start_time ?? '',
+    endTime: b.endTime ?? b.end_time ?? '',
+    locationName: b.locationName ?? b.location_name ?? '',
+    playerName: b.playerName ?? b.player_name ?? '',
+    coachName: b.coachName ?? b.coach_name ?? '',
+    creditsUsed: b.creditsUsed ?? b.credits_used ?? 0,
+    amountCharged: b.amountCharged ?? b.amount_charged ?? 0,
+    bookingRef: b.bookingRef ?? b.booking_ref ?? b.id,
+    canAmend: b.canAmend ?? true,
+    canCancel: b.canCancel ?? true,
+    amendments: Array.isArray(b.amendments) ? b.amendments.map((a) => ({
+      ...a,
+      action: a.action ?? a.amendment_type ?? '',
+      createdAt: a.createdAt ?? a.created_at ?? '',
+    })) : [],
+  };
+}
+
 export default function BookingDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get(`/bookings/${id}`).then(setBooking).catch(() => setBooking(null)).finally(() => setLoading(false));
+    apiClient.get(`/bookings/${id}`)
+      .then((data) => setBooking(normaliseBooking(data)))
+      .catch(() => setBooking(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleAddToCalendar = (type) => window.open(`/api/bookings/${id}/calendar?type=${type}`, '_blank');
@@ -36,7 +62,7 @@ export default function BookingDetails() {
         <div className="bg-[#0D1B2A] p-6 border-b border-white/10">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-slate-400 text-xs mb-1">Booking #{booking.bookingRef || id}</p>
+              <p className="text-slate-400 text-xs mb-1">Booking #{booking.bookingRef}</p>
               <h1 className="text-white font-black text-2xl">{booking.sessionName}</h1>
             </div>
             <span className={`text-xs font-bold px-3 py-1.5 rounded-full ${
@@ -50,11 +76,11 @@ export default function BookingDetails() {
         <div className="p-6 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: Calendar, label: 'Date', value: new Date(booking.sessionDate).toLocaleDateString('en-MT', { weekday: 'long', day: 'numeric', month: 'long' }) },
+              { icon: Calendar, label: 'Date', value: booking.sessionDate ? new Date(booking.sessionDate).toLocaleDateString('en-MT', { weekday: 'long', day: 'numeric', month: 'long' }) : '—' },
               { icon: Clock, label: 'Time', value: `${booking.startTime} – ${booking.endTime}` },
-              { icon: MapPin, label: 'Location', value: booking.locationName },
-              { icon: User, label: 'Coach', value: booking.coachName },
-              { icon: User, label: 'Player', value: booking.playerName },
+              { icon: MapPin, label: 'Location', value: booking.locationName || '—' },
+              { icon: User, label: 'Coach', value: booking.coachName || '—' },
+              { icon: User, label: 'Player', value: booking.playerName || '—' },
               { icon: CreditCard, label: 'Payment', value: booking.creditsUsed ? `${booking.creditsUsed} credits` : `€${booking.amountCharged}` },
             ].map((item) => (
               <div key={item.label} className="flex items-start gap-3">
@@ -121,7 +147,7 @@ export default function BookingDetails() {
                 <div className="w-1.5 h-1.5 rounded-full bg-[#2563EB] mt-1.5 flex-shrink-0" />
                 <div>
                   <p className="font-medium text-slate-300">{a.action}</p>
-                  <p className="text-slate-500 text-xs">{new Date(a.createdAt).toLocaleString('en-MT')}</p>
+                  <p className="text-slate-500 text-xs">{a.createdAt ? new Date(a.createdAt).toLocaleString('en-MT') : ''}</p>
                 </div>
               </div>
             ))}

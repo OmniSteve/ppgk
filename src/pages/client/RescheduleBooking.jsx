@@ -1,7 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Calendar, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
-import { apiClient } from '@/services/apiClient';
+import { apiClient, unwrap } from '@/services/apiClient';
+
+function normaliseSession(s) {
+  if (!s) return s;
+  return {
+    ...s,
+    name: s.name ?? s.title ?? '',
+    date: s.date ?? s.session_date ?? '',
+    startTime: s.startTime ?? s.start_time ?? '',
+    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.booked_count != null ? s.capacity - s.booked_count : null) ?? 0,
+  };
+}
+
+function normaliseBooking(b) {
+  if (!b) return null;
+  return {
+    ...b,
+    sessionName: b.sessionName ?? b.session_name ?? '',
+    playerName: b.playerName ?? b.player_name ?? '',
+  };
+}
 
 export default function RescheduleBooking() {
   const { id } = useParams();
@@ -15,11 +35,16 @@ export default function RescheduleBooking() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
+    // Fetch booking details + all available sessions for rescheduling
     Promise.all([
       apiClient.get(`/bookings/${id}`),
-      apiClient.get(`/bookings/${id}/reschedule-options`),
-    ]).then(([b, sessions]) => {
-      setBooking(b); setAvailableSessions(sessions);
+      apiClient.get('/sessions'),
+    ]).then(([b, sessionsData]) => {
+      setBooking(normaliseBooking(b));
+      // Filter out the current session and only show sessions with spots
+      const allSessions = unwrap(sessionsData, 'sessions').map(normaliseSession);
+      const currentSessionId = b.session_id;
+      setAvailableSessions(allSessions.filter((s) => s.id !== currentSessionId && s.spotsRemaining > 0));
     }).catch(() => navigate(`/bookings/${id}`)).finally(() => setLoading(false));
   }, [id, navigate]);
 
@@ -82,7 +107,7 @@ export default function RescheduleBooking() {
                     <input type="radio" name="session" value={s.id} checked={selected === s.id} onChange={() => setSelected(s.id)} className="accent-[#2563EB]" />
                     <div>
                       <p className="font-semibold text-white text-sm">{s.name}</p>
-                      <p className="text-slate-400 text-xs">{new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' })} · {s.startTime}</p>
+                      <p className="text-slate-400 text-xs">{s.date ? new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' }) : '—'} · {s.startTime}</p>
                     </div>
                   </div>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.spotsRemaining <= 3 ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}`}>

@@ -121,7 +121,7 @@ const AppRoutes = () => {
           <Route path="/players/:id/edit" element={<EditPlayer />} />
           <Route path="/packages" element={<Packages />} />
           <Route path="/credits" element={<CreditBalance />} />
-          <Route path="/purchases" element={<PurchaseHistory />} />
+          <Route path="/purchase-history" element={<PurchaseHistory />} />
           <Route path="/notifications" element={<ClientNotifications />} />
           <Route path="/account" element={<AccountDetails />} />
         </Route>

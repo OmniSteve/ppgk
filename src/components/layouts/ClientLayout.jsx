@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import ClientErrorBoundary from '@/components/ClientErrorBoundary';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   LayoutDashboard, Calendar, Users, CreditCard, ShoppingBag,
@@ -14,7 +15,7 @@ const navItems = [
   { label: 'Players', icon: Users, href: '/players' },
   { label: 'Packages', icon: CreditCard, href: '/packages' },
   { label: 'Credits', icon: CreditCard, href: '/credits' },
-  { label: 'Purchases', icon: ShoppingBag, href: '/purchases' },
+  { label: 'Purchases', icon: ShoppingBag, href: '/purchase-history' },
   { label: 'Notifications', icon: Bell, href: '/notifications' },
   { label: 'Account', icon: User, href: '/account' },
 ];
@@ -145,7 +146,9 @@ export default function ClientLayout({ children }) {
         </header>
 
         <main className="flex-1 p-4 md:p-6 lg:p-8">
-          {children ?? <Outlet />}
+          <ClientErrorBoundary>
+            {children ?? <Outlet />}
+          </ClientErrorBoundary>
         </main>
       </div>
     </div>

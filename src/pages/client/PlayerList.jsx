@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, User, Calendar, Activity } from 'lucide-react';
-import { apiClient } from '@/services/apiClient';
+import { apiClient, unwrap } from '@/services/apiClient';
+
+function normalisePlayer(p) {
+  if (!p) return p;
+  return {
+    ...p,
+    firstName: p.firstName ?? p.first_name ?? '',
+    lastName: p.lastName ?? p.last_name ?? '',
+    ageGroup: p.ageGroup ?? p.age_group ?? '',
+    experienceLevel: p.experienceLevel ?? p.experience_level ?? '',
+    currentClub: p.currentClub ?? p.current_club ?? '',
+    dateOfBirth: p.dateOfBirth ?? p.date_of_birth ?? '',
+    status: p.status ?? 'active',
+  };
+}
 
 export default function PlayerList() {
   const [players, setPlayers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get('/players').then((data) => setPlayers(data.players ?? data ?? [])).catch(() => setPlayers([])).finally(() => setLoading(false));
+    apiClient.get('/players')
+      .then((data) => setPlayers(unwrap(data, 'players').map(normalisePlayer)))
+      .catch(() => setPlayers([])).finally(() => setLoading(false));
   }, []);
 
   return (
@@ -46,7 +62,7 @@ export default function PlayerList() {
                   </div>
                   <div>
                     <p className="font-bold text-white">{p.firstName} {p.lastName}</p>
-                    <p className="text-slate-400 text-xs">{p.ageGroup} · {p.experienceLevel}</p>
+                    <p className="text-slate-400 text-xs">{p.ageGroup}{p.experienceLevel ? ` · ${p.experienceLevel}` : ''}</p>
                   </div>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}`}>

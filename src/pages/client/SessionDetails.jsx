@@ -3,6 +3,25 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Users, User, ChevronLeft, CreditCard } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
+function normaliseSession(s) {
+  if (!s) return null;
+  return {
+    ...s,
+    name: s.name ?? s.title ?? '',
+    date: s.date ?? s.session_date ?? '',
+    startTime: s.startTime ?? s.start_time ?? '',
+    endTime: s.endTime ?? s.end_time ?? '',
+    credits: s.credits ?? s.credit_cost ?? null,
+    locationName: s.locationName ?? s.location_name ?? '',
+    locationAddress: s.locationAddress ?? s.address_line1 ?? '',
+    sessionType: s.sessionType ?? s.session_type_name ?? '',
+    coachName: s.coachName ?? s.coach_name ?? '',
+    ageGroup: s.ageGroup ?? s.age_group ?? '',
+    abilityLevel: s.abilityLevel ?? s.ability_level ?? '',
+    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.booked_count != null ? s.capacity - s.booked_count : null) ?? 0,
+  };
+}
+
 export default function SessionDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -10,7 +29,10 @@ export default function SessionDetails() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiClient.get(`/sessions/${id}`).then(setSession).catch(() => setSession(null)).finally(() => setLoading(false));
+    apiClient.get(`/sessions/${id}`)
+      .then((data) => setSession(normaliseSession(data)))
+      .catch(() => setSession(null))
+      .finally(() => setLoading(false));
   }, [id]);
 
   const handleBookNow = () => {
@@ -59,12 +81,12 @@ export default function SessionDetails() {
 
           <div className="grid grid-cols-2 gap-4">
             {[
-              { icon: Calendar, label: 'Date', value: new Date(session.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'long' }) },
+              { icon: Calendar, label: 'Date', value: session.date ? new Date(session.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'long' }) : '—' },
               { icon: Clock, label: 'Time', value: `${session.startTime} – ${session.endTime}` },
               { icon: MapPin, label: 'Location', value: session.locationName },
-              { icon: User, label: 'Coach', value: session.coachName },
-              { icon: Users, label: 'Age Group', value: `${session.ageGroup} · ${session.abilityLevel}` },
-              { icon: CreditCard, label: 'Price', value: session.credits ? `${session.credits} credit${session.credits > 1 ? 's' : ''}` : `€${session.price}` },
+              { icon: User, label: 'Coach', value: session.coachName || '—' },
+              { icon: Users, label: 'Age Group', value: `${session.ageGroup}${session.abilityLevel ? ' · ' + session.abilityLevel : ''}` },
+              { icon: CreditCard, label: 'Price', value: session.credits ? `${session.credits} credit${session.credits > 1 ? 's' : ''}` : `€${session.price ?? '—'}` },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
@@ -90,7 +112,7 @@ export default function SessionDetails() {
               <div>
                 <p className="text-slate-400 text-sm">Total per player</p>
                 <p className="text-3xl font-black text-white">
-                  {session.credits ? `${session.credits} credits` : `€${session.price}`}
+                  {session.credits ? `${session.credits} credits` : `€${session.price ?? '—'}`}
                 </p>
               </div>
             </div>

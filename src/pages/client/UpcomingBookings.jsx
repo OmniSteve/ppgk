@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, ChevronRight } from 'lucide-react';
-import { apiClient } from '@/services/apiClient';
+import { apiClient, unwrap } from '@/services/apiClient';
 
 const statusColor = {
   confirmed: 'bg-green-500/20 text-green-400',
@@ -14,14 +14,43 @@ const statusColor = {
   payment_failed: 'bg-red-500/20 text-red-400',
 };
 
+// Normalise booking fields from snake_case API response
+function normaliseBooking(b) {
+  if (!b) return b;
+  return {
+    ...b,
+    sessionName: b.sessionName ?? b.session_name ?? '',
+    sessionDate: b.sessionDate ?? b.session_date ?? '',
+    startTime: b.startTime ?? b.start_time ?? '',
+    endTime: b.endTime ?? b.end_time ?? '',
+    locationName: b.locationName ?? b.location_name ?? '',
+    playerName: b.playerName ?? b.player_name ?? '',
+  };
+}
+
+// Map UI filter tabs to API status query values
+const FILTER_STATUS = {
+  upcoming: '',          // server defaults to upcoming when no status
+  past: 'past',
+  cancelled: 'cancelled_by_client',
+  all: 'all',
+};
+
 export default function UpcomingBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [filter, setFilter] = useState('upcoming');
 
   useEffect(() => {
-    apiClient.get(`/bookings?filter=${filter}`)
-      .then((data) => setBookings(data.bookings ?? data ?? [])).catch(() => setBookings([])).finally(() => setLoading(false));
+    setLoading(true);
+    setError('');
+    const status = FILTER_STATUS[filter] ?? '';
+    const qs = status ? `?status=${status}` : '';
+    apiClient.get(`/bookings${qs}`)
+      .then((data) => setBookings(unwrap(data, 'bookings').map(normaliseBooking)))
+      .catch((err) => { console.error('Bookings fetch error:', err); setError('Could not load bookings.'); setBookings([]); })
+      .finally(() => setLoading(false));
   }, [filter]);
 
   return (
@@ -42,13 +71,15 @@ export default function UpcomingBookings() {
         ].map((f) => (
           <button
             key={f.key}
-            onClick={() => { setFilter(f.key); setLoading(true); }}
+            onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${filter === f.key ? 'bg-[#2563EB] text-white' : 'bg-white/5 border border-white/10 text-slate-400 hover:border-[#2563EB]/40 hover:text-white'}`}
           >
             {f.label}
           </button>
         ))}
       </div>
+
+      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>}
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
@@ -69,8 +100,8 @@ export default function UpcomingBookings() {
               className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/10 hover:border-[#2563EB]/40 transition-all group"
             >
               <div className="w-12 h-12 rounded-xl bg-[#2563EB]/20 flex flex-col items-center justify-center flex-shrink-0">
-                <span className="text-white text-sm font-black leading-none">{new Date(b.sessionDate).getDate()}</span>
-                <span className="text-[#2563EB] text-[9px] font-bold uppercase">{new Date(b.sessionDate).toLocaleString('en', { month: 'short' })}</span>
+                <span className="text-white text-sm font-black leading-none">{b.sessionDate ? new Date(b.sessionDate).getDate() : '—'}</span>
+                <span className="text-[#2563EB] text-[9px] font-bold uppercase">{b.sessionDate ? new Date(b.sessionDate).toLocaleString('en', { month: 'short' }) : ''}</span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2 mb-1">
@@ -80,9 +111,9 @@ export default function UpcomingBookings() {
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-slate-400 text-xs">
-                  <span className="flex items-center gap-1"><Clock size={11} />{b.startTime}</span>
+                  {b.startTime && <span className="flex items-center gap-1"><Clock size={11} />{b.startTime}</span>}
                   {b.locationName && <span className="flex items-center gap-1"><MapPin size={11} />{b.locationName}</span>}
-                  <span className="text-slate-500">Player: {b.playerName}</span>
+                  {b.playerName && <span className="text-slate-500">Player: {b.playerName}</span>}
                 </div>
               </div>
               <ChevronRight size={16} className="text-slate-600 group-hover:text-[#2563EB] flex-shrink-0 transition-colors" />

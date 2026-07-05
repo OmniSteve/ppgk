@@ -1,18 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ShoppingCart, CreditCard, Users, AlertCircle, Loader2 } from 'lucide-react';
-import { apiClient } from '@/services/apiClient';
+import { apiClient, unwrap } from '@/services/apiClient';
 
 const sectionCls = 'bg-white/5 rounded-2xl border border-white/10 p-5';
+
+// Normalise session fields for display (may come from sessionStorage with already-camel or API snake_case)
+function normaliseSession(s) {
+  if (!s) return s;
+  return {
+    ...s,
+    name: s.name ?? s.title ?? '',
+    date: s.date ?? s.session_date ?? '',
+    startTime: s.startTime ?? s.start_time ?? '',
+    endTime: s.endTime ?? s.end_time ?? '',
+    credits: s.credits ?? s.credit_cost ?? null,
+  };
+}
+
+// Normalise player fields from API (snake_case → camelCase display fields)
+function normalisePlayer(p) {
+  if (!p) return p;
+  return {
+    ...p,
+    firstName: p.firstName ?? p.first_name ?? '',
+    lastName: p.lastName ?? p.last_name ?? '',
+    ageGroup: p.ageGroup ?? p.age_group ?? '',
+    experienceLevel: p.experienceLevel ?? p.experience_level ?? '',
+  };
+}
 
 export default function Checkout() {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState([]);
   const [players, setPlayers] = useState([]);
-  const [credits, setCredits] = useState([]);
+  const [creditBalance, setCreditBalance] = useState(0);
   const [selectedPlayer, setSelectedPlayer] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('card');
-  const [selectedPackage, setSelectedPackage] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -20,14 +44,27 @@ export default function Checkout() {
   useEffect(() => {
     const stored = sessionStorage.getItem('ppgk_checkout_sessions');
     if (!stored) { navigate('/sessions'); return; }
-    setSessions(JSON.parse(stored));
-    apiClient.get('/players').then(setPlayers).catch(() => setPlayers([]));
-    apiClient.get('/credits/balance').then((d) => setCredits(d.packages || [])).catch(() => setCredits([]));
+    try {
+      const parsed = JSON.parse(stored);
+      setSessions(Array.isArray(parsed) ? parsed.map(normaliseSession) : []);
+    } catch {
+      navigate('/sessions');
+      return;
+    }
+
+    // Load players
+    apiClient.get('/players')
+      .then((data) => setPlayers(unwrap(data, 'players').map(normalisePlayer)))
+      .catch(() => setPlayers([]));
+
+    // Load credit balance
+    apiClient.get('/credits')
+      .then((data) => setCreditBalance(data?.balance ?? 0))
+      .catch(() => setCreditBalance(0));
   }, [navigate]);
 
   const totalCredits = sessions.reduce((sum, s) => sum + (s.credits || 0), 0);
   const totalPrice = sessions.reduce((sum, s) => sum + (s.price || 0), 0);
-  const availableCredits = credits.reduce((sum, p) => sum + (p.remainingCredits || 0), 0);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -35,15 +72,27 @@ export default function Checkout() {
     if (!agreed) return setError('Please confirm the terms.');
     setError(''); setLoading(true);
     try {
-      const res = await apiClient.post('/bookings/create', {
+      const res = await apiClient.post('/bookings', {
         sessionIds: sessions.map((s) => s.id),
         playerId: selectedPlayer,
         paymentMethod,
-        packagePurchaseId: paymentMethod === 'credits' ? selectedPackage : null,
         idempotencyKey: `checkout-${Date.now()}-${Math.random().toString(36).slice(2)}`,
       });
+
       sessionStorage.removeItem('ppgk_checkout_sessions');
-      navigate(`/payment-result?status=success&bookingIds=${res.bookingIds?.join(',')}`);
+
+      if (paymentMethod === 'card' && res.orderId) {
+        // Initiate Stripe checkout
+        const checkoutRes = await apiClient.post('/checkout', { orderId: res.orderId });
+        if (checkoutRes.checkoutUrl) {
+          window.location.href = checkoutRes.checkoutUrl;
+          return;
+        }
+      }
+
+      // Credits payment — booking already confirmed
+      const bookingIds = Array.isArray(res.bookingIds) ? res.bookingIds : [];
+      navigate(`/payment/result?status=success&bookingIds=${bookingIds.join(',')}`);
     } catch (err) {
       setError(err.message || 'Booking failed. Please try again.');
     } finally {
@@ -51,7 +100,11 @@ export default function Checkout() {
     }
   };
 
-  if (sessions.length === 0) return null;
+  if (sessions.length === 0) return (
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+    </div>
+  );
 
   const radioItem = (active) => `flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all ${active ? 'border-[#2563EB] bg-[#2563EB]/10' : 'border-white/10 hover:border-white/20'}`;
 
@@ -79,9 +132,9 @@ export default function Checkout() {
               <div key={s.id} className="flex items-center justify-between py-2 border-b border-white/10 last:border-0">
                 <div>
                   <p className="font-semibold text-white text-sm">{s.name}</p>
-                  <p className="text-slate-400 text-xs">{new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' })} · {s.startTime} – {s.endTime}</p>
+                  <p className="text-slate-400 text-xs">{s.date ? new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' }) : '—'} · {s.startTime} – {s.endTime}</p>
                 </div>
-                <span className="font-bold text-white text-sm">{s.credits ? `${s.credits} cr` : `€${s.price}`}</span>
+                <span className="font-bold text-white text-sm">{s.credits ? `${s.credits} cr` : `€${s.price ?? '—'}`}</span>
               </div>
             ))}
           </div>
@@ -109,7 +162,7 @@ export default function Checkout() {
                   <input type="radio" name="player" value={p.id} checked={selectedPlayer === p.id} onChange={() => setSelectedPlayer(p.id)} className="accent-[#2563EB]" />
                   <div>
                     <p className="font-semibold text-white text-sm">{p.firstName} {p.lastName}</p>
-                    <p className="text-slate-400 text-xs">{p.ageGroup} · {p.experienceLevel}</p>
+                    <p className="text-slate-400 text-xs">{p.ageGroup}{p.experienceLevel ? ` · ${p.experienceLevel}` : ''}</p>
                   </div>
                 </label>
               ))}
@@ -129,13 +182,13 @@ export default function Checkout() {
                 <p className="text-slate-400 text-xs">Secure card payment — €{totalPrice.toFixed(2)} EUR</p>
               </div>
             </label>
-            <label className={`${radioItem(paymentMethod === 'credits')} ${availableCredits < totalCredits ? 'opacity-50 cursor-not-allowed' : ''}`}>
-              <input type="radio" disabled={availableCredits < totalCredits} checked={paymentMethod === 'credits'} onChange={() => setPaymentMethod('credits')} className="accent-[#2563EB]" />
+            <label className={`${radioItem(paymentMethod === 'credits')} ${creditBalance < totalCredits ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              <input type="radio" disabled={creditBalance < totalCredits} checked={paymentMethod === 'credits'} onChange={() => setPaymentMethod('credits')} className="accent-[#2563EB]" />
               <div>
                 <p className="font-semibold text-white text-sm">Use session credits</p>
                 <p className="text-slate-400 text-xs">
-                  {availableCredits} credits available · Need {totalCredits}
-                  {availableCredits < totalCredits ? ' — insufficient balance' : ''}
+                  {creditBalance} credits available · Need {totalCredits}
+                  {creditBalance < totalCredits ? ' — insufficient balance' : ''}
                 </p>
               </div>
             </label>

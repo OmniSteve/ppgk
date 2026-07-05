@@ -18,6 +18,25 @@ const Input = (props) => <input className={inputCls} {...props} />;
 const Select = ({ children, ...props }) => <select className={inputCls} {...props}>{children}</select>;
 const Textarea = (props) => <textarea className={`${inputCls} resize-none`} rows={3} {...props} />;
 
+// Normalise API snake_case → camelCase for form fields
+function normalisePlayer(p) {
+  if (!p) return null;
+  return {
+    firstName: p.firstName ?? p.first_name ?? '',
+    lastName: p.lastName ?? p.last_name ?? '',
+    dateOfBirth: p.dateOfBirth ?? p.date_of_birth ?? '',
+    ageGroup: p.ageGroup ?? p.age_group ?? '',
+    experienceLevel: p.experienceLevel ?? p.experience_level ?? '',
+    currentClub: p.currentClub ?? p.current_club ?? '',
+    medicalInfo: p.medicalInfo ?? p.medical_info ?? '',
+    allergies: p.allergies ?? '',
+    emergencyContactName: p.emergencyContactName ?? p.emergency_contact_name ?? '',
+    emergencyContactPhone: p.emergencyContactPhone ?? p.emergency_contact_phone ?? '',
+    emergencyContactRelationship: p.emergencyContactRelationship ?? p.emergency_contact_relationship ?? '',
+    status: p.status ?? 'active',
+  };
+}
+
 export default function EditPlayer() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -27,7 +46,10 @@ export default function EditPlayer() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    apiClient.get(`/players/${id}`).then(setForm).catch(() => navigate('/players')).finally(() => setLoading(false));
+    apiClient.get(`/players/${id}`)
+      .then((data) => setForm(normalisePlayer(data)))
+      .catch(() => navigate('/players'))
+      .finally(() => setLoading(false));
   }, [id, navigate]);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
@@ -46,7 +68,12 @@ export default function EditPlayer() {
   };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" /></div>;
-  if (!form) return null;
+  if (!form) return (
+    <div className="text-center py-20">
+      <p className="text-slate-400">Player not found</p>
+      <Link to="/players" className="text-[#2563EB] text-sm hover:underline mt-2 block">← Back to players</Link>
+    </div>
+  );
 
   const sectionCls = 'bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4';
 
@@ -64,27 +91,27 @@ export default function EditPlayer() {
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Personal Details</h2>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="First name" required><Input required value={form.firstName || ''} onChange={set('firstName')} /></Field>
-            <Field label="Last name" required><Input required value={form.lastName || ''} onChange={set('lastName')} /></Field>
+            <Field label="First name" required><Input required value={form.firstName} onChange={set('firstName')} /></Field>
+            <Field label="Last name" required><Input required value={form.lastName} onChange={set('lastName')} /></Field>
           </div>
-          <Field label="Date of birth"><Input type="date" value={form.dateOfBirth || ''} onChange={set('dateOfBirth')} /></Field>
+          <Field label="Date of birth"><Input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} /></Field>
           <div className="grid grid-cols-2 gap-4">
             <Field label="Age group">
-              <Select value={form.ageGroup || ''} onChange={set('ageGroup')}>
+              <Select value={form.ageGroup} onChange={set('ageGroup')}>
                 <option value="">Select</option>
                 {['U8','U10','U12','U14','U16','U18','Senior'].map(v => <option key={v}>{v}</option>)}
               </Select>
             </Field>
             <Field label="Experience level">
-              <Select value={form.experienceLevel || ''} onChange={set('experienceLevel')}>
+              <Select value={form.experienceLevel} onChange={set('experienceLevel')}>
                 <option value="">Select</option>
                 {['Beginner','Intermediate','Advanced','Elite'].map(v => <option key={v}>{v}</option>)}
               </Select>
             </Field>
           </div>
-          <Field label="Current club"><Input value={form.currentClub || ''} onChange={set('currentClub')} /></Field>
+          <Field label="Current club"><Input value={form.currentClub} onChange={set('currentClub')} /></Field>
           <Field label="Status">
-            <Select value={form.status || 'active'} onChange={set('status')}>
+            <Select value={form.status} onChange={set('status')}>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
             </Select>
@@ -93,16 +120,16 @@ export default function EditPlayer() {
 
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Health & Safety</h2>
-          <Field label="Medical information"><Textarea value={form.medicalInfo || ''} onChange={set('medicalInfo')} /></Field>
-          <Field label="Allergies"><Textarea value={form.allergies || ''} onChange={set('allergies')} rows={2} /></Field>
+          <Field label="Medical information"><Textarea value={form.medicalInfo} onChange={set('medicalInfo')} /></Field>
+          <Field label="Allergies"><Textarea value={form.allergies} onChange={set('allergies')} rows={2} /></Field>
         </div>
 
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Emergency Contact</h2>
-          <Field label="Name"><Input value={form.emergencyContactName || ''} onChange={set('emergencyContactName')} /></Field>
+          <Field label="Name"><Input value={form.emergencyContactName} onChange={set('emergencyContactName')} /></Field>
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Phone"><Input type="tel" value={form.emergencyContactPhone || ''} onChange={set('emergencyContactPhone')} /></Field>
-            <Field label="Relationship"><Input value={form.emergencyContactRelationship || ''} onChange={set('emergencyContactRelationship')} /></Field>
+            <Field label="Phone"><Input type="tel" value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} /></Field>
+            <Field label="Relationship"><Input value={form.emergencyContactRelationship} onChange={set('emergencyContactRelationship')} /></Field>
           </div>
         </div>
 
