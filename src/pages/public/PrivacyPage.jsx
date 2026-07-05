@@ -39,7 +39,7 @@ export default function PrivacyPage() {
           </section>
           <section>
             <h2 className="text-xl font-bold text-white mb-3">8. Contact</h2>
-            <p>For privacy queries, contact: info@premierperformancegk.com</p>
+            <p>For privacy queries, contact: info@ppgk.app</p>
           </section>
         </div>
       </div>
