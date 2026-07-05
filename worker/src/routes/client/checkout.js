@@ -76,18 +76,18 @@ export async function handleCheckout(request, env, ctx, params) {
   const appUrl = env.APP_URL || 'https://premierperformancegk.com';
 
   // Build URLSearchParams — encode all line items
-  const params = new URLSearchParams();
-  params.set('mode', 'payment');
-  params.set('success_url', `${appUrl}/payment/result?status=success&orderId=${orderId}`);
-  params.set('cancel_url',  `${appUrl}/payment/result?status=cancelled&orderId=${orderId}`);
-  params.set('metadata[orderId]', orderId);
-  params.set('payment_intent_data[metadata][orderId]', orderId);
-  if (payload.email) params.set('customer_email', payload.email);
+  const formData = new URLSearchParams();
+  formData.set('mode', 'payment');
+  formData.set('success_url', `${appUrl}/payment/result?status=success&orderId=${orderId}`);
+  formData.set('cancel_url',  `${appUrl}/payment/result?status=cancelled&orderId=${orderId}`);
+  formData.set('metadata[orderId]', orderId);
+  formData.set('payment_intent_data[metadata][orderId]', orderId);
+  if (payload.email) formData.set('customer_email', payload.email);
   lineItems.forEach((item, i) => {
-    params.set(`line_items[${i}][price_data][currency]`,               item.price_data.currency);
-    params.set(`line_items[${i}][price_data][unit_amount]`,            String(item.price_data.unit_amount));
-    params.set(`line_items[${i}][price_data][product_data][name]`,     item.price_data.product_data.name);
-    params.set(`line_items[${i}][quantity]`,                           '1');
+    formData.set(`line_items[${i}][price_data][currency]`,               item.price_data.currency);
+    formData.set(`line_items[${i}][price_data][unit_amount]`,            String(item.price_data.unit_amount));
+    formData.set(`line_items[${i}][price_data][product_data][name]`,     item.price_data.product_data.name);
+    formData.set(`line_items[${i}][quantity]`,                           '1');
   });
 
   // Create Stripe Checkout Session
@@ -97,7 +97,7 @@ export async function handleCheckout(request, env, ctx, params) {
       Authorization: `Bearer ${env.STRIPE_SECRET}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: params.toString(),
+    body: formData.toString(),
   });
 
   if (!stripeRes.ok) {
