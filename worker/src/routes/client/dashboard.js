@@ -7,7 +7,10 @@ import { toCamelArray } from '../../lib/serializers.js';
 export async function handleClientDashboard(request, env) {
   const payload = await requireRole(request, env, 'client', 'coach', 'head_coach', 'admin');
   const clientId = payload.sub;
-  const today = new Date().toISOString().slice(0, 10);
+  // Use yesterday as cutoff to avoid UTC offset issues dropping today's sessions
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const today = d.toISOString().slice(0, 10);
 
   // Credit balance — reuse the same getBalance logic as checkout so numbers always match
   const creditBalance = await getBalance(env, clientId);
@@ -36,7 +39,7 @@ export async function handleClientDashboard(request, env) {
      LEFT JOIN locations l ON l.id = s.location_id
      WHERE b.client_id = ?
        AND s.session_date >= ?
-       AND b.status IN ('confirmed', 'pending_payment')
+       AND b.status NOT IN ('cancelled_by_client', 'cancelled_by_admin', 'payment_failed', 'rescheduled')
      ORDER BY s.session_date, s.start_time
      LIMIT 5`,
     [clientId, today]
