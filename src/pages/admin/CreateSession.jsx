@@ -33,7 +33,11 @@ export default function CreateSession() {
       apiClient.get('/admin/coaches'),
       apiClient.get('/admin/locations'),
       apiClient.get('/admin/session-types'),
-    ]).then(([c, l, st]) => { setCoaches(c); setLocations(l); setSessionTypes(st); }).catch(() => {});
+    ]).then(([c, l, st]) => {
+      setCoaches(Array.isArray(c) ? c : (c.coaches || []));
+      setLocations(Array.isArray(l) ? l : (l.locations || []));
+      setSessionTypes(Array.isArray(st) ? st : (st.sessionTypes || st.session_types || []));
+    }).catch(() => {});
   }, []);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
@@ -42,7 +46,20 @@ export default function CreateSession() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      await apiClient.post('/admin/sessions', form);
+      await apiClient.post('/admin/sessions', {
+        title: form.name,
+        sessionTypeId: form.sessionTypeId || null,
+        locationId: form.locationId || null,
+        coachId: form.coachId || null,
+        sessionDate: form.date,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        capacity: form.capacity || 10,
+        creditCost: form.credits || 1,
+        price: form.price || null,
+        description: form.description || null,
+        notes: form.internalNotes || null,
+      });
       navigate('/admin/sessions');
     } catch (err) {
       setError(err.message || 'Failed to create session.');
