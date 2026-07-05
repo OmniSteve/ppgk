@@ -16,8 +16,13 @@ export default function Packages() {
     setPurchasing(pkg.id);
     setError('');
     try {
-      const res = await apiClient.post('/orders/package', { packageId: pkg.id, idempotencyKey: `pkg-${pkg.id}-${Date.now()}` });
-      window.location.href = res.paymentUrl;
+      // Step 1: create pending order
+      const order = await apiClient.post(`/packages/${pkg.id}/purchase`, {
+        idempotencyKey: `pkg-${pkg.id}-${Date.now()}`,
+      });
+      // Step 2: create Stripe checkout session and redirect
+      const checkout = await apiClient.post('/checkout', { orderId: order.orderId });
+      window.location.href = checkout.checkoutUrl;
     } catch (err) {
       setError(err.message || 'Purchase failed. Please try again.');
     } finally {

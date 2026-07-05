@@ -75,6 +75,21 @@ export async function handleCheckout(request, env, ctx, params) {
 
   const appUrl = env.APP_URL || 'https://premierperformancegk.com';
 
+  // Build URLSearchParams — encode all line items
+  const params = new URLSearchParams();
+  params.set('mode', 'payment');
+  params.set('success_url', `${appUrl}/payment/result?status=success&orderId=${orderId}`);
+  params.set('cancel_url',  `${appUrl}/payment/result?status=cancelled&orderId=${orderId}`);
+  params.set('metadata[orderId]', orderId);
+  params.set('payment_intent_data[metadata][orderId]', orderId);
+  if (payload.email) params.set('customer_email', payload.email);
+  lineItems.forEach((item, i) => {
+    params.set(`line_items[${i}][price_data][currency]`,               item.price_data.currency);
+    params.set(`line_items[${i}][price_data][unit_amount]`,            String(item.price_data.unit_amount));
+    params.set(`line_items[${i}][price_data][product_data][name]`,     item.price_data.product_data.name);
+    params.set(`line_items[${i}][quantity]`,                           '1');
+  });
+
   // Create Stripe Checkout Session
   const stripeRes = await fetch('https://api.stripe.com/v1/checkout/sessions', {
     method: 'POST',
@@ -82,19 +97,7 @@ export async function handleCheckout(request, env, ctx, params) {
       Authorization: `Bearer ${env.STRIPE_SECRET}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: new URLSearchParams({
-      mode:                          'payment',
-      'line_items[0][price_data][currency]':                    lineItems[0].price_data.currency,
-      'line_items[0][price_data][unit_amount]':                 String(lineItems[0].price_data.unit_amount),
-      'line_items[0][price_data][product_data][name]':          lineItems[0].price_data.product_data.name,
-      'line_items[0][quantity]':                                '1',
-      // Full line_items building via URLSearchParams for multiple items
-      success_url: `${appUrl}/payment/result?status=success&orderId=${orderId}`,
-      cancel_url:  `${appUrl}/payment/result?status=cancelled&orderId=${orderId}`,
-      'metadata[orderId]':           orderId,
-      'payment_intent_data[metadata][orderId]': orderId,
-      ...(payload.email ? { customer_email: payload.email } : {}),
-    }).toString(),
+    body: params.toString(),
   });
 
   if (!stripeRes.ok) {
