@@ -17,6 +17,24 @@ export async function handleAdminCoaches(request, env, ctx, params) {
     return Response.json({ coaches: toCamelArray(rows) });
   }
 
+  if (method === 'POST' && url.pathname.endsWith('/sync')) {
+    // Auto-create coach_profiles for any users with role coach/head_coach who don't have one
+    const unlinked = await query(env,
+      `SELECT u.id, u.first_name, u.last_name, u.email FROM users u
+       WHERE u.role IN ('coach', 'head_coach')
+       AND NOT EXISTS (SELECT 1 FROM coach_profiles cp WHERE cp.user_id = u.id)`
+    , []);
+    for (const u of unlinked) {
+      const coachId = crypto.randomUUID();
+      await execute(env,
+        `INSERT INTO coach_profiles (id, user_id, first_name, last_name, email, active) VALUES (?,?,?,?,?,1)`,
+        [coachId, u.id, u.first_name, u.last_name, u.email ?? null]
+      );
+    }
+    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'sync', recordType: 'coach', recordId: 'bulk', description: `Synced ${unlinked.length} coach profile(s) from user roles` });
+    return Response.json({ synced: unlinked.length });
+  }
+
   if (method === 'POST') {
     const body = await request.json();
     const { firstName, lastName, email, phone, bio, specialisations, active } = body;

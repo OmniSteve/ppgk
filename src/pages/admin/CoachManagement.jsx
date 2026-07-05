@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Loader2, X, CheckCircle } from 'lucide-react';
+import { Search, Plus, Edit2, Loader2, X, CheckCircle, RefreshCw } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
 const defaultForm = { firstName: '', lastName: '', email: '', phone: '', bio: '', specialisations: '', active: true };
@@ -11,6 +11,7 @@ export default function CoachManagement() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(defaultForm);
   const [saving, setSaving] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
@@ -23,6 +24,19 @@ export default function CoachManagement() {
   };
 
   useEffect(() => { load(); }, [search]);
+
+  const handleSync = async () => {
+    setSyncing(true); setError(''); setSuccess('');
+    try {
+      const res = await apiClient.post('/admin/coaches/sync', {});
+      setSuccess(`Synced ${res.synced} coach profile(s) from user roles.`);
+      load();
+    } catch (err) {
+      setError(err.message || 'Sync failed.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const openNew = () => { setForm(defaultForm); setEditing('new'); setError(''); setSuccess(''); };
   const openEdit = (c) => { setForm({ ...c }); setEditing(c.id); setError(''); setSuccess(''); };
@@ -55,9 +69,14 @@ export default function CoachManagement() {
           <h1 className="text-2xl font-black text-white">Coaches</h1>
           <p className="text-slate-400 text-sm">{coaches.length} coaches registered</p>
         </div>
-        <button onClick={openNew} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors">
-          <Plus size={15} />New Coach
-        </button>
+        <div className="flex gap-2">
+          <button onClick={handleSync} disabled={syncing} className="border border-white/20 hover:bg-white/10 text-slate-300 font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors disabled:opacity-50">
+            <RefreshCw size={15} className={syncing ? 'animate-spin' : ''} />Sync from Roles
+          </button>
+          <button onClick={openNew} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors">
+            <Plus size={15} />New Coach
+          </button>
+        </div>
       </div>
 
       {success && <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-3 flex items-center gap-2 text-green-400 text-sm"><CheckCircle size={15} />{success}</div>}
