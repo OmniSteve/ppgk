@@ -87,7 +87,7 @@ export default function EditSession() {
     if (!window.confirm('Cancel this session? All clients will be notified and eligible credits restored.')) return;
     setCancelling(true);
     try {
-      await apiClient.post(`/admin/sessions/${id}/cancel`, {});
+      await apiClient.patch(`/admin/sessions/${id}`, { status: 'cancelled' });
       navigate('/admin/sessions');
     } catch (err) {
       setError(err.message || 'Cancellation failed.');

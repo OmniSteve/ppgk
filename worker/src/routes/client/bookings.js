@@ -177,7 +177,7 @@ export async function handleClientBookings(request, env, ctx, params) {
         step = 'check duplicate booking';
         const dup = await queryOne(env,
           `SELECT id FROM bookings WHERE player_id = ? AND session_id = ?
-           AND status NOT IN ('cancelled_by_client','cancelled_by_admin','payment_failed','rescheduled')`,
+           AND status NOT IN ('cancelled_by_client','cancelled_by_admin','payment_failed','pending_payment','rescheduled')`,
           [playerId, sessionId]
         );
         if (dup) { errors.push({ sessionId, reason: 'Player already has an active booking for this session' }); continue; }
