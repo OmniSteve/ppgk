@@ -52,6 +52,7 @@ export async function handleAdminClients(request, env, ctx, params) {
   if ((method === 'PUT' || method === 'PATCH') && params?.id) {
     const body = await request.json();
     const { firstName, lastName, phone, role, active } = body;
+
     await execute(env,
       `UPDATE users SET
          first_name = COALESCE(?, first_name),
@@ -65,6 +66,20 @@ export async function handleAdminClients(request, env, ctx, params) {
        active != null ? (active ? 1 : 0) : null,
        new Date().toISOString(), params.id]
     );
+
+    // Auto-create a coach_profile when role is promoted to coach/head_coach
+    if (role === 'coach' || role === 'head_coach') {
+      const existing = await queryOne(env, 'SELECT id FROM coach_profiles WHERE user_id = ?', [params.id]);
+      if (!existing) {
+        const user = await queryOne(env, 'SELECT first_name, last_name, email FROM users WHERE id = ?', [params.id]);
+        const coachId = crypto.randomUUID();
+        await execute(env,
+          `INSERT INTO coach_profiles (id, user_id, first_name, last_name, email, active) VALUES (?,?,?,?,?,1)`,
+          [coachId, params.id, user.first_name, user.last_name, user.email ?? null]
+        );
+      }
+    }
+
     await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'update', recordType: 'user', recordId: params.id, description: `Admin updated user ${params.id}: role=${role}, active=${active}` });
     return Response.json({ message: 'User updated' });
   }
