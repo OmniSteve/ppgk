@@ -106,11 +106,13 @@ export async function handleClientBookings(request, env, ctx, params) {
     const booking = await queryOne(env,
       `SELECT b.*, p.first_name || ' ' || p.last_name as player_name,
               s.title as session_name, s.session_date, s.start_time, s.end_time,
-              l.name as location_name, l.address_line1
+              l.name as location_name, l.address_line1,
+              c.first_name || ' ' || c.last_name as coach_name
        FROM bookings b
        JOIN players p ON p.id = b.player_id
        JOIN sessions s ON s.id = b.session_id
        LEFT JOIN locations l ON l.id = s.location_id
+       LEFT JOIN coach_profiles c ON c.id = s.coach_id
        WHERE b.id = ? AND b.client_id = ?`,
       [params.id, payload.sub]
     );
