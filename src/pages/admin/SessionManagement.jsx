@@ -22,7 +22,11 @@ export default function SessionManagement() {
   const fetchSessions = () => {
     setLoading(true);
     apiClient.get(`/admin/sessions?search=${search}&status=${statusFilter}&page=${page}&limit=20`)
-      .then((data) => { setSessions(data.sessions || []); setTotal(data.total || 0); })
+      .then((data) => {
+        const list = Array.isArray(data) ? data : (Array.isArray(data?.sessions) ? data.sessions : []);
+        setSessions(list);
+        setTotal(data?.total || list.length);
+      })
       .catch(() => setSessions([]))
       .finally(() => setLoading(false));
   };
