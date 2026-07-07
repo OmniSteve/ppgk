@@ -23,17 +23,41 @@ export const AuthProvider = ({ children }) => {
       setIsLoading(false);
       return;
     }
-    const stored = localStorage.getItem('ppgk_user');
     const token = localStorage.getItem('ppgk_token');
-    if (stored && token) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch {
-        localStorage.removeItem('ppgk_user');
-        localStorage.removeItem('ppgk_token');
-      }
+    const stored = localStorage.getItem('ppgk_user');
+    if (!token || !stored) {
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
+    // Validate the persisted token against the backend on startup so that an
+    // expired/invalid token does not leave the UI in a "logged in but no data"
+    // state. Uses a raw fetch (not apiClient) to avoid the 401 auto-redirect —
+    // we clear state quietly here and let route guards send to /signin.
+    console.info('[auth] rehydrating session — validating token');
+    fetch('/api/auth/me', { headers: { Authorization: `Bearer ${token}` } })
+      .then(async (res) => {
+        if (res.ok) {
+          const me = await res.json();
+          console.info('[auth] token valid — session restored for', me.email);
+          const restored = {
+            id: me.id, email: me.email, firstName: me.firstName, lastName: me.lastName, role: me.role,
+          };
+          localStorage.setItem('ppgk_user', JSON.stringify(restored));
+          setUser(restored);
+        } else {
+          console.warn('[auth] token invalid/expired (' + res.status + ') — clearing stale session');
+          localStorage.removeItem('ppgk_token');
+          localStorage.removeItem('ppgk_user');
+          setUser(null);
+        }
+      })
+      .catch((e) => {
+        console.warn('[auth] session validation failed — clearing stale session:', e.message);
+        localStorage.removeItem('ppgk_token');
+        localStorage.removeItem('ppgk_user');
+        setUser(null);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const signIn = async (email, password) => {

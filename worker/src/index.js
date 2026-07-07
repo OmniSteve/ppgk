@@ -183,8 +183,17 @@ export default {
 
       return await router.handle();
     } catch (err) {
-      console.error('Unhandled worker error:', err);
-      return Response.json({ error: 'Internal server error' }, { status: 500 });
+      // Auth helpers (requireAuth/requireRole) throw errors carrying a `status`
+      // (401/403). Honour that so the frontend can react correctly instead of
+      // receiving a misleading 500.
+      const status = (err && Number.isInteger(err.status) && err.status >= 400 && err.status < 600)
+        ? err.status
+        : 500;
+      if (status === 500) console.error('Unhandled worker error:', err);
+      return Response.json(
+        { error: status === 500 ? 'Internal server error' : (err.message || 'Error') },
+        { status }
+      );
     }
   },
 

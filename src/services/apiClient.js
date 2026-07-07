@@ -26,22 +26,50 @@ export function toCamel(obj) {
   );
 }
 
+let _redirecting = false;
+
+function handleAuthFailure(status, path) {
+  console.warn(`[api] ${status} on ${path} — clearing stale auth state`);
+  localStorage.removeItem('ppgk_token');
+  localStorage.removeItem('ppgk_user');
+  // Don't redirect for auth endpoints themselves (handled by callers) or if
+  // already redirecting, to avoid loops from parallel requests.
+  if (!_redirecting && !path.startsWith('/auth/')) {
+    _redirecting = true;
+    window.location.href = '/signin';
+  }
+}
+
 async function request(path, options = {}) {
+  const token = getToken();
+  console.debug(`[api] ${options.method || 'GET'} ${path} auth=${token ? 'yes' : 'no'}`);
   const response = await fetch(`/api${path}`, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
-      ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
       ...(options.headers || {}),
     },
     credentials: 'include',
   });
+
+  // 401 → token missing/expired/invalid: clear stale session and force re-login.
+  if (response.status === 401) {
+    const body = await response.json().catch(() => ({}));
+    handleAuthFailure(401, path);
+    const error = new Error(body.message || body.error || 'Session expired. Please sign in again.');
+    error.status = 401;
+    error.responseBody = body;
+    throw error;
+  }
+
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
     const msg = body.step
       ? `${body.error || 'Request failed'} at ${body.step}: ${body.message || response.status}`
       : body.message || body.error || `Request failed: ${response.status}`;
     const error = new Error(msg);
+    error.status = response.status;
     error.responseBody = body;
     throw error;
   }
@@ -56,12 +84,18 @@ export const apiClient = {
   delete: (path)        => request(path, { method: 'DELETE' }),
 
   async upload(path, formData) {
+    const token = getToken();
     const response = await fetch(`/api${path}`, {
       method: 'POST',
-      headers: { ...(getToken() ? { Authorization: `Bearer ${getToken()}` } : {}) },
+      headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
       credentials: 'include',
       body: formData,
     });
+    if (response.status === 401) {
+      const body = await response.json().catch(() => ({}));
+      handleAuthFailure(401, path);
+      throw new Error(body.message || body.error || 'Session expired. Please sign in again.');
+    }
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message || `Upload failed: ${response.status}`);
