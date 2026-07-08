@@ -16,7 +16,7 @@ const navGroups = [
   {
     label: 'People',
     items: [
-      { label: 'Clients', icon: Users, href: '/admin/clients' },
+      { label: 'Users', icon: Users, href: '/admin/clients' },
       { label: 'Players', icon: UserCheck, href: '/admin/players' },
       { label: 'Coaches', icon: Dumbbell, href: '/admin/coaches' },
     ],
