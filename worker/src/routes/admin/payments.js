@@ -51,21 +51,47 @@ export async function handleAdminPayments(request, env, ctx, params) {
     const payment = await queryOne(env, 'SELECT * FROM payments WHERE id = ?', [params.id]);
     if (!payment) return Response.json({ message: 'Payment not found' }, { status: 404 });
     if (payment.status !== 'paid') return Response.json({ message: 'Payment cannot be refunded (not in paid status)' }, { status: 400 });
+    if (!payment.stripe_payment_intent) {
+      return Response.json({ message: 'Payment has no Stripe payment intent on record — refund it from the Stripe dashboard' }, { status: 400 });
+    }
+    if (!env.STRIPE_SECRET) return Response.json({ message: 'Payment processing is not configured' }, { status: 503 });
 
-    // TODO: Call Stripe refund API here
-    // const refund = await stripe.refunds.create({ payment_intent: payment.stripe_payment_intent });
+    // Issue the refund with Stripe first; only record it locally once Stripe accepts.
+    // The idempotency key makes retries of this endpoint safe (Stripe dedupes).
+    const formData = new URLSearchParams();
+    formData.set('payment_intent', payment.stripe_payment_intent);
+    const stripeRes = await fetch('https://api.stripe.com/v1/refunds', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${env.STRIPE_SECRET}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Idempotency-Key': `ppgk-refund-${payment.id}`,
+      },
+      body: formData.toString(),
+    });
+
+    if (!stripeRes.ok) {
+      const stripeErr = await stripeRes.json().catch(() => ({}));
+      console.error('Stripe refund failed:', stripeErr);
+      const detail = stripeErr?.error?.message ? ` (${stripeErr.error.message})` : '';
+      return Response.json({ message: `Stripe refund failed${detail}` }, { status: 502 });
+    }
+
+    const stripeRefund = await stripeRes.json();
+    const now = new Date().toISOString();
 
     const refundId = crypto.randomUUID();
     await execute(env,
-      `INSERT INTO refunds (id, payment_id, amount, reason, status, performed_by) VALUES (?,?,?,?,?,?)`,
-      [refundId, payment.id, payment.amount, 'admin_requested', 'pending', actor.sub]
+      `INSERT INTO refunds (id, payment_id, amount, stripe_refund_id, reason, status, performed_by) VALUES (?,?,?,?,?,?,?)`,
+      [refundId, payment.id, payment.amount, stripeRefund.id ?? null, 'admin_requested',
+       stripeRefund.status === 'succeeded' ? 'succeeded' : 'pending', actor.sub]
     );
     await execute(env,
       'UPDATE payments SET status = ?, updated_at = ? WHERE id = ?',
-      ['refunded', new Date().toISOString(), payment.id]
+      ['refunded', now, payment.id]
     );
-    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'payment', recordType: 'payment', recordId: payment.id, description: `Refund initiated for payment ${payment.reference}` });
-    return Response.json({ message: 'Refund initiated' });
+    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'payment', recordType: 'payment', recordId: payment.id, description: `Refund issued via Stripe (${stripeRefund.id}) for payment ${payment.reference}` });
+    return Response.json({ message: 'Refund issued', stripeRefundId: stripeRefund.id, stripeStatus: stripeRefund.status });
   }
 
   return Response.json({ message: 'Method not allowed' }, { status: 405 });
