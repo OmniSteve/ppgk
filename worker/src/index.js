@@ -133,6 +133,7 @@ export default {
       router.put  ('/api/admin/packages/:id',                         handleAdminPackages);
       router.patch('/api/admin/packages/:id',                         handleAdminPackages);
       router.get  ('/api/admin/payments',                             handleAdminPayments);
+      router.get  ('/api/admin/payments/:id/refund-preview',          handleAdminPayments);
       router.post ('/api/admin/payments/:id/refund',                  handleAdminPayments);
       router.get  ('/api/admin/credits',                              handleAdminCredits);
       router.post ('/api/admin/credits/grant',                        handleAdminCredits);

@@ -38,20 +38,17 @@ async function processExpiredCredits(env) {
       continue;
     }
 
-    // Calculate remaining unused credits for this purchase
-    const usageRow = await queryOne(env,
-      `SELECT COALESCE(SUM(amount), 0) as net FROM credit_ledger
-       WHERE package_purchase_id = ? AND type IN ('purchase','refund','expiry')`,
+    // Calculate remaining unused credits for this purchase.
+    // Net consumption: usage (−) spends, refund (+) restores on cancellation,
+    // refund_removal (−) removes credits whose money was refunded.
+    const consumedRow = await queryOne(env,
+      `SELECT -COALESCE(SUM(amount), 0) as consumed FROM credit_ledger
+       WHERE package_purchase_id = ? AND type IN ('usage','refund','refund_removal')`,
       [pp.id]
     );
-    const usageDeductions = await queryOne(env,
-      `SELECT COALESCE(SUM(ABS(amount)), 0) as used FROM credit_ledger
-       WHERE package_purchase_id = ? AND type = 'usage'`,
-      [pp.id]
-    );
-    const issued = pp.credits_granted;
-    const used   = usageDeductions?.used ?? 0;
-    const remaining = issued - used;
+    const issued    = pp.credits_granted;
+    const consumed  = Number(consumedRow?.consumed ?? 0);
+    const remaining = issued - consumed;
 
     if (remaining > 0) {
       // Get current balance
@@ -98,8 +95,8 @@ async function sendCreditExpiryReminders(env) {
     `SELECT pp.id, pp.client_id, pp.expires_at, pp.credits_granted,
             pd.name as package_name,
             u.email, u.first_name,
-            (SELECT COALESCE(SUM(ABS(amount)), 0) FROM credit_ledger
-             WHERE package_purchase_id = pp.id AND type = 'usage') as used
+            (SELECT -COALESCE(SUM(amount), 0) FROM credit_ledger
+             WHERE package_purchase_id = pp.id AND type IN ('usage','refund','refund_removal')) as used
      FROM package_purchases pp
      JOIN package_definitions pd ON pd.id = pp.package_definition_id
      JOIN users u ON u.id = pp.client_id
