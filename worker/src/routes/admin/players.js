@@ -12,7 +12,7 @@ export async function handleAdminPlayers(request, env, ctx, params) {
     const now  = new Date().toISOString();
     const { firstName, lastName, dateOfBirth, ageGroup, experienceLevel,
             currentClub, school, medicalInfo, allergies,
-            emergencyContactName, emergencyContactPhone, notes, status } = body;
+            emergencyContactName, emergencyContactPhone, emergencyContactRelationship, notes, status } = body;
 
     await execute(env,
       `UPDATE players SET
@@ -27,6 +27,7 @@ export async function handleAdminPlayers(request, env, ctx, params) {
          allergies  = COALESCE(?, allergies),
          emergency_contact_name  = COALESCE(?, emergency_contact_name),
          emergency_contact_phone = COALESCE(?, emergency_contact_phone),
+         emergency_contact_relationship = COALESCE(?, emergency_contact_relationship),
          notes      = COALESCE(?, notes),
          status     = COALESCE(?, status),
          updated_at = ?
@@ -35,6 +36,7 @@ export async function handleAdminPlayers(request, env, ctx, params) {
        ageGroup ?? null, experienceLevel ?? null, currentClub ?? null,
        school ?? null, medicalInfo ?? null, allergies ?? null,
        emergencyContactName ?? null, emergencyContactPhone ?? null,
+       emergencyContactRelationship ?? null,
        notes ?? null, status ?? null,
        now, params.id]
     );

@@ -21,6 +21,7 @@ function EditModal({ player, onClose, onSaved }) {
     allergies: player.allergies || '',
     emergencyContactName: player.emergencyContactName || '',
     emergencyContactPhone: player.emergencyContactPhone || '',
+    emergencyContactRelationship: player.emergencyContactRelationship || '',
     notes: player.notes || '',
     status: player.status || 'active',
   });
@@ -105,6 +106,7 @@ function EditModal({ player, onClose, onSaved }) {
             <div className="grid grid-cols-2 gap-4">
               <div><label className={labelCls}>Name</label><input className={inputCls} value={form.emergencyContactName} onChange={set('emergencyContactName')} /></div>
               <div><label className={labelCls}>Phone</label><input className={inputCls} value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} /></div>
+              <div className="col-span-2"><label className={labelCls}>Relationship</label><input className={inputCls} value={form.emergencyContactRelationship} onChange={set('emergencyContactRelationship')} placeholder="e.g. Parent" /></div>
             </div>
           </div>
 
