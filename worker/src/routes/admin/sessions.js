@@ -70,16 +70,16 @@ export async function handleAdminSessions(request, env, ctx, params) {
 
   if (method === 'POST') {
     const body = await request.json();
-    const { title, sessionTypeId, locationId, coachId, sessionDate, startTime, endTime, capacity, creditCost, price, description, notes, status } = body;
+    const { title, sessionTypeId, locationId, coachId, sessionDate, startTime, endTime, capacity, creditCost, price, description, notes, ageGroup, abilityLevel, status } = body;
     if (!title || !sessionDate || !startTime || !endTime) {
       return Response.json({ message: 'title, sessionDate, startTime and endTime are required' }, { status: 400 });
     }
     const id = crypto.randomUUID();
     await execute(env,
-      `INSERT INTO sessions (id, title, session_type_id, location_id, coach_id, session_date, start_time, end_time, capacity, credit_cost, price, description, notes, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO sessions (id, title, session_type_id, location_id, coach_id, session_date, start_time, end_time, capacity, credit_cost, price, description, notes, age_group, ability_level, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, title, sessionTypeId ?? null, locationId ?? null, coachId ?? null, sessionDate, startTime, endTime,
-       capacity ?? 10, creditCost ?? 1, price ?? null, description ?? null, notes ?? null, status ?? 'draft']
+       capacity ?? 10, creditCost ?? 1, price ?? null, description ?? null, notes ?? null, ageGroup ?? null, abilityLevel ?? null, status ?? 'draft']
     );
     await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'create', recordType: 'session', recordId: id, description: `Session created: ${title} on ${sessionDate}` });
     return Response.json({ id, message: 'Session created' }, { status: 201 });
