@@ -56,7 +56,34 @@ export async function handleClientBookings(request, env, ctx, params) {
 
   // ── List bookings ──────────────────────────────────────────────────────────
   if (method === 'GET' && !params?.id) {
-    const status = url.searchParams.get('status') || '';
+    const status = url.searchParams.get('status') || 'upcoming';
+    // Use yesterday as the cutoff so sessions happening "today" still count as
+    // upcoming regardless of UTC offset (matches the dashboard card logic).
+    const d = new Date();
+    d.setDate(d.getDate() - 1);
+    const today = d.toISOString().slice(0, 10);
+
+    const conditions = ['b.client_id = ?'];
+    const bindings   = [payload.sub];
+    let orderBy      = 's.session_date DESC';
+
+    if (status === 'upcoming') {
+      conditions.push("s.session_date >= ?");
+      conditions.push("b.status NOT IN ('cancelled_by_client','cancelled_by_admin','payment_failed','rescheduled')");
+      bindings.push(today);
+      orderBy = "s.session_date ASC, s.start_time ASC";
+    } else if (status === 'past') {
+      conditions.push("s.session_date < ?");
+      conditions.push("b.status NOT IN ('cancelled_by_client','cancelled_by_admin','payment_failed','rescheduled')");
+      bindings.push(today);
+    } else if (status === 'all') {
+      // no extra filter — return everything
+    } else {
+      // exact status match (e.g. 'cancelled_by_client')
+      conditions.push('b.status = ?');
+      bindings.push(status);
+    }
+
     const bookings = await query(env,
       `SELECT b.id, b.status, b.booked_at, b.credits_used, b.amount_charged,
               p.first_name || ' ' || p.last_name as player_name,
@@ -66,9 +93,9 @@ export async function handleClientBookings(request, env, ctx, params) {
        JOIN players p ON p.id = b.player_id
        JOIN sessions s ON s.id = b.session_id
        LEFT JOIN locations l ON l.id = s.location_id
-       WHERE b.client_id = ? ${status ? 'AND b.status = ?' : ''}
-       ORDER BY s.session_date DESC`,
-      status ? [payload.sub, status] : [payload.sub]
+       WHERE ${conditions.join(' AND ')}
+       ORDER BY ${orderBy}`,
+      bindings
     );
     return ok({ bookings });
   }
