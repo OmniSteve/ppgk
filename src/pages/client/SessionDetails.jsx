@@ -88,7 +88,7 @@ export default function SessionDetails() {
               { icon: Clock, label: 'Time', value: `${session.startTime} – ${session.endTime}` },
               { icon: MapPin, label: 'Location', value: session.locationName },
               { icon: User, label: 'Coach', value: session.coachName || '—' },
-              { icon: Users, label: 'Age Group', value: `${session.ageGroup}${session.abilityLevel ? ' · ' + session.abilityLevel : ''}` },
+              { icon: Users, label: 'Age Group', value: `${session.ageGroup || 'All ages'}${session.abilityLevel ? ' · ' + session.abilityLevel : ''}` },
               { icon: CreditCard, label: 'Price', value: session.credits ? `${session.credits} credit${session.credits > 1 ? 's' : ''}` : `€${session.price ?? '—'}` },
             ].map((item) => (
               <div key={item.label} className="flex items-center gap-3">

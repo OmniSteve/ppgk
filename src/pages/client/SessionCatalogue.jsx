@@ -56,7 +56,7 @@ const SessionCard = ({ session, onSelect, selected }) => (
       <div className="space-y-1.5 mb-4">
         <div className="flex items-center gap-2 text-slate-400 text-xs"><Clock size={12} />{session.startTime} – {session.endTime}</div>
         <div className="flex items-center gap-2 text-slate-400 text-xs"><MapPin size={12} />{session.locationName}</div>
-        <div className="flex items-center gap-2 text-slate-400 text-xs"><Users size={12} />{session.ageGroup}{session.abilityLevel ? ` · ${session.abilityLevel}` : ''}</div>
+        <div className="flex items-center gap-2 text-slate-400 text-xs"><Users size={12} />{session.ageGroup || 'All ages'}{session.abilityLevel ? ` · ${session.abilityLevel}` : ''}</div>
       </div>
 
       <div className="flex items-center justify-between">

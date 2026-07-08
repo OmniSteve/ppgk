@@ -40,7 +40,7 @@ export async function handleClientSessions(request, env, ctx, params) {
 
   const sessions = await query(env,
     `SELECT s.id, s.title, s.session_date, s.start_time, s.end_time, s.capacity, s.booked_count,
-            s.credit_cost, s.price, s.description,
+            s.credit_cost, s.price, s.description, s.age_group, s.ability_level,
             l.name as location_name, l.city,
             st.name as session_type_name, st.colour,
             c.first_name || ' ' || c.last_name as coach_name
