@@ -42,6 +42,6 @@ export async function handleDebugEmail(request, env) {
 
   return Response.json({ checks }, {
     status: 200,
-    headers: corsHeaders(request),
+    headers: corsHeaders(request, env),
   });
 }

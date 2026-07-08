@@ -7,7 +7,10 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'https://ppgk.app',
+        // Local frontend dev proxies to the DEV API by default — never
+        // production. Override when needed, e.g. against a local worker:
+        //   PPGK_API_PROXY_TARGET=http://localhost:8787 npm run dev
+        target: process.env.PPGK_API_PROXY_TARGET || 'https://dev.ppgk.app',
         changeOrigin: true,
         secure: true,
       },

@@ -133,6 +133,81 @@ Confirmed: no secret values appear in any committed file.
 
 ---
 
+## Dev Environment (dev.ppgk.app)
+
+Branch workflow: **feature branch → `dev` → test on dev.ppgk.app → `main` → ppgk.app**
+
+The dev stack is fully isolated from production:
+
+| | Production | Dev |
+|---|---|---|
+| Branch | `main` | `dev` |
+| Domain | ppgk.app | dev.ppgk.app |
+| Worker | `ppgk` (top-level config) | `ppgk-dev` (`[env.dev]`) |
+| D1 | `ppgk-production` | `ppgk-dev` |
+| R2 | `ppgk` | `ppgk-dev` |
+| Stripe | live keys (when launched) | **test keys only** |
+| Secrets | `wrangler secret put <NAME>` | `wrangler secret put <NAME> --env dev` |
+
+### One-time setup
+
+```bash
+# 1. Fill in the ppgk-dev database_id in wrangler.toml [env.dev]
+npx wrangler d1 list                          # copy the ppgk-dev ID
+
+# 2. Create the dev R2 bucket
+npx wrangler r2 bucket create ppgk-dev
+
+# 3. Apply migrations to ppgk-dev (remote) — production is untouched
+npx wrangler d1 migrations apply ppgk-dev --remote --env dev
+
+# 4. Dev secrets (Stripe TEST keys only)
+npx wrangler secret put JWT_SECRET            --env dev
+npx wrangler secret put STRIPE_SECRET         --env dev
+npx wrangler secret put STRIPE_WEBHOOK_SECRET --env dev
+npx wrangler secret put RESEND_API_KEY        --env dev
+
+# 5. Stripe sandbox: add a second webhook endpoint →
+#    https://dev.ppgk.app/api/webhooks/stripe
+#    (events: checkout.session.completed, payment_intent.payment_failed,
+#     charge.refunded) and use ITS signing secret in step 4.
+```
+
+### Deploying
+
+```bash
+# Dev API worker (route dev.ppgk.app/api/*)
+npx wrangler deploy --env dev
+
+# Dev frontend — Pages preview deployment on the dev branch alias
+git checkout dev && npm run build
+npx wrangler pages deploy dist --project-name=ppgk --branch=dev
+
+# Production (unchanged)
+npx wrangler deploy
+npx wrangler pages deploy dist --project-name=ppgk
+```
+
+### dev.ppgk.app DNS / Pages
+
+The Pages deployment with `--branch=dev` is served at the branch alias
+`dev.ppgk.pages.dev`. Point the custom domain at it: Cloudflare dashboard →
+ppgk.app zone → DNS → add a **CNAME** record `dev` → `dev.ppgk.pages.dev`
+(proxied). The `[env.dev]` worker route then intercepts
+`dev.ppgk.app/api/*`, exactly as production does on ppgk.app.
+
+### Safety rails
+
+- Non-production hostnames render a fixed **DEV ENVIRONMENT** badge
+  (`src/components/EnvironmentBadge.jsx`).
+- `GET /api/health` reports `{ "env": "development" | "production" }`.
+- CORS allows only the deployment's own `APP_URL` origin (+ localhost) —
+  dev cannot call the production API from the browser and vice versa.
+- The Vite dev-server proxy targets dev.ppgk.app by default, never
+  production (`PPGK_API_PROXY_TARGET` overrides).
+
+---
+
 ## Running Tests
 
 ```bash
