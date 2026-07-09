@@ -68,14 +68,11 @@ crons = ["0 3 * * *", "0 7 * * *"]
 [[env.dev.d1_databases]]
 binding       = "DB"
 database_name = "ppgk-dev"
-# REPLACE ME: Cloudflare dashboard → Storage & Databases → D1 → ppgk-dev →
-# "Database ID"  (or run: npx wrangler d1 list)
 database_id   = "93870f17-1cce-4ddd-9af0-47ff13ffd186"
 migrations_dir = "migrations"
 
 [[env.dev.r2_buckets]]
 binding     = "STORAGE"
-# Create first: npx wrangler r2 bucket create ppgk-dev
 bucket_name = "ppgk-dev"
 
 [env.dev.observability.logs]
@@ -89,10 +86,3 @@ APP_URL = "https://dev.ppgk.app"
 [[env.dev.routes]]
 pattern   = "dev.ppgk.app/api/*"
 zone_name = "ppgk.app"
-
-# Dev secrets — set separately from production (NEVER reuse live keys):
-#   npx wrangler secret put JWT_SECRET            --env dev   # fresh random value
-#   npx wrangler secret put STRIPE_SECRET         --env dev   # sk_test_... ONLY
-#   npx wrangler secret put STRIPE_WEBHOOK_SECRET --env dev   # whsec_... from a
-#     separate Stripe sandbox webhook endpoint → https://dev.ppgk.app/api/webhooks/stripe
-#   npx wrangler secret put RESEND_API_KEY        --env dev
