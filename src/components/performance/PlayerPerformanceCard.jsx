@@ -1,6 +1,6 @@
-import React from 'react';
 import { Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
 import RatingDisplay from './RatingDisplay';
+import TrendIndicator from './TrendIndicator';
 
 const CATEGORY_FIELDS = [
   ['handlingRating', 'Handling'],
@@ -23,8 +23,11 @@ function formatDate(d) {
   return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-/** One performance evaluation, in a card. Edit/delete/visibility are staff-only (canManage). */
-export default function PlayerPerformanceCard({ record, canManage, onEdit, onDelete, deleting }) {
+/**
+ * One performance evaluation, in a card. Edit/delete/visibility are staff-only (canManage).
+ * `previous` (optional) is the chronologically-prior evaluation, used to show a trend badge.
+ */
+export default function PlayerPerformanceCard({ record, previous, canManage, onEdit, onDelete, deleting }) {
   const hasNotes = TEXT_FIELDS.some(([field]) => record[field]);
 
   return (
@@ -37,6 +40,7 @@ export default function PlayerPerformanceCard({ record, canManage, onEdit, onDel
               {record.overallRating}<span className="text-slate-500 text-sm">/5</span>
             </span>
             <RatingDisplay value={record.overallRating} size="md" />
+            {previous && <TrendIndicator current={record.overallRating} previous={previous.overallRating} />}
           </div>
         </div>
 
@@ -50,7 +54,7 @@ export default function PlayerPerformanceCard({ record, canManage, onEdit, onDel
             </span>
           )}
           {canManage && (
-            <>
+            <span className="flex items-center gap-2 print:hidden">
               <button
                 onClick={() => onEdit(record)}
                 className="w-8 h-8 rounded-lg bg-white/10 hover:bg-[#2563EB] flex items-center justify-center text-slate-400 hover:text-white transition-all"
@@ -66,7 +70,7 @@ export default function PlayerPerformanceCard({ record, canManage, onEdit, onDel
               >
                 <Trash2 size={14} />
               </button>
-            </>
+            </span>
           )}
         </div>
       </div>

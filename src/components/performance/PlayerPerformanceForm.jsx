@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { X, Save } from 'lucide-react';
 import RatingInput from './RatingInput';
 import { createPerformanceRecord, updatePerformanceRecord } from '@/services/playerPerformance';

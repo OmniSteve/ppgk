@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ChevronLeft, User } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
@@ -39,7 +39,7 @@ export default function ClientPlayerPerformance() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <Link to="/players" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
+      <Link to="/players" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors print:hidden">
         <ChevronLeft size={16} />Back to Players
       </Link>
 

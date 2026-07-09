@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star } from 'lucide-react';
 
 const SIZES = { sm: 13, md: 18, lg: 24 };

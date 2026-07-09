@@ -1,5 +1,14 @@
-import React from 'react';
 import RatingDisplay from './RatingDisplay';
+import TrendIndicator from './TrendIndicator';
+
+const CATEGORY_FIELDS = [
+  ['handlingRating', 'Handling'],
+  ['divingRating', 'Diving'],
+  ['footworkRating', 'Footwork'],
+  ['distributionRating', 'Distribution'],
+  ['communicationRating', 'Communication'],
+  ['attitudeRating', 'Attitude'],
+];
 
 function formatDate(d) {
   if (!d) return '—';
@@ -11,35 +20,53 @@ function average(records, field) {
   return Math.round((sum / records.length) * 10) / 10;
 }
 
-/** Small summary card: latest evaluation + average overall rating (when there's more than one record). */
-export default function PerformanceSummary({ records }) {
-  if (!records || records.length === 0) return null;
+/**
+ * Latest-evaluation highlight card: overall + category ratings, each with a trend
+ * indicator vs. the previous evaluation, plus the overall average across all records.
+ *
+ * `chronological` must be sorted newest-first regardless of any display sort applied
+ * elsewhere, so "latest"/"previous" here always mean the two most recent evaluations.
+ */
+export default function PerformanceSummary({ chronological }) {
+  if (!chronological || chronological.length === 0) return null;
 
-  const latest = records[0];
-  const avgOverall = records.length > 1 ? average(records, 'overallRating') : null;
+  const [latest, previous] = chronological;
+  const avgOverall = chronological.length > 1 ? average(chronological, 'overallRating') : null;
 
   return (
-    <div className="bg-[#0D1B2A] rounded-2xl border border-white/10 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-      <div>
-        <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Latest Evaluation</p>
-        <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-3xl font-black text-white leading-none">
-            {latest.overallRating}<span className="text-slate-500 text-lg">/5</span>
-          </span>
-          <RatingDisplay value={latest.overallRating} size="md" />
+    <div className="bg-[#0D1B2A] rounded-2xl border border-white/10 p-5 space-y-4">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div>
+          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Latest Evaluation</p>
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-3xl font-black text-white leading-none">
+              {latest.overallRating}<span className="text-slate-500 text-lg">/5</span>
+            </span>
+            <RatingDisplay value={latest.overallRating} size="md" />
+            {previous && <TrendIndicator current={latest.overallRating} previous={previous.overallRating} showLabel />}
+          </div>
+          <p className="text-slate-400 text-xs mt-1.5">{formatDate(latest.evaluationDate)}</p>
         </div>
-        <p className="text-slate-400 text-xs mt-1.5">{formatDate(latest.evaluationDate)}</p>
+
+        {avgOverall !== null && (
+          <div className="sm:text-right">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Average Overall</p>
+            <p className="text-2xl font-black text-[#2563EB] leading-none">
+              {avgOverall}<span className="text-slate-500 text-base">/5</span>
+            </p>
+            <p className="text-slate-500 text-xs mt-1.5">{chronological.length} evaluations</p>
+          </div>
+        )}
       </div>
 
-      {avgOverall !== null && (
-        <div className="sm:text-right">
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Average Overall</p>
-          <p className="text-2xl font-black text-[#2563EB] leading-none">
-            {avgOverall}<span className="text-slate-500 text-base">/5</span>
-          </p>
-          <p className="text-slate-500 text-xs mt-1.5">{records.length} evaluations</p>
-        </div>
-      )}
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2.5 pt-3 border-t border-white/10">
+        {CATEGORY_FIELDS.map(([field, label]) => (
+          <div key={field} className="flex items-center gap-2 flex-wrap">
+            <RatingDisplay value={latest[field]} label={label} size="sm" />
+            {previous && <TrendIndicator current={latest[field]} previous={previous[field]} />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

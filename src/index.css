@@ -90,3 +90,12 @@
     @apply bg-background text-foreground font-body;
   }
 }
+
+/* Browsers strip background colors on print by default; without this, the
+   app's dark-themed cards (bg-white/5 etc.) would render as blank/white. */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}

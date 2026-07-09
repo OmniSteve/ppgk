@@ -1,4 +1,3 @@
-import React from 'react';
 import { useParams, useLocation, Link } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
 import PlayerPerformanceList from '@/components/performance/PlayerPerformanceList';
@@ -11,7 +10,7 @@ export default function AdminPlayerPerformance() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <Link to="/admin/players" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
+      <Link to="/admin/players" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors print:hidden">
         <ChevronLeft size={16} />Back to Players
       </Link>
 

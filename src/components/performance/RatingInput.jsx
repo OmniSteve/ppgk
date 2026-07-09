@@ -1,4 +1,3 @@
-import React from 'react';
 import { Star } from 'lucide-react';
 
 /** Interactive 1-5 star rating picker for the evaluation form. */
