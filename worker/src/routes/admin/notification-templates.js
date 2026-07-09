@@ -1,6 +1,7 @@
 /** CRUD /api/admin/notification-templates */
 import { requireRole } from '../../lib/auth.js';
 import { query, execute, audit } from '../../lib/db.js';
+import { ok } from '../../lib/validate.js';
 
 export async function handleAdminNotificationTemplates(request, env, ctx, params) {
   const actor  = await requireRole(request, env, 'admin');
@@ -9,7 +10,7 @@ export async function handleAdminNotificationTemplates(request, env, ctx, params
 
   if (method === 'GET') {
     const templates = await query(env, 'SELECT * FROM notification_templates ORDER BY name', []);
-    return Response.json({ templates });
+    return ok({ templates });
   }
 
   if (method === 'POST' && !params?.id) {

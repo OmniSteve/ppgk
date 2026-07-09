@@ -1,6 +1,7 @@
 /** Coach session endpoints */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { ok } from '../../lib/validate.js';
 
 export async function handleCoachSessions(request, env, ctx, params) {
   const payload = await requireRole(request, env, 'coach', 'head_coach', 'admin');
@@ -21,7 +22,7 @@ export async function handleCoachSessions(request, env, ctx, params) {
        WHERE b.session_id = ? AND b.status = 'confirmed'`,
       [params.id]
     );
-    return Response.json({ attendees });
+    return ok({ attendees });
   }
 
   if (params?.id) {
@@ -31,10 +32,10 @@ export async function handleCoachSessions(request, env, ctx, params) {
       [params.id]
     );
     if (!session) return Response.json({ message: 'Session not found' }, { status: 404 });
-    return Response.json(session);
+    return ok(session);
   }
 
-  if (!coachId && !isAdmin) return Response.json({ sessions: [] });
+  if (!coachId && !isAdmin) return ok({ sessions: [] });
 
   const sessions = await query(env,
     `SELECT s.id, s.title, s.session_date, s.start_time, s.end_time, s.capacity, s.booked_count, s.status,
@@ -45,5 +46,5 @@ export async function handleCoachSessions(request, env, ctx, params) {
     isAdmin ? [today] : [coachId, today]
   );
 
-  return Response.json({ sessions });
+  return ok({ sessions });
 }

@@ -3,24 +3,24 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Calendar, MapPin, Clock, Users, Filter, Search, ChevronDown, X } from 'lucide-react';
 import { apiClient, unwrap } from '@/services/apiClient';
 
-// Normalise a session from the API (snake_case) to the shape this page expects
+// Normalise a session from the camelCase API to the shape this page expects
 function normaliseSession(s) {
   if (!s) return s;
   const capacity = s.capacity ?? null;
-  const bookedCount = s.bookedCount ?? s.booked_count ?? null;
+  const bookedCount = s.bookedCount ?? null;
   return {
     ...s,
     name: s.name ?? s.title ?? '',
-    date: s.date ?? s.sessionDate ?? s.session_date ?? '',
-    startTime: s.startTime ?? s.start_time ?? '',
-    endTime: s.endTime ?? s.end_time ?? '',
-    credits: s.credits ?? s.creditCost ?? s.credit_cost ?? null,
+    date: s.date ?? s.sessionDate ?? '',
+    startTime: s.startTime ?? '',
+    endTime: s.endTime ?? '',
+    credits: s.credits ?? s.creditCost ?? null,
     price: s.price ?? null,
-    locationName: s.locationName ?? s.location_name ?? '',
-    sessionType: s.sessionType ?? s.sessionTypeName ?? s.session_type_name ?? '',
+    locationName: s.locationName ?? '',
+    sessionType: s.sessionType ?? s.sessionTypeName ?? '',
     spotsRemaining: s.spotsRemaining ?? (capacity != null && bookedCount != null ? capacity - bookedCount : null),
-    ageGroup: s.ageGroup ?? s.age_group ?? '',
-    abilityLevel: s.abilityLevel ?? s.ability_level ?? '',
+    ageGroup: s.ageGroup ?? '',
+    abilityLevel: s.abilityLevel ?? '',
   };
 }
 

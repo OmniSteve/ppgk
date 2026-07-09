@@ -4,6 +4,7 @@
  */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { ok } from '../../lib/validate.js';
 
 export async function handleAdminDashboard(request, env) {
   await requireRole(request, env, 'admin', 'head_coach');
@@ -28,7 +29,7 @@ export async function handleAdminDashboard(request, env) {
     [today]
   );
 
-  return Response.json({
+  return ok({
     stats: {
       totalClients:    totalClients?.count ?? 0,
       upcomingSessions: upcomingSessions?.count ?? 0,

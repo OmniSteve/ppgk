@@ -44,7 +44,7 @@ export default function PurchaseHistory() {
                 </div>
                 <div>
                   <p className="font-bold text-white text-sm">{e.description}</p>
-                  <p className="text-slate-500 text-xs mt-0.5">{e.created_at ? new Date(e.created_at).toLocaleDateString('en-MT', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}</p>
+                  <p className="text-slate-500 text-xs mt-0.5">{e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-MT', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}</p>
                 </div>
               </div>
               <div className="text-right">

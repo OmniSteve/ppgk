@@ -57,9 +57,9 @@ export default function AdminDashboard() {
               <div key={s.id} className="flex items-center justify-between px-5 py-3">
                 <div>
                   <p className="text-white text-sm font-semibold">{s.title}</p>
-                  <p className="text-slate-400 text-xs">{s.session_date} · {s.start_time} · {s.location_name || 'No location'}</p>
+                  <p className="text-slate-400 text-xs">{s.sessionDate} · {s.startTime} · {s.locationName || 'No location'}</p>
                 </div>
-                <p className="text-slate-400 text-xs">{s.booked_count ?? 0}/{s.capacity ?? '–'} booked</p>
+                <p className="text-slate-400 text-xs">{s.bookedCount ?? 0}/{s.capacity ?? '–'} booked</p>
               </div>
             ))}
           </div>

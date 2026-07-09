@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { BarChart2, Download, Loader2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
+// camelCase or snake_case key → human label ('totalBookings' → 'total bookings')
+const labelise = (key) => key.replace(/_/g, ' ').replace(/([a-z0-9])([A-Z])/g, '$1 $2').toLowerCase();
+
 const REPORT_TYPES = [
   { key: 'bookings',             label: 'Session Bookings' },
   { key: 'attendance',           label: 'Attendance' },
@@ -120,7 +123,7 @@ export default function Reports() {
                   {Object.entries(results.summary).map(([key, val]) => (
                     <div key={key} className="bg-white/5 rounded-xl p-4">
                       <p className="text-2xl font-black text-white">{val}</p>
-                      <p className="text-slate-400 text-xs mt-0.5 capitalize">{key.replace(/_/g, ' ')}</p>
+                      <p className="text-slate-400 text-xs mt-0.5 capitalize">{labelise(key)}</p>
                     </div>
                   ))}
                 </div>
@@ -132,7 +135,7 @@ export default function Reports() {
                     <thead>
                       <tr className="border-b border-white/10">
                         {Object.keys(results.rows[0]).map((col) => (
-                          <th key={col} className="text-left text-slate-400 font-semibold text-xs uppercase tracking-wide py-2 pr-4 whitespace-nowrap">{col.replace(/_/g, ' ')}</th>
+                          <th key={col} className="text-left text-slate-400 font-semibold text-xs uppercase tracking-wide py-2 pr-4 whitespace-nowrap">{labelise(col)}</th>
                         ))}
                       </tr>
                     </thead>

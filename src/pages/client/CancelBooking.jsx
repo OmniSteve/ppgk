@@ -7,11 +7,11 @@ function normaliseBooking(b) {
   if (!b) return null;
   return {
     ...b,
-    sessionName: b.sessionName ?? b.session_name ?? '',
-    sessionDate: b.sessionDate ?? b.session_date ?? '',
-    startTime: b.startTime ?? b.start_time ?? '',
-    playerName: b.playerName ?? b.player_name ?? '',
-    paymentMethod: b.paymentMethod ?? b.payment_method ?? '',
+    sessionName: b.sessionName ?? '',
+    sessionDate: b.sessionDate ?? '',
+    startTime: b.startTime ?? '',
+    playerName: b.playerName ?? '',
+    paymentMethod: b.paymentMethod ?? '',
   };
 }
 

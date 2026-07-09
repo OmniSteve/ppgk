@@ -6,21 +6,21 @@ import { apiClient } from '@/services/apiClient';
 function normaliseSession(s) {
   if (!s) return null;
   const capacity = s.capacity ?? null;
-  const bookedCount = s.bookedCount ?? s.booked_count ?? null;
+  const bookedCount = s.bookedCount ?? null;
   return {
     ...s,
     name: s.name ?? s.title ?? '',
-    date: s.date ?? s.sessionDate ?? s.session_date ?? '',
-    startTime: s.startTime ?? s.start_time ?? '',
-    endTime: s.endTime ?? s.end_time ?? '',
-    credits: s.credits ?? s.creditCost ?? s.credit_cost ?? null,
+    date: s.date ?? s.sessionDate ?? '',
+    startTime: s.startTime ?? '',
+    endTime: s.endTime ?? '',
+    credits: s.credits ?? s.creditCost ?? null,
     price: s.price ?? null,
-    locationName: s.locationName ?? s.location_name ?? '',
-    locationAddress: s.locationAddress ?? s.addressLine1 ?? s.address_line1 ?? '',
-    sessionType: s.sessionType ?? s.sessionTypeName ?? s.session_type_name ?? '',
-    coachName: s.coachName ?? s.coach_name ?? '',
-    ageGroup: s.ageGroup ?? s.age_group ?? '',
-    abilityLevel: s.abilityLevel ?? s.ability_level ?? '',
+    locationName: s.locationName ?? '',
+    locationAddress: s.locationAddress ?? s.addressLine1 ?? '',
+    sessionType: s.sessionType ?? s.sessionTypeName ?? '',
+    coachName: s.coachName ?? '',
+    ageGroup: s.ageGroup ?? '',
+    abilityLevel: s.abilityLevel ?? '',
     spotsRemaining: s.spotsRemaining ?? (capacity != null && bookedCount != null ? capacity - bookedCount : null),
   };
 }

@@ -8,9 +8,9 @@ function normaliseSession(s) {
   return {
     ...s,
     name: s.name ?? s.title ?? '',
-    date: s.date ?? s.session_date ?? '',
-    startTime: s.startTime ?? s.start_time ?? '',
-    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.booked_count != null ? s.capacity - s.booked_count : null) ?? 0,
+    date: s.date ?? s.sessionDate ?? '',
+    startTime: s.startTime ?? '',
+    spotsRemaining: s.spotsRemaining ?? (s.capacity != null && s.bookedCount != null ? s.capacity - s.bookedCount : null) ?? 0,
   };
 }
 
@@ -18,8 +18,8 @@ function normaliseBooking(b) {
   if (!b) return null;
   return {
     ...b,
-    sessionName: b.sessionName ?? b.session_name ?? '',
-    playerName: b.playerName ?? b.player_name ?? '',
+    sessionName: b.sessionName ?? '',
+    playerName: b.playerName ?? '',
   };
 }
 

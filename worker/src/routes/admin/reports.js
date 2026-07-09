@@ -1,6 +1,7 @@
 /** GET /api/admin/reports/:type */
 import { requireRole } from '../../lib/auth.js';
 import { query, queryOne } from '../../lib/db.js';
+import { ok } from '../../lib/validate.js';
 
 const REPORT_QUERIES = {
   bookings: {
@@ -58,5 +59,5 @@ export async function handleAdminReports(request, env, ctx, params) {
   const [summaryRaw, rows] = await Promise.all([handler.summary(env, filters), handler.rows(env, filters)]);
   const summary = summaryRaw ? Object.fromEntries(Object.entries(summaryRaw).map(([k, v]) => [k, Number(v) === v ? Number(v).toFixed(2) : v])) : null;
 
-  return Response.json({ summary, rows, totalRows: rows.length });
+  return ok({ summary, rows, totalRows: rows.length });
 }

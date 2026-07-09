@@ -30,7 +30,7 @@ export default function SessionAttendees() {
       {session && (
         <div className="bg-[#0D1B2A] rounded-2xl p-5 border border-white/10">
           <h1 className="text-white font-black text-xl">{session.title || session.name}</h1>
-          <p className="text-slate-400 text-sm mt-1">{session.session_date ? new Date(session.session_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {session.start_time} – {session.end_time}</p>
+          <p className="text-slate-400 text-sm mt-1">{session.sessionDate ? new Date(session.sessionDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {session.startTime} – {session.endTime}</p>
           <p className="text-[#2563EB] text-sm mt-1">{attendees.length} / {session.capacity} players</p>
         </div>
       )}
@@ -53,32 +53,32 @@ export default function SessionAttendees() {
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex items-center justify-center">
-                    <span className="font-bold text-white text-sm">{a.first_name?.[0]}{a.last_name?.[0]}</span>
+                    <span className="font-bold text-white text-sm">{a.firstName?.[0]}{a.lastName?.[0]}</span>
                   </div>
                   <div>
-                    <p className="font-bold text-white text-sm">{a.first_name} {a.last_name}</p>
-                    <p className="text-slate-400 text-xs">{a.age_group} · {a.experience_level}</p>
-                    <p className="text-slate-500 text-xs mt-0.5">Parent: {a.parent_name}</p>
+                    <p className="font-bold text-white text-sm">{a.firstName} {a.lastName}</p>
+                    <p className="text-slate-400 text-xs">{a.ageGroup} · {a.experienceLevel}</p>
+                    <p className="text-slate-500 text-xs mt-0.5">Parent: {a.parentName}</p>
                   </div>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  a.booking_status === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'
-                }`}>{a.booking_status?.replace(/_/g, ' ')}</span>
+                  a.bookingStatus === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'
+                }`}>{a.bookingStatus?.replace(/_/g, ' ')}</span>
               </div>
 
-              {(a.medical_info || a.allergies) && (
+              {(a.medicalInfo || a.allergies) && (
                 <div className="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-start gap-2">
                   <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
                   <div className="text-xs text-amber-300">
-                    {a.medical_info && <p><strong>Medical:</strong> {a.medical_info}</p>}
+                    {a.medicalInfo && <p><strong>Medical:</strong> {a.medicalInfo}</p>}
                     {a.allergies && <p><strong>Allergies:</strong> {a.allergies}</p>}
                   </div>
                 </div>
               )}
 
-              {a.emergency_phone && (
+              {a.emergencyPhone && (
                 <div className="mt-2 flex items-center gap-1.5 text-slate-500 text-xs">
-                  <Phone size={12} />Emergency: {a.emergency_contact_name} — {a.emergency_phone}
+                  <Phone size={12} />Emergency: {a.emergencyContactName} — {a.emergencyPhone}
                 </div>
               )}
             </div>
