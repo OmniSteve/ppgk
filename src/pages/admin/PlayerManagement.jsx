@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, User, AlertTriangle, RefreshCw, X, Save } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, User, AlertTriangle, RefreshCw, X, Save, TrendingUp } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
 const EXPERIENCE_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Elite'];
@@ -176,32 +177,41 @@ export default function PlayerManagement() {
               <p className="text-slate-400">No players found</p>
             </div>
           ) : players.map((p) => (
-            <button
-              key={p.id}
-              onClick={() => setEditing(p)}
-              className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition-colors text-left"
-            >
-              <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-[#2563EB] font-bold text-sm">{p.firstName?.[0]}{p.lastName?.[0]}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-white text-sm">{p.firstName} {p.lastName}</p>
-                  {(p.medicalInfo || p.allergies) && (
-                    <AlertTriangle size={13} className="text-amber-400 flex-shrink-0" title="Medical info / allergies on file" />
-                  )}
+            <div key={p.id} className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition-colors">
+              <button
+                onClick={() => setEditing(p)}
+                className="flex items-center gap-4 flex-1 min-w-0 text-left"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-[#2563EB] font-bold text-sm">{p.firstName?.[0]}{p.lastName?.[0]}</span>
                 </div>
-                <p className="text-slate-400 text-xs mt-0.5">
-                  {p.dateOfBirth ? `DOB: ${p.dateOfBirth}` : 'No DOB'} · {p.currentClub || 'No club'} · Parent: {p.parentName || '—'}
-                </p>
-              </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <p className="font-bold text-white text-sm">{p.firstName} {p.lastName}</p>
+                    {(p.medicalInfo || p.allergies) && (
+                      <AlertTriangle size={13} className="text-amber-400 flex-shrink-0" title="Medical info / allergies on file" />
+                    )}
+                  </div>
+                  <p className="text-slate-400 text-xs mt-0.5">
+                    {p.dateOfBirth ? `DOB: ${p.dateOfBirth}` : 'No DOB'} · {p.currentClub || 'No club'} · Parent: {p.parentName || '—'}
+                  </p>
+                </div>
+              </button>
               <div className="text-right flex-shrink-0">
                 <p className="text-slate-300 text-xs font-medium">{p.experienceLevel || '—'}</p>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}`}>
                   {p.status || 'unknown'}
                 </span>
               </div>
-            </button>
+              <Link
+                to={`/admin/players/${p.id}/performance`}
+                state={{ player: p }}
+                title="Performance evaluations"
+                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all flex-shrink-0"
+              >
+                <TrendingUp size={15} />
+              </Link>
+            </div>
           ))}
         </div>
       )}

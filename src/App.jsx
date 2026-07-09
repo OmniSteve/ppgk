@@ -42,6 +42,7 @@ import PaymentResult from '@/pages/client/PaymentResult';
 import PlayerList from '@/pages/client/PlayerList';
 import CreatePlayer from '@/pages/client/CreatePlayer';
 import EditPlayer from '@/pages/client/EditPlayer';
+import ClientPlayerPerformance from '@/pages/client/PlayerPerformance';
 import Packages from '@/pages/client/Packages';
 import CreditBalance from '@/pages/client/CreditBalance';
 import PurchaseHistory from '@/pages/client/PurchaseHistory';
@@ -53,6 +54,7 @@ import CoachDashboard from '@/pages/coach/CoachDashboard';
 import CoachSessions from '@/pages/coach/CoachSessions';
 import SessionAttendees from '@/pages/coach/SessionAttendees';
 import AttendanceRecording from '@/pages/coach/AttendanceRecording';
+import CoachPlayerPerformance from '@/pages/coach/PlayerPerformance';
 
 // Layouts
 import ClientLayout from '@/components/layouts/ClientLayout';
@@ -63,6 +65,7 @@ import AdminLayout from '@/components/layouts/AdminLayout';
 import AdminDashboard from '@/pages/admin/AdminDashboard';
 import ClientManagement from '@/pages/admin/ClientManagement';
 import PlayerManagement from '@/pages/admin/PlayerManagement';
+import AdminPlayerPerformance from '@/pages/admin/PlayerPerformance';
 import CoachManagement from '@/pages/admin/CoachManagement';
 import SessionManagement from '@/pages/admin/SessionManagement';
 import CreateSession from '@/pages/admin/CreateSession';
@@ -115,6 +118,7 @@ const AppRoutes = () => {
           <Route path="/players" element={<PlayerList />} />
           <Route path="/players/new" element={<CreatePlayer />} />
           <Route path="/players/:id/edit" element={<EditPlayer />} />
+          <Route path="/players/:id/performance" element={<ClientPlayerPerformance />} />
           <Route path="/packages" element={<Packages />} />
           <Route path="/credits" element={<CreditBalance />} />
           <Route path="/purchase-history" element={<PurchaseHistory />} />
@@ -129,6 +133,7 @@ const AppRoutes = () => {
           <Route path="/coach/sessions" element={<CoachSessions />} />
           <Route path="/coach/sessions/:id/attendees" element={<SessionAttendees />} />
           <Route path="/coach/sessions/:id/attendance" element={<AttendanceRecording />} />
+          <Route path="/coach/players/:id/performance" element={<CoachPlayerPerformance />} />
         </Route>
       </Route>
 
@@ -137,6 +142,7 @@ const AppRoutes = () => {
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/admin/clients" element={<ClientManagement />} />
           <Route path="/admin/players" element={<PlayerManagement />} />
+          <Route path="/admin/players/:id/performance" element={<AdminPlayerPerformance />} />
           <Route path="/admin/coaches" element={<CoachManagement />} />
           <Route path="/admin/sessions" element={<SessionManagement />} />
           <Route path="/admin/sessions/new" element={<CreateSession />} />

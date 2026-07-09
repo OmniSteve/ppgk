@@ -66,6 +66,10 @@ import { handleCoachDashboard }  from './routes/coach/dashboard.js';
 import { handleCoachSessions }   from './routes/coach/sessions.js';
 import { handleCoachAttendance } from './routes/coach/attendance.js';
 
+// Player performance routes
+import { handlePlayerPerformance }       from './routes/player-performance.js';
+import { handleClientPlayerPerformance } from './routes/client/player-performance.js';
+
 // Stripe webhook
 import { handleStripeWebhook } from './routes/webhooks/stripe.js';
 
@@ -173,6 +177,7 @@ export default {
       router.get  ('/api/account',                     handleClientAccount);
       router.put  ('/api/account',                     handleClientAccount);
       router.post ('/api/checkout',                    handleCheckout);
+      router.get  ('/api/client/player-performance/player/:playerId', handleClientPlayerPerformance);
 
       // ── Coach ─────────────────────────────────────────────────────────────
       router.get ('/api/coach/dashboard',               handleCoachDashboard);
@@ -181,6 +186,13 @@ export default {
       router.get ('/api/coach/sessions/:id/attendees',  handleCoachSessions);
       router.post('/api/coach/attendance',              handleCoachAttendance);
       router.patch('/api/coach/attendance/:id',         handleCoachAttendance);
+
+      // ── Player Performance (admin/head_coach/coach) ─────────────────────────
+      router.get   ('/api/player-performance/player/:playerId', handlePlayerPerformance);
+      router.get   ('/api/player-performance/:id',               handlePlayerPerformance);
+      router.post  ('/api/player-performance',                   handlePlayerPerformance);
+      router.put   ('/api/player-performance/:id',                handlePlayerPerformance);
+      router.delete('/api/player-performance/:id',                handlePlayerPerformance);
 
       return await router.handle();
     } catch (err) {

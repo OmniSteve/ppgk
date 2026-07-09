@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, User, Calendar, Activity } from 'lucide-react';
+import { Plus, Edit2, User, Calendar, Activity, TrendingUp } from 'lucide-react';
 import { apiClient, unwrap } from '@/services/apiClient';
 
 function normalisePlayer(p) {
@@ -75,9 +75,14 @@ export default function PlayerList() {
                   <Calendar size={11} />DOB: {p.dateOfBirth ? new Date(p.dateOfBirth).toLocaleDateString('en-MT') : '—'}
                 </p>
               </div>
-              <Link to={`/players/${p.id}/edit`} className="flex items-center gap-2 text-[#2563EB] text-sm font-semibold hover:underline">
-                <Edit2 size={13} />Edit Profile
-              </Link>
+              <div className="flex items-center gap-4">
+                <Link to={`/players/${p.id}/edit`} className="flex items-center gap-2 text-[#2563EB] text-sm font-semibold hover:underline">
+                  <Edit2 size={13} />Edit Profile
+                </Link>
+                <Link to={`/players/${p.id}/performance`} className="flex items-center gap-2 text-[#2563EB] text-sm font-semibold hover:underline">
+                  <TrendingUp size={13} />Performance
+                </Link>
+              </div>
             </div>
           ))}
         </div>

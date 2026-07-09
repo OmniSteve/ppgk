@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ChevronLeft, User, Phone, AlertTriangle, ClipboardList } from 'lucide-react';
+import { ChevronLeft, User, Phone, AlertTriangle, ClipboardList, TrendingUp } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
 export default function SessionAttendees() {
@@ -81,6 +81,16 @@ export default function SessionAttendees() {
                   <Phone size={12} />Emergency: {a.emergencyContactName} — {a.emergencyPhone}
                 </div>
               )}
+
+              <div className="mt-3 flex justify-end">
+                <Link
+                  to={`/coach/players/${a.playerId}/performance`}
+                  state={{ player: { firstName: a.firstName, lastName: a.lastName, clientId: a.clientId } }}
+                  className="flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:text-white transition-colors"
+                >
+                  <TrendingUp size={13} />Performance
+                </Link>
+              </div>
             </div>
           ))}
         </div>
