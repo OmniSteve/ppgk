@@ -22,6 +22,7 @@ import { AuthProvider as Base44PreviewProvider } from '@/lib/AuthContext';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import AppProtectedRoute from '@/components/AppProtectedRoute';
+import EnvironmentBadge from '@/components/EnvironmentBadge';
 
 // Public pages
 import LandingPage from '@/pages/public/LandingPage';
@@ -173,6 +174,7 @@ function App() {
             <ScrollToTop />
             <AppRoutes />
           </Router>
+          <EnvironmentBadge />
           <Toaster />
         </QueryClientProvider>
       </AuthProvider>

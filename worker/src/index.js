@@ -75,7 +75,7 @@ export default {
 
     // Handle CORS preflight
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers: corsHeaders(request) });
+      return new Response(null, { status: 204, headers: corsHeaders(request, env) });
     }
 
     // Only handle /api/* here; everything else goes to Pages
@@ -85,6 +85,10 @@ export default {
 
     try {
       const router = new Router(request, env, ctx);
+
+      // ── Health (no auth) — reports which environment answered ──────────
+      router.get('/api/health', (req, env2) =>
+        Response.json({ status: 'ok', env: env2.APP_ENV ?? 'unknown' }));
 
       // ── Webhooks (no auth) ──────────────────────────────────────────────
       router.post('/api/webhooks/stripe', handleStripeWebhook);
@@ -133,6 +137,7 @@ export default {
       router.put  ('/api/admin/packages/:id',                         handleAdminPackages);
       router.patch('/api/admin/packages/:id',                         handleAdminPackages);
       router.get  ('/api/admin/payments',                             handleAdminPayments);
+      router.get  ('/api/admin/payments/:id/refund-preview',          handleAdminPayments);
       router.post ('/api/admin/payments/:id/refund',                  handleAdminPayments);
       router.get  ('/api/admin/credits',                              handleAdminCredits);
       router.post ('/api/admin/credits/grant',                        handleAdminCredits);

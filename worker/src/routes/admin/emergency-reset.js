@@ -65,5 +65,5 @@ export async function handleEmergencyReset(request, env) {
     newHashVerified: updated?.email_verified === 1,
     hashesMatch: updated?.password_hash === passwordHash,
     message: 'Password reset and email verified. You can now sign in. Remove EMERGENCY_RESET_SECRET when done.',
-  }, { status: 200, headers: corsHeaders(request) });
+  }, { status: 200, headers: corsHeaders(request, env) });
 }
