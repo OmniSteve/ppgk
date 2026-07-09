@@ -48,18 +48,26 @@ function downloadCsv(records, playerName) {
   URL.revokeObjectURL(url);
 }
 
+// Newest first = latest evaluationDate, then latest createdAt (stable tie-break when
+// two evaluations share a date — e.g. two records logged for the same day).
+function compareNewestFirst(a, b) {
+  const byDate = (b.evaluationDate || '').localeCompare(a.evaluationDate || '');
+  if (byDate !== 0) return byDate;
+  return (b.createdAt || '').localeCompare(a.createdAt || '');
+}
+
 function sortRecords(records, sortBy) {
   const list = [...records];
   switch (sortBy) {
     case 'oldest':
-      return list.sort((a, b) => (a.evaluationDate || '').localeCompare(b.evaluationDate || ''));
+      return list.sort((a, b) => -compareNewestFirst(a, b));
     case 'highest':
-      return list.sort((a, b) => (b.overallRating || 0) - (a.overallRating || 0));
+      return list.sort((a, b) => (b.overallRating || 0) - (a.overallRating || 0) || compareNewestFirst(a, b));
     case 'lowest':
-      return list.sort((a, b) => (a.overallRating || 0) - (b.overallRating || 0));
+      return list.sort((a, b) => (a.overallRating || 0) - (b.overallRating || 0) || compareNewestFirst(a, b));
     case 'newest':
     default:
-      return list.sort((a, b) => (b.evaluationDate || '').localeCompare(a.evaluationDate || ''));
+      return list.sort(compareNewestFirst);
   }
 }
 
