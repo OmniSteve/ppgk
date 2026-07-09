@@ -14,14 +14,16 @@ export function unwrap(data, key) {
 
 /**
  * Normalise snake_case keys to camelCase for objects returned by the Worker.
- * Only one level deep — nested arrays/objects are handled where needed.
+ * Handles nested arrays/objects recursively.
  */
 export function toCamel(obj) {
-  if (!obj || typeof obj !== 'object' || Array.isArray(obj)) return obj;
+  if (obj === null || obj === undefined) return obj;
+  if (Array.isArray(obj)) return obj.map(toCamel);
+  if (typeof obj !== 'object') return obj;
   return Object.fromEntries(
     Object.entries(obj).map(([k, v]) => [
-      k.replace(/_([a-z])/g, (_, c) => c.toUpperCase()),
-      Array.isArray(v) ? v.map(toCamel) : (v && typeof v === 'object' ? toCamel(v) : v),
+      k.replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase()),
+      Array.isArray(v) ? v.map(toCamel) : (v !== null && typeof v === 'object' ? toCamel(v) : v),
     ])
   );
 }
@@ -73,7 +75,7 @@ async function request(path, options = {}) {
     error.responseBody = body;
     throw error;
   }
-  return response.json();
+  return toCamel(await response.json());
 }
 
 export const apiClient = {
@@ -100,6 +102,6 @@ export const apiClient = {
       const err = await response.json().catch(() => ({}));
       throw new Error(err.message || `Upload failed: ${response.status}`);
     }
-    return response.json();
+    return toCamel(await response.json());
   },
 };
