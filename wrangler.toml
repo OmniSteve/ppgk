@@ -18,6 +18,10 @@ database_name = "ppgk-production"
 database_id = "8a8d6008-cc41-48fb-b635-0b7d6a86ce82"
 migrations_dir = "migrations"
 
+[[kv_namespaces]]
+binding = "KV"
+id = "35040e1a00044815855ef7cd2e373980"
+
 [[r2_buckets]]
 binding = "STORAGE"
 bucket_name = "ppgk"
