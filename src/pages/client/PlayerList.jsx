@@ -7,12 +7,12 @@ function normalisePlayer(p) {
   if (!p) return p;
   return {
     ...p,
-    firstName: p.firstName ?? p.first_name ?? '',
-    lastName: p.lastName ?? p.last_name ?? '',
-    ageGroup: p.ageGroup ?? p.age_group ?? '',
-    experienceLevel: p.experienceLevel ?? p.experience_level ?? '',
-    currentClub: p.currentClub ?? p.current_club ?? '',
-    dateOfBirth: p.dateOfBirth ?? p.date_of_birth ?? '',
+    firstName: p.firstName ?? '',
+    lastName: p.lastName ?? '',
+    ageGroup: p.ageGroup ?? '',
+    experienceLevel: p.experienceLevel ?? '',
+    currentClub: p.currentClub ?? '',
+    dateOfBirth: p.dateOfBirth ?? '',
     status: p.status ?? 'active',
   };
 }

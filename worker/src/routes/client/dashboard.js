@@ -58,14 +58,6 @@ export async function handleClientDashboard(request, env) {
     [clientId]
   );
 
-  console.log('DASHBOARD', {
-    clientId,
-    creditBalance,
-    upcomingBookingsCount: upcomingBookings?.length ?? 0,
-    players: playerRow?.cnt ?? 0,
-    notifications: notifRow?.cnt ?? 0,
-  });
-
   return Response.json({
     creditBalance,
     expiringCredits: expiringRow?.expiring ?? 0,

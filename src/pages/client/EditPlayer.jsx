@@ -18,21 +18,21 @@ const Input = (props) => <input className={inputCls} {...props} />;
 const Select = ({ children, ...props }) => <select className={inputCls} {...props}>{children}</select>;
 const Textarea = (props) => <textarea className={`${inputCls} resize-none`} rows={3} {...props} />;
 
-// Normalise API snake_case → camelCase for form fields
+// Default form fields — the API contract guarantees camelCase keys
 function normalisePlayer(p) {
   if (!p) return null;
   return {
-    firstName: p.firstName ?? p.first_name ?? '',
-    lastName: p.lastName ?? p.last_name ?? '',
-    dateOfBirth: p.dateOfBirth ?? p.date_of_birth ?? '',
-    ageGroup: p.ageGroup ?? p.age_group ?? '',
-    experienceLevel: p.experienceLevel ?? p.experience_level ?? '',
-    currentClub: p.currentClub ?? p.current_club ?? '',
-    medicalInfo: p.medicalInfo ?? p.medical_info ?? '',
+    firstName: p.firstName ?? '',
+    lastName: p.lastName ?? '',
+    dateOfBirth: p.dateOfBirth ?? '',
+    ageGroup: p.ageGroup ?? '',
+    experienceLevel: p.experienceLevel ?? '',
+    currentClub: p.currentClub ?? '',
+    medicalInfo: p.medicalInfo ?? '',
     allergies: p.allergies ?? '',
-    emergencyContactName: p.emergencyContactName ?? p.emergency_contact_name ?? '',
-    emergencyContactPhone: p.emergencyContactPhone ?? p.emergency_contact_phone ?? '',
-    emergencyContactRelationship: p.emergencyContactRelationship ?? p.emergency_contact_relationship ?? '',
+    emergencyContactName: p.emergencyContactName ?? '',
+    emergencyContactPhone: p.emergencyContactPhone ?? '',
+    emergencyContactRelationship: p.emergencyContactRelationship ?? '',
     status: p.status ?? 'active',
   };
 }

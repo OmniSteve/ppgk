@@ -14,17 +14,17 @@ const statusColor = {
   payment_failed: 'bg-red-500/20 text-red-400',
 };
 
-// Normalise booking fields from snake_case API response
+// Default optional display fields — the API contract guarantees camelCase keys
 function normaliseBooking(b) {
   if (!b) return b;
   return {
     ...b,
-    sessionName: b.sessionName ?? b.session_name ?? '',
-    sessionDate: b.sessionDate ?? b.session_date ?? '',
-    startTime: b.startTime ?? b.start_time ?? '',
-    endTime: b.endTime ?? b.end_time ?? '',
-    locationName: b.locationName ?? b.location_name ?? '',
-    playerName: b.playerName ?? b.player_name ?? '',
+    sessionName: b.sessionName ?? '',
+    sessionDate: b.sessionDate ?? '',
+    startTime: b.startTime ?? '',
+    endTime: b.endTime ?? '',
+    locationName: b.locationName ?? '',
+    playerName: b.playerName ?? '',
   };
 }
 

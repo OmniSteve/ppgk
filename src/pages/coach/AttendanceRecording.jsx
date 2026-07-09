@@ -26,12 +26,12 @@ export default function AttendanceRecording() {
     ]).then(([s, a]) => {
       setSession(s);
       const list = Array.isArray(a) ? a : (a?.attendees ?? []);
-      setAttendance(list.map((att) => ({ ...att, attendanceStatus: att.attendance_status || 'not_recorded', notes: att.notes || '' })));
+      setAttendance(list.map((att) => ({ ...att, attendanceStatus: att.attendanceStatus || 'not_recorded', notes: att.notes || '' })));
     }).finally(() => setLoading(false));
   }, [id]);
 
   const updateStatus = (bookingId, field, value) => {
-    setAttendance((prev) => prev.map((a) => a.booking_id === bookingId ? { ...a, [field]: value } : a));
+    setAttendance((prev) => prev.map((a) => a.bookingId === bookingId ? { ...a, [field]: value } : a));
   };
 
   const handleSave = async () => {
@@ -39,9 +39,9 @@ export default function AttendanceRecording() {
     try {
       await Promise.all(attendance.map((a) =>
         apiClient.post('/coach/attendance', {
-          bookingId: a.booking_id,
+          bookingId: a.bookingId,
           sessionId: id,
-          playerId: a.player_id,
+          playerId: a.playerId,
           status: a.attendanceStatus,
           notes: a.notes,
         })
@@ -66,7 +66,7 @@ export default function AttendanceRecording() {
       {session && (
         <div className="bg-[#0D1B2A] rounded-2xl p-5 border border-white/10">
           <h1 className="text-white font-black text-xl">Attendance — {session.title}</h1>
-          <p className="text-slate-400 text-sm mt-1">{session.session_date ? new Date(session.session_date).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {session.start_time}</p>
+          <p className="text-slate-400 text-sm mt-1">{session.sessionDate ? new Date(session.sessionDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {session.startTime}</p>
         </div>
       )}
 
@@ -75,16 +75,16 @@ export default function AttendanceRecording() {
 
       <div className="space-y-3">
         {attendance.map((a) => (
-          <div key={a.booking_id} className="bg-white/5 rounded-2xl border border-white/10 p-5">
+          <div key={a.bookingId} className="bg-white/5 rounded-2xl border border-white/10 p-5">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex items-center justify-center">
-                <span className="font-bold text-white text-sm">{a.first_name?.[0]}{a.last_name?.[0]}</span>
+                <span className="font-bold text-white text-sm">{a.firstName?.[0]}{a.lastName?.[0]}</span>
               </div>
               <div>
-                <p className="font-bold text-white">{a.first_name} {a.last_name}</p>
-                <p className="text-slate-400 text-xs">{a.age_group}</p>
+                <p className="font-bold text-white">{a.firstName} {a.lastName}</p>
+                <p className="text-slate-400 text-xs">{a.ageGroup}</p>
               </div>
-              {(a.medical_info || a.allergies) && (
+              {(a.medicalInfo || a.allergies) && (
                 <AlertTriangle size={16} className="text-amber-400 ml-auto" title="Medical info on file" />
               )}
             </div>
@@ -93,7 +93,7 @@ export default function AttendanceRecording() {
               {STATUS_OPTIONS.map((opt) => (
                 <button
                   key={opt.value}
-                  onClick={() => updateStatus(a.booking_id, 'attendanceStatus', opt.value)}
+                  onClick={() => updateStatus(a.bookingId, 'attendanceStatus', opt.value)}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold border-2 transition-all ${
                     a.attendanceStatus === opt.value ? opt.activeClass : 'border-white/10 text-slate-500 hover:border-white/20 hover:text-slate-300'
                   }`}
@@ -105,7 +105,7 @@ export default function AttendanceRecording() {
 
             <textarea
               value={a.notes}
-              onChange={(e) => updateStatus(a.booking_id, 'notes', e.target.value)}
+              onChange={(e) => updateStatus(a.bookingId, 'notes', e.target.value)}
               placeholder="Coach notes (optional)…"
               rows={2}
               className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors resize-none"

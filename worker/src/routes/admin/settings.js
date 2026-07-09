@@ -29,6 +29,11 @@ export async function handleAdminSettings(request, env) {
         settings[row.key] = row.value ?? '';
       }
     }
+    // Deliberately NOT ok() from lib/validate.js: ok() camelCases every key,
+    // but these keys are DATA — setting identifiers from the app_settings.key
+    // column (e.g. 'booking_amendment_limit'). Converting them would rename
+    // the settings and break lookups. Same reason the PUT below writes body
+    // keys verbatim.
     return Response.json(settings);
   }
 

@@ -5,28 +5,29 @@ import { apiClient, unwrap } from '@/services/apiClient';
 
 const sectionCls = 'bg-white/5 rounded-2xl border border-white/10 p-5';
 
-// Normalise session fields for display (may come from sessionStorage with already-camel or API snake_case)
+// Normalise session fields for display (may come from sessionStorage, which stores
+// the already-normalised catalogue shape, or straight from the camelCase API)
 function normaliseSession(s) {
   if (!s) return s;
   return {
     ...s,
     name: s.name ?? s.title ?? '',
-    date: s.date ?? s.session_date ?? '',
-    startTime: s.startTime ?? s.start_time ?? '',
-    endTime: s.endTime ?? s.end_time ?? '',
-    credits: s.credits ?? s.credit_cost ?? null,
+    date: s.date ?? s.sessionDate ?? '',
+    startTime: s.startTime ?? '',
+    endTime: s.endTime ?? '',
+    credits: s.credits ?? s.creditCost ?? null,
   };
 }
 
-// Normalise player fields from API (snake_case → camelCase display fields)
+// Default optional player display fields — the API contract guarantees camelCase keys
 function normalisePlayer(p) {
   if (!p) return p;
   return {
     ...p,
-    firstName: p.firstName ?? p.first_name ?? '',
-    lastName: p.lastName ?? p.last_name ?? '',
-    ageGroup: p.ageGroup ?? p.age_group ?? '',
-    experienceLevel: p.experienceLevel ?? p.experience_level ?? '',
+    firstName: p.firstName ?? '',
+    lastName: p.lastName ?? '',
+    ageGroup: p.ageGroup ?? '',
+    experienceLevel: p.experienceLevel ?? '',
   };
 }
 
