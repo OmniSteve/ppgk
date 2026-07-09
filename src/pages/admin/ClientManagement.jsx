@@ -97,7 +97,7 @@ export default function ClientManagement() {
               <label className="block text-slate-400 text-xs mb-1 flex items-center gap-1"><Shield size={11} />Role</label>
               <div className="relative">
                 <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className={inp + ' appearance-none pr-8'}>
-                  {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                  {ROLES.map((r) => <option key={r} value={r} className="bg-[#1e2330] text-white">{r}</option>)}
                 </select>
                 <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               </div>
