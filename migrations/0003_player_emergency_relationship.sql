@@ -5,4 +5,4 @@
 -- Run AFTER 0001_initial_schema.sql and 0002_additions.sql
 -- =============================================================================
 
-ALTER TABLE players ADD COLUMN IF NOT EXISTS emergency_contact_relationship TEXT;
+ALTER TABLE players ADD COLUMN emergency_contact_relationship TEXT;
