@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Loader2, CheckCircle, Settings } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import { normalizeAppSettings, serializeAppSettings } from '@/services/appSettings';
 
 const SETTING_GROUPS = [
   {
@@ -37,6 +38,12 @@ const SETTING_GROUPS = [
   },
 ];
 
+// key → 'number' | 'boolean' | 'text' | ... derived from the groups above,
+// used to type-coerce values on load and save.
+const SETTING_TYPES = Object.fromEntries(
+  SETTING_GROUPS.flatMap((g) => g.settings.map((s) => [s.key, s.type]))
+);
+
 export default function AppSettings() {
   const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(true);
@@ -45,15 +52,18 @@ export default function AppSettings() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    apiClient.get('/admin/settings').then(setSettings).catch(() => setSettings({})).finally(() => setLoading(false));
+    apiClient.get('/admin/settings')
+      .then((response) => setSettings(normalizeAppSettings(response, SETTING_TYPES)))
+      .catch((err) => setError(err.message || 'Failed to load settings.'))
+      .finally(() => setLoading(false));
   }, []);
 
-  const set = (key, val) => setSettings({ ...settings, [key]: val });
+  const set = (key, val) => setSettings((prev) => ({ ...prev, [key]: val }));
 
   const handleSave = async () => {
     setSaving(true); setError(''); setSuccess(false);
     try {
-      await apiClient.put('/admin/settings', settings);
+      await apiClient.put('/admin/settings', serializeAppSettings(settings, SETTING_TYPES));
       setSuccess(true);
     } catch (err) {
       setError(err.message || 'Failed to save settings.');
@@ -91,10 +101,12 @@ export default function AppSettings() {
               <div className="flex-shrink-0">
                 {s.type === 'boolean' ? (
                   <button
+                    role="switch"
+                    aria-checked={Boolean(settings[s.key])}
                     onClick={() => set(s.key, !settings[s.key])}
-                    className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${settings[s.key] ? 'bg-[#2563EB]' : 'bg-white/20'}`}
+                    className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${Boolean(settings[s.key]) ? 'bg-[#2563EB]' : 'bg-white/20'}`}
                   >
-                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${settings[s.key] ? 'translate-x-6' : 'translate-x-0'}`} />
+                    <div className={`w-4 h-4 rounded-full bg-white transition-transform ${Boolean(settings[s.key]) ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
                 ) : (
                   <input

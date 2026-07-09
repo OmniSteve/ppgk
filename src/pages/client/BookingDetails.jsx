@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, User, CreditCard, ChevronLeft, ArrowRight, AlertCircle, Edit2, X } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
