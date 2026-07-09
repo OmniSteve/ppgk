@@ -8,6 +8,53 @@ export async function handleAdminCredits(request, env, ctx, params) {
   const url    = new URL(request.url);
   const method = request.method;
 
+  // ── GET /api/admin/credits/search-players ─────────────────────────────────
+  // Player-based search for the grant/deduct selector. Joins players → users
+  // (the client/parent account) and returns camelCase fields with the current
+  // valid (non-expired) credit balance.
+  if (method === 'GET' && url.pathname.endsWith('/search-players')) {
+    const q = (url.searchParams.get('q') || '').trim();
+    if (q.length < 2) return Response.json([]);
+
+    const like = `%${q}%`;
+    const now  = new Date().toISOString();
+    const rows = await query(env,
+      `SELECT p.id            AS player_id,
+              p.client_id     AS client_id,
+              p.first_name   AS player_first_name,
+              p.last_name    AS player_last_name,
+              p.date_of_birth AS player_date_of_birth,
+              u.first_name   AS client_first_name,
+              u.last_name    AS client_last_name,
+              u.email        AS client_email,
+              u.phone        AS client_phone,
+              (SELECT COALESCE(SUM(amount), 0)
+                 FROM credit_ledger
+                WHERE client_id = p.client_id
+                  AND (expires_at IS NULL OR expires_at > ?)) AS credit_balance
+         FROM players p
+         JOIN users u ON u.id = p.client_id
+        WHERE p.first_name LIKE ? OR p.last_name LIKE ?
+           OR u.first_name LIKE ? OR u.last_name LIKE ?
+           OR u.email LIKE ? OR u.phone LIKE ?
+        ORDER BY p.first_name, p.last_name
+        LIMIT 15`,
+      [now, like, like, like, like, like, like]
+    );
+
+    const results = rows.map((r) => ({
+      playerId:         r.player_id,
+      clientId:         r.client_id,
+      playerName:       `${r.player_first_name} ${r.player_last_name}`,
+      playerDateOfBirth: r.player_date_of_birth,
+      clientName:       `${r.client_first_name} ${r.client_last_name}`,
+      clientEmail:      r.client_email,
+      clientPhone:      r.client_phone,
+      creditBalance:    r.credit_balance ?? 0,
+    }));
+    return Response.json(results);
+  }
+
   if (method === 'GET') {
     const search = url.searchParams.get('search') || '';
     const type   = url.searchParams.get('type')   || '';
@@ -43,11 +90,22 @@ export async function handleAdminCredits(request, env, ctx, params) {
   if (method === 'POST') {
     // POST /api/admin/credits/grant
     const body = await request.json();
-    const { clientId, amount, reason } = body;
+    const { clientId, playerId, amount, reason } = body;
     if (!clientId || !amount || !reason) return Response.json({ message: 'clientId, amount and reason required' }, { status: 400 });
 
     const amountInt = parseInt(amount);
     if (isNaN(amountInt)) return Response.json({ message: 'amount must be an integer' }, { status: 400 });
+
+    // Validate the client exists
+    const client = await queryOne(env, 'SELECT id FROM users WHERE id = ?', [clientId]);
+    if (!client) return Response.json({ message: 'Selected client does not exist' }, { status: 400 });
+
+    // If a playerId is supplied, validate it exists and belongs to that client
+    if (playerId) {
+      const player = await queryOne(env, 'SELECT id, client_id FROM players WHERE id = ?', [playerId]);
+      if (!player) return Response.json({ message: 'Selected player does not exist' }, { status: 400 });
+      if (player.client_id !== clientId) return Response.json({ message: 'Player does not belong to the selected client' }, { status: 400 });
+    }
 
     // Calculate current balance
     const balRow = await queryOne(env,
@@ -66,7 +124,10 @@ export async function handleAdminCredits(request, env, ctx, params) {
       [crypto.randomUUID(), clientId, type, amountInt, newBalance, reason, actor.sub]
     );
 
-    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'credit', recordType: 'credit', recordId: clientId, description: `Admin ${type}: ${amountInt} credits for client ${clientId}. Reason: ${reason}` });
+    const auditDesc = playerId
+      ? `Admin ${type}: ${amountInt} credits for client ${clientId} (player ${playerId}). Reason: ${reason}`
+      : `Admin ${type}: ${amountInt} credits for client ${clientId}. Reason: ${reason}`;
+    await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'credit', recordType: 'credit', recordId: clientId, description: auditDesc });
     return Response.json({ message: 'Credits updated', newBalance });
   }
 

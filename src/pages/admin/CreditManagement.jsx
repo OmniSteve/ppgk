@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Loader2, X } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import PlayerCreditSelector from '@/components/credits/PlayerCreditSelector';
 
 const txnColor = {
   purchase: 'bg-green-500/20 text-green-400',
@@ -19,7 +20,8 @@ export default function CreditManagement() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [showGrant, setShowGrant] = useState(false);
-  const [grant, setGrant] = useState({ clientId: '', amount: '', reason: '' });
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [grant, setGrant] = useState({ amount: '', reason: '' });
   const [granting, setGranting] = useState(false);
   const [grantError, setGrantError] = useState('');
 
@@ -37,9 +39,15 @@ export default function CreditManagement() {
   const handleGrant = async () => {
     setGranting(true); setGrantError('');
     try {
-      await apiClient.post('/admin/credits/grant', grant);
+      await apiClient.post('/admin/credits/grant', {
+        clientId: selectedPlayer.clientId,
+        playerId: selectedPlayer.playerId,
+        amount: grant.amount,
+        reason: grant.reason,
+      });
       setShowGrant(false);
-      setGrant({ clientId: '', amount: '', reason: '' });
+      setSelectedPlayer(null);
+      setGrant({ amount: '', reason: '' });
       load();
     } catch (err) {
       setGrantError(err.message || 'Failed to grant credits.');
@@ -69,14 +77,14 @@ export default function CreditManagement() {
             <button onClick={() => setShowGrant(false)} className="text-slate-400 hover:text-white"><X size={18} /></button>
           </div>
           {grantError && <p className="text-red-400 text-sm">{grantError}</p>}
-          <div className="grid grid-cols-2 gap-4">
-            <div><label className="block text-slate-400 text-xs mb-1">Client ID</label><input value={grant.clientId} onChange={(e) => setGrant({ ...grant, clientId: e.target.value })} className={inp} placeholder="Client UUID" /></div>
+          <PlayerCreditSelector selected={selectedPlayer} onSelect={setSelectedPlayer} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div><label className="block text-slate-400 text-xs mb-1">Amount (negative to deduct)</label><input type="number" value={grant.amount} onChange={(e) => setGrant({ ...grant, amount: e.target.value })} className={inp} placeholder="e.g. 5 or -2" /></div>
+            <div><label className="block text-slate-400 text-xs mb-1">Reason (required for audit)</label><input value={grant.reason} onChange={(e) => setGrant({ ...grant, reason: e.target.value })} className={inp} placeholder="e.g. Goodwill adjustment" /></div>
           </div>
-          <div><label className="block text-slate-400 text-xs mb-1">Reason (required for audit)</label><input value={grant.reason} onChange={(e) => setGrant({ ...grant, reason: e.target.value })} className={inp} placeholder="e.g. Goodwill adjustment" /></div>
           <div className="flex gap-3">
             <button onClick={() => setShowGrant(false)} className="flex-1 border border-white/20 text-slate-300 font-semibold py-2.5 rounded-xl text-sm hover:bg-white/5 transition-colors">Cancel</button>
-            <button onClick={handleGrant} disabled={granting || !grant.clientId || !grant.amount || !grant.reason} className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
+            <button onClick={handleGrant} disabled={granting || !selectedPlayer || !grant.amount || !grant.reason} className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
               {granting ? <><Loader2 size={14} className="animate-spin" />Processing…</> : 'Submit'}
             </button>
           </div>
