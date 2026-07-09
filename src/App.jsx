@@ -4,9 +4,6 @@
  * Authentication is handled entirely by src/contexts/AuthContext.jsx using
  * the custom apiClient (/api/* routes).
  *
- * The Base44PreviewProvider import below satisfies the Base44 editor
- * environment and does nothing for application auth. Remove it on Cloudflare
- * deployment and replace with a React.Fragment.
  */
 import React from 'react';
 import { Toaster } from '@/components/ui/toaster';
@@ -15,8 +12,6 @@ import { queryClientInstance } from '@/lib/query-client';
 import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-router-dom';
 import PageNotFound from '@/lib/PageNotFound';
 
-// Base44 preview compatibility only — not used for auth logic.
-import { AuthProvider as Base44PreviewProvider } from '@/lib/AuthContext';
 
 // Real application auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
@@ -167,7 +162,6 @@ const AppRoutes = () => {
 
 function App() {
   return (
-    <Base44PreviewProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
@@ -178,7 +172,6 @@ function App() {
           <Toaster />
         </QueryClientProvider>
       </AuthProvider>
-    </Base44PreviewProvider>
   );
 }
 
