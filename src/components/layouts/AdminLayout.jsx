@@ -158,7 +158,7 @@ export default function AdminLayout({ children = <Outlet /> }) {
   return (
     <div className="min-h-screen bg-[#0F172A] flex">
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex flex-col w-56 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30 border-r border-white/5">
+      <aside className="hidden lg:flex flex-col w-56 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30 border-r border-white/5 print:hidden">
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
@@ -175,9 +175,9 @@ export default function AdminLayout({ children = <Outlet /> }) {
         </div>
       )}
 
-      <div className="flex-1 lg:ml-56 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-56 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile header */}
-        <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-white/10">
+        <header className="lg:hidden print:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-white/10">
           <div className="flex items-center gap-2">
             <Shield size={16} className="text-[#2563EB]" />
             <span className="text-white font-semibold text-sm">Admin Panel</span>

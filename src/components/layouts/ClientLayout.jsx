@@ -110,7 +110,7 @@ export default function ClientLayout({ children }) {
   return (
     <div className="min-h-screen bg-[#0F172A] flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30">
+      <aside className="hidden lg:flex flex-col w-64 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30 print:hidden">
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
@@ -131,9 +131,9 @@ export default function ClientLayout({ children }) {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 lg:ml-64 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="lg:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-white/10">
+        <header className="lg:hidden print:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-white/10">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center">
               <span className="text-white font-bold text-xs">GK</span>
