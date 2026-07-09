@@ -8,13 +8,32 @@ const labelCls = 'block text-sm font-medium text-slate-300 mb-1.5';
 
 export default function AccountDetails() {
   const { user, updateUser } = useAuth();
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', mobile: '', emergencyContactName: '', emergencyContactPhone: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (user) setForm({ firstName: user.firstName || '', lastName: user.lastName || '', email: user.email || '', mobile: user.mobile || '', emergencyContactName: user.emergencyContactName || '', emergencyContactPhone: user.emergencyContactPhone || '' });
+    let active = true;
+    (async () => {
+      try {
+        const data = await apiClient.get('/account');
+        if (!active) return;
+        setForm({
+          firstName: data.firstName || '',
+          lastName: data.lastName || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          emergencyContactName: data.emergencyContactName || '',
+          emergencyContactPhone: data.emergencyContactPhone || '',
+          emergencyContactRelation: data.emergencyContactRelation || '',
+        });
+      } catch (err) {
+        // fall back to auth context user
+        if (user) setForm(f => ({ ...f, firstName: user.firstName || '', lastName: user.lastName || '', email: user.email || '' }));
+      }
+    })();
+    return () => { active = false; };
   }, [user]);
 
   const set = (field) => (e) => setForm({ ...form, [field]: e.target.value });
@@ -24,7 +43,7 @@ export default function AccountDetails() {
     setError(''); setSuccess(false); setLoading(true);
     try {
       const updated = await apiClient.put('/account', form);
-      updateUser(updated);
+      updateUser({ id: user?.id, role: user?.role, ...updated });
       setSuccess(true);
     } catch (err) {
       setError(err.message || 'Failed to save.');
@@ -48,7 +67,7 @@ export default function AccountDetails() {
             <div><label className={labelCls}>Last name</label><input value={form.lastName} onChange={set('lastName')} className={inputCls} /></div>
           </div>
           <div><label className={labelCls}>Email address</label><input type="email" value={form.email} onChange={set('email')} className={inputCls} /></div>
-          <div><label className={labelCls}>Mobile number</label><input type="tel" value={form.mobile} onChange={set('mobile')} className={inputCls} /></div>
+          <div><label className={labelCls}>Mobile number</label><input type="tel" value={form.phone} onChange={set('phone')} className={inputCls} /></div>
         </div>
 
         <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
@@ -56,6 +75,7 @@ export default function AccountDetails() {
           <div className="grid grid-cols-2 gap-4">
             <div><label className={labelCls}>Name</label><input value={form.emergencyContactName} onChange={set('emergencyContactName')} className={inputCls} /></div>
             <div><label className={labelCls}>Phone</label><input type="tel" value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} className={inputCls} /></div>
+            <div className="col-span-2"><label className={labelCls}>Relationship</label><input value={form.emergencyContactRelation} onChange={set('emergencyContactRelation')} placeholder="e.g. Parent, Spouse, Guardian" className={inputCls} /></div>
           </div>
         </div>
 
