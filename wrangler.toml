@@ -70,7 +70,7 @@ binding       = "DB"
 database_name = "ppgk-dev"
 # REPLACE ME: Cloudflare dashboard → Storage & Databases → D1 → ppgk-dev →
 # "Database ID"  (or run: npx wrangler d1 list)
-database_id   = "445f96a4-ed9c-4159-8bc7-2804a6c3cb9e"
+database_id   = "93870f17-1cce-4ddd-9af0-47ff13ffd186"
 migrations_dir = "migrations"
 
 [[env.dev.r2_buckets]]
