@@ -64,8 +64,8 @@ export default function Register() {
         <div className="w-full max-w-md text-center">
           {emailFailed ? (
             <>
-              <div className="w-16 h-16 rounded-full bg-yellow-500/20 flex items-center justify-center mx-auto mb-4">
-                <AlertTriangle size={32} className="text-yellow-400" />
+              <div className="w-16 h-16 rounded-full bg-warning/20 flex items-center justify-center mx-auto mb-4">
+                <AlertTriangle size={32} className="text-warning" />
               </div>
               <h2 className="text-foreground font-black text-2xl mb-3">Account created!</h2>
               <p className="text-muted-foreground mb-4">
@@ -79,7 +79,7 @@ export default function Register() {
                 <button
                   onClick={handleResend}
                   disabled={resendLoading}
-                  className="bg-yellow-500 hover:bg-yellow-400 disabled:opacity-50 text-black font-bold px-8 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mx-auto mb-4"
+                  className="bg-warning hover:bg-warning/80 disabled:opacity-50 text-warning-foreground font-bold px-8 py-3 rounded-xl transition-colors flex items-center justify-center gap-2 mx-auto mb-4"
                 >
                   {resendLoading ? <><Loader2 size={16} className="animate-spin" /> Sending…</> : 'Resend Verification Email'}
                 </button>
@@ -113,7 +113,7 @@ export default function Register() {
           <p className="text-muted-foreground">Join Premier Performance Goalkeeping</p>
         </div>
 
-        <div className="bg-[#0F2237] rounded-2xl p-8 border border-border shadow-xl">
+        <div className="bg-card rounded-2xl p-8 border border-border shadow-xl">
           {error && (
             <div className="bg-destructive/20 border border-destructive/30 text-destructive text-sm rounded-lg p-3 mb-6">
               {error}
@@ -124,28 +124,28 @@ export default function Register() {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-foreground text-sm font-medium mb-2">First name</label>
-                <input required value={form.firstName} onChange={set('firstName')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="First name" />
+                <input required value={form.firstName} onChange={set('firstName')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="First name" />
               </div>
               <div>
                 <label className="block text-foreground text-sm font-medium mb-2">Last name</label>
-                <input required value={form.lastName} onChange={set('lastName')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Last name" />
+                <input required value={form.lastName} onChange={set('lastName')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Last name" />
               </div>
             </div>
 
             <div>
               <label className="block text-foreground text-sm font-medium mb-2">Email address</label>
-              <input type="email" required value={form.email} onChange={set('email')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="you@example.com" />
+              <input type="email" required value={form.email} onChange={set('email')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="you@example.com" />
             </div>
 
             <div>
               <label className="block text-foreground text-sm font-medium mb-2">Mobile number</label>
-              <input type="tel" required value={form.mobile} onChange={set('mobile')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="+356 7900 0000" />
+              <input type="tel" required value={form.mobile} onChange={set('mobile')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="+356 7900 0000" />
             </div>
 
             <div>
               <label className="block text-foreground text-sm font-medium mb-2">Password</label>
               <div className="relative">
-                <input type={showPassword ? 'text' : 'password'} required value={form.password} onChange={set('password')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 pr-12 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Min. 8 characters" />
+                <input type={showPassword ? 'text' : 'password'} required value={form.password} onChange={set('password')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Min. 8 characters" />
                 <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
@@ -154,17 +154,17 @@ export default function Register() {
 
             <div>
               <label className="block text-foreground text-sm font-medium mb-2">Confirm password</label>
-              <input type="password" required value={form.confirmPassword} onChange={set('confirmPassword')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Repeat password" />
+              <input type="password" required value={form.confirmPassword} onChange={set('confirmPassword')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Repeat password" />
             </div>
 
             <div className="border-t border-border pt-4">
               <p className="text-muted-foreground text-xs font-medium mb-3 uppercase tracking-wide">Emergency Contact</p>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <input value={form.emergencyContactName} onChange={set('emergencyContactName')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Contact name" />
+                  <input value={form.emergencyContactName} onChange={set('emergencyContactName')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Contact name" />
                 </div>
                 <div>
-                  <input value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Contact phone" />
+                  <input value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm" placeholder="Contact phone" />
                 </div>
               </div>
             </div>

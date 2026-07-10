@@ -38,7 +38,7 @@ export default function SignIn() {
           <p className="text-muted-foreground">Sign in to your account</p>
         </div>
 
-        <div className="bg-[#0F2237] rounded-2xl p-8 border border-border shadow-xl">
+        <div className="bg-card rounded-2xl p-8 border border-border shadow-xl">
           {error && (
             <div className="bg-destructive/20 border border-destructive/30 text-destructive text-sm rounded-lg p-3 mb-6">
               {error}
@@ -53,7 +53,7 @@ export default function SignIn() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
+                className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                 placeholder="you@example.com"
               />
             </div>
@@ -66,7 +66,7 @@ export default function SignIn() {
                   required
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 pr-12 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
+                  className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors"
                   placeholder="••••••••"
                 />
                 <button

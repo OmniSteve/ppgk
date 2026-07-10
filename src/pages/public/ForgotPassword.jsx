@@ -37,7 +37,7 @@ export default function ForgotPassword() {
           <p className="text-muted-foreground">We'll send a reset link to your email</p>
         </div>
 
-        <div className="bg-[#0F2237] rounded-2xl p-8 border border-border shadow-xl">
+        <div className="bg-card rounded-2xl p-8 border border-border shadow-xl">
           {sent ? (
             <div className="text-center">
               <CheckCircle size={40} className="text-success mx-auto mb-4" />
@@ -51,7 +51,7 @@ export default function ForgotPassword() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-foreground text-sm font-medium mb-2">Email address</label>
-                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" placeholder="you@example.com" />
+                  <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors" placeholder="you@example.com" />
                 </div>
                 <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                   {loading ? <><Loader2 size={18} className="animate-spin" /> Sending…</> : 'Send Reset Link'}

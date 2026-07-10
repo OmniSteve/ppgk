@@ -45,7 +45,7 @@ export default function ResetPassword() {
           <h1 className="text-foreground font-black text-3xl mb-2 text-display">New password</h1>
           <p className="text-muted-foreground">Choose a strong password</p>
         </div>
-        <div className="bg-[#0F2237] rounded-2xl p-8 border border-border shadow-xl">
+        <div className="bg-card rounded-2xl p-8 border border-border shadow-xl">
           {success ? (
             <div className="text-center">
               <CheckCircle size={40} className="text-success mx-auto mb-4" />
@@ -59,11 +59,11 @@ export default function ResetPassword() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-foreground text-sm font-medium mb-2">New password</label>
-                  <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" placeholder="Min. 8 characters" />
+                  <input type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors" placeholder="Min. 8 characters" />
                 </div>
                 <div>
                   <label className="block text-foreground text-sm font-medium mb-2">Confirm password</label>
-                  <input type="password" required value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" placeholder="Repeat password" />
+                  <input type="password" required value={form.confirmPassword} onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })} className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors" placeholder="Repeat password" />
                 </div>
                 <button type="submit" disabled={loading || !token} className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2">
                   {loading ? <><Loader2 size={18} className="animate-spin" /> Updating…</> : 'Update Password'}

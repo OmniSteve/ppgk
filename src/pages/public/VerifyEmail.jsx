@@ -56,7 +56,7 @@ export default function VerifyEmail() {
 
   return (
     <div className="min-h-screen bg-sidebar flex items-center justify-center p-4">
-      <div className="w-full max-w-md text-center bg-[#0F2237] rounded-2xl p-10 border border-border shadow-xl">
+      <div className="w-full max-w-md text-center bg-card rounded-2xl p-10 border border-border shadow-xl">
 
         {status === 'loading' && (
           <>
@@ -94,7 +94,7 @@ export default function VerifyEmail() {
                   placeholder="Enter your email to resend"
                   value={resendEmail}
                   onChange={(e) => setResendEmail(e.target.value)}
-                  className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-sm"
+                  className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors text-sm"
                 />
                 <button
                   onClick={handleResend}
