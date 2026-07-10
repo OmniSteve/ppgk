@@ -125,7 +125,7 @@ export default function ClientManagement() {
       {loading ? (
         <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" /></div>
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border">
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {users.length === 0 ? (
             <div className="p-16 text-center"><Users size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No users found</p></div>
           ) : users.map((u) => (

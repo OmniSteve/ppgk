@@ -56,7 +56,7 @@ export default function AuditLog() {
           <FileText size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No audit records found</p>
         </div>
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border">
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {logs.map((log) => (
             <div key={log.id} className="px-5 py-4 hover:bg-accent transition-colors">
               <div className="flex items-start justify-between gap-4 mb-1">

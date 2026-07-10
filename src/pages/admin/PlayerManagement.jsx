@@ -170,7 +170,7 @@ export default function PlayerManagement() {
           <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-card rounded-2xl border border-border divide-y divide-border">
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {players.length === 0 ? (
             <div className="p-16 text-center">
               <User size={36} className="text-muted-foreground mx-auto mb-2" />
