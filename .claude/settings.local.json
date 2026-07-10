@@ -3,7 +3,8 @@
     "allow": [
       "Bash(xargs grep:*)",
       "Bash(grep -v \"//.*text-slate\\\\|//.*bg-white\")",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "Bash(grep -n \"#[0-9a-fA-F]\\\\{3,6\\\\}\\\\|Spline\" \"C:/Test/Projects/ppgk/ppgk/src/pages/public/LandingPage.jsx\" \"C:/Test/Projects/ppgk/ppgk/src/pages/public/LandingPage.css\")"
     ]
   }
 }
