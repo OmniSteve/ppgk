@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle, XCircle, Calendar, ArrowRight } from 'lucide-react';
+import { apiClient } from '@/services/apiClient';
+import { buildGoogleCalendarUrl, buildOutlookCalendarUrl, downloadIcs } from '@/utils/calendarUtils';
 
 export default function PaymentResult() {
   const params = new URLSearchParams(window.location.search);
@@ -8,8 +10,27 @@ export default function PaymentResult() {
   const bookingIds = params.get('bookingIds')?.split(',').filter(Boolean) || [];
   const success = status === 'success';
 
+  const [bookings, setBookings] = useState([]);
+
+  useEffect(() => {
+    if (!success || bookingIds.length === 0) return;
+    Promise.all(bookingIds.map((id) => apiClient.get(`/bookings/${id}`).catch(() => null)))
+      .then((results) => setBookings(results.filter(Boolean)));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const handleAddToCalendar = (type) => {
-    bookingIds.forEach((id) => window.open(`/api/bookings/${id}/calendar?type=${type}`, '_blank'));
+    if (bookings.length === 0) return;
+    if (type === 'google') {
+      bookings.forEach((b) => window.open(buildGoogleCalendarUrl(b), '_blank', 'noopener,noreferrer'));
+    } else if (type === 'outlook') {
+      bookings.forEach((b) => window.open(buildOutlookCalendarUrl(b), '_blank', 'noopener,noreferrer'));
+    } else if (type === 'ics') {
+      const filename = bookings.length === 1
+        ? `booking-${bookings[0].id.slice(0, 8)}.ics`
+        : `bookings-${bookings[0].id.slice(0, 8)}.ics`;
+      downloadIcs(bookings, filename);
+    }
   };
 
   return (
@@ -40,7 +61,8 @@ export default function PaymentResult() {
               <button
                 key={cal.type}
                 onClick={() => handleAddToCalendar(cal.type)}
-                className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-white/10 hover:border-[#2563EB]/40 text-sm font-medium text-slate-300 hover:text-[#2563EB] transition-all"
+                disabled={bookings.length === 0}
+                className="w-full flex items-center justify-between px-4 py-3 rounded-xl border border-white/10 hover:border-[#2563EB]/40 text-sm font-medium text-slate-300 hover:text-[#2563EB] transition-all disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 {cal.label}<ArrowRight size={14} />
               </button>

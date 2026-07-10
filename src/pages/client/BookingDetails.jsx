@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Calendar, Clock, MapPin, User, CreditCard, ChevronLeft, ArrowRight, AlertCircle, Edit2, X } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import { buildGoogleCalendarUrl, buildOutlookCalendarUrl, downloadIcs } from '@/utils/calendarUtils';
 
 function normaliseBooking(b) {
   if (!b) return null;
@@ -39,7 +40,16 @@ export default function BookingDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleAddToCalendar = (type) => window.open(`/api/bookings/${id}/calendar?type=${type}`, '_blank');
+  const handleAddToCalendar = (type) => {
+    if (!booking) return;
+    if (type === 'google') {
+      window.open(buildGoogleCalendarUrl(booking), '_blank', 'noopener,noreferrer');
+    } else if (type === 'outlook') {
+      window.open(buildOutlookCalendarUrl(booking), '_blank', 'noopener,noreferrer');
+    } else if (type === 'ics') {
+      downloadIcs(booking, `booking-${booking.id.slice(0, 8)}.ics`);
+    }
+  };
 
   if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" /></div>;
   if (!booking) return (
