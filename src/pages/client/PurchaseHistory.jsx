@@ -48,7 +48,7 @@ export default function PurchaseHistory() {
                 </div>
               </div>
               <div className="text-right">
-                <p className={`font-black text-base text-label-mono ${e.amount > 0 ? 'text-success' : 'text-destructive'}`}>
+                <p className={`font-black text-base ${e.amount > 0 ? 'text-success' : 'text-destructive'}`}>
                   {e.amount > 0 ? '+' : ''}{e.amount}
                 </p>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${typeColor[e.type] || 'bg-accent text-muted-foreground'}`}>

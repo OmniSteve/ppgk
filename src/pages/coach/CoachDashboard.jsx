@@ -30,7 +30,7 @@ export default function CoachDashboard() {
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-2 ${s.color}`}>
               <s.icon size={18} />
             </div>
-            <p className="text-2xl font-black text-foreground text-label-mono">{s.value}</p>
+            <p className="text-display text-3xl font-black text-foreground">{s.value}</p>
             <p className="text-muted-foreground text-xs mt-0.5">{s.label}</p>
           </div>
         ))}

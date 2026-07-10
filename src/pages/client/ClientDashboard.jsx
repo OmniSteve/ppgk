@@ -12,7 +12,7 @@ const StatCard = ({ label, value, sub, icon: Icon, color, href }) => (
       </div>
       <ChevronRight size={16} className="text-muted-foreground group-hover:text-primary transition-colors" />
     </div>
-    <p className="text-2xl font-black text-foreground text-label-mono">{value}</p>
+    <p className="text-display text-3xl font-black text-foreground">{value}</p>
     <p className="text-muted-foreground text-sm font-medium mt-0.5">{label}</p>
     {sub && <p className="text-muted-foreground text-xs mt-1">{sub}</p>}
   </Link>
@@ -90,7 +90,7 @@ export default function ClientDashboard() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Available Credits" value={data?.creditBalance ?? 0} sub={data?.expiringCredits > 0 ? `${data.expiringCredits} expiring soon` : 'All valid'} icon={CreditCard} color="bg-primary/20 text-primary" href="/credits" />
         <StatCard label="Upcoming Bookings" value={data?.upcomingBookings?.length ?? 0} sub="Confirmed sessions" icon={Calendar} color="bg-success/20 text-success" href="/bookings" />
-        <StatCard label="Players" value={data?.players ?? 0} sub="Active profiles" icon={Users} color="bg-purple-500/20 text-purple-400" href="/players" />
+        <StatCard label="Players" value={data?.players ?? 0} sub="Active profiles" icon={Users} color="bg-info/20 text-info" href="/players" />
         <StatCard label="Notifications" value={data?.unreadNotifications ?? 0} sub="Unread messages" icon={Bell} color="bg-warning/20 text-warning" href="/notifications" />
       </div>
 

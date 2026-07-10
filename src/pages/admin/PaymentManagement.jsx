@@ -117,19 +117,19 @@ export default function PaymentManagement() {
         <div className="grid grid-cols-3 gap-4">
           {totals.totalPaid !== undefined && (
             <div className="bg-card rounded-2xl border border-border p-4">
-              <p className="text-2xl font-black text-foreground text-label-mono">€{Number(totals.totalPaid || 0).toFixed(2)}</p>
+              <p className="text-display text-3xl font-black text-foreground">€{Number(totals.totalPaid || 0).toFixed(2)}</p>
               <p className="text-muted-foreground text-xs mt-0.5">Total Collected</p>
             </div>
           )}
           {totals.totalRefunded !== undefined && (
             <div className="bg-card rounded-2xl border border-border p-4">
-              <p className="text-2xl font-black text-info text-label-mono">€{Number(totals.totalRefunded || 0).toFixed(2)}</p>
+              <p className="text-display text-3xl font-black text-info">€{Number(totals.totalRefunded || 0).toFixed(2)}</p>
               <p className="text-muted-foreground text-xs mt-0.5">Total Refunded</p>
             </div>
           )}
           {totals.totalPending !== undefined && (
             <div className="bg-card rounded-2xl border border-border p-4">
-              <p className="text-2xl font-black text-warning text-label-mono">€{Number(totals.totalPending || 0).toFixed(2)}</p>
+              <p className="text-display text-3xl font-black text-warning">€{Number(totals.totalPending || 0).toFixed(2)}</p>
               <p className="text-muted-foreground text-xs mt-0.5">Pending</p>
             </div>
           )}

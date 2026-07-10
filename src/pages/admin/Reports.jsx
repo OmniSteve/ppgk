@@ -122,7 +122,7 @@ export default function Reports() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                   {Object.entries(results.summary).map(([key, val]) => (
                     <div key={key} className="bg-accent rounded-xl p-4">
-                      <p className="text-2xl font-black text-foreground text-label-mono">{val}</p>
+                      <p className="text-display text-3xl font-black text-foreground">{val}</p>
                       <p className="text-muted-foreground text-xs mt-0.5 capitalize">{labelise(key)}</p>
                     </div>
                   ))}

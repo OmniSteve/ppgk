@@ -11,7 +11,7 @@ const StatCard = ({ label, value, sub, icon: Icon, color, href, alert }) => (
       </div>
       {alert && <AlertCircle size={16} className="text-warning" />}
     </div>
-    <p className={`text-2xl font-black text-label-mono ${alert ? 'text-warning' : 'text-foreground'}`}>{value}</p>
+    <p className={`text-display text-3xl font-black ${alert ? 'text-warning' : 'text-foreground'}`}>{value}</p>
     <p className={`text-sm font-medium mt-0.5 ${alert ? 'text-warning' : 'text-muted-foreground'}`}>{label}</p>
     {sub && <p className={`text-xs mt-1 ${alert ? 'text-warning/70' : 'text-muted-foreground'}`}>{sub}</p>}
   </Link>
@@ -43,7 +43,7 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <StatCard label="Sessions Today" value={data?.stats?.upcomingSessions ?? 0} icon={Calendar} color="bg-primary/20 text-primary" href="/admin/sessions" />
           <StatCard label="Bookings Today" value={data?.stats?.todayBookings ?? 0} icon={ClipboardList} color="bg-success/20 text-success" href="/admin/bookings" />
-          <StatCard label="Total Clients" value={data?.stats?.totalClients ?? 0} icon={UserPlus} color="bg-purple-500/20 text-purple-400" href="/admin/clients" />
+          <StatCard label="Total Clients" value={data?.stats?.totalClients ?? 0} icon={UserPlus} color="bg-info/20 text-info" href="/admin/clients" />
           <StatCard label="Total Revenue" value={`€${data?.stats?.totalRevenue ?? 0}`} sub="All time" icon={TrendingUp} color="bg-warning/20 text-warning" href="/admin/payments" />
         </div>
       </div>

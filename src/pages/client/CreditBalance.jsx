@@ -35,7 +35,7 @@ export default function CreditBalance() {
 
       <div className="bg-sidebar rounded-2xl p-6 text-center border border-border">
         <p className="text-muted-foreground text-sm mb-1">Available Credits</p>
-        <p className="text-foreground font-black text-5xl text-label-mono">{data?.balance ?? 0}</p>
+        <p className="text-display text-5xl font-black text-foreground">{data?.balance ?? 0}</p>
         <p className="text-muted-foreground text-sm mt-2">across {data?.purchases?.length ?? 0} active packages</p>
       </div>
 
@@ -55,7 +55,7 @@ export default function CreditBalance() {
                     <p className="text-muted-foreground text-xs">Purchased {purchaseDate ? purchaseDate.toLocaleDateString('en-GB') : '—'}</p>
                   </div>
                   <div className="text-right">
-                    <p className="font-black text-foreground text-label-mono">{pkg.creditsRemaining ?? pkg.creditsGranted ?? '?'} <span className="text-muted-foreground font-normal text-xs">credits</span></p>
+                    <p className="font-black text-foreground text-lg">{pkg.creditsRemaining ?? pkg.creditsGranted ?? '?'} <span className="text-muted-foreground font-normal text-xs">credits</span></p>
                     <p className={`text-xs font-semibold ${expiringSoon ? 'text-destructive' : 'text-muted-foreground'}`}>
                       {expiryDate ? `Expires ${expiryDate.toLocaleDateString('en-GB')}${expiringSoon ? ` (${daysLeft} days)` : ''}` : 'No expiry'}
                     </p>
@@ -84,7 +84,7 @@ export default function CreditBalance() {
                     <p className="text-muted-foreground text-xs">{tx.createdAt ? new Date(tx.createdAt).toLocaleString('en-GB') : '—'}</p>
                   </div>
                 </div>
-                <span className={`font-bold text-sm text-label-mono ${tx.amount > 0 ? 'text-success' : 'text-destructive'}`}>
+                <span className={`font-bold text-sm ${tx.amount > 0 ? 'text-success' : 'text-destructive'}`}>
                   {tx.amount > 0 ? '+' : ''}{tx.amount}
                 </span>
               </div>
