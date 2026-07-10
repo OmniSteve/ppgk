@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PPGK | Premier Performance Goalkeeping, Malta</title>
+<meta name="description" content="Specialist goalkeeper coaching in Malta. Structured programmes, individual and group sessions, and clear performance tracking for young goalkeepers.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pitch-950:#0a120e;      /* page background: floodlit pitch at night */
+  --pitch-900:#0f1a14;      /* raised surfaces */
+  --pitch-800:#16241c;      /* card surfaces */
+  --line-500:#2a3d32;       /* hairlines, net lines */
+  --chalk-100:#eef2ec;      /* primary text: pitch chalk */
+  --chalk-400:#9fb0a4;      /* secondary text */
+  --glove-500:#f2a03d;      /* accent: match-glove amber */
+  --glove-600:#d9871f;      /* accent hover */
+  --display:'Big Shoulders Display',sans-serif;
+  --body:'Instrument Sans',sans-serif;
+  --mono:'Spline Sans Mono',monospace;
+  --ease:cubic-bezier(0.16,1,0.3,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--pitch-950);
+  color:var(--chalk-100);
+  font-family:var(--body);
+  font-size:17px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--glove-500);color:var(--pitch-950)}
+img,svg{display:block;max-width:100%}
+a{color:inherit}
+
+/* ---------- type scale ---------- */
+h1,h2,h3{font-family:var(--display);text-transform:uppercase;line-height:0.95;letter-spacing:0.01em}
+h1{font-weight:800;font-size:clamp(3.2rem,9vw,7rem)}
+h2{font-weight:800;font-size:clamp(2.2rem,5.5vw,3.8rem)}
+h3{font-weight:700;font-size:1.35rem;letter-spacing:0.03em}
+.eyebrow{
+  font-family:var(--mono);font-size:0.78rem;letter-spacing:0.22em;
+  text-transform:uppercase;color:var(--glove-500);
+  display:inline-flex;align-items:center;gap:0.7rem;
+}
+.eyebrow::before{content:"";width:26px;height:1px;background:var(--glove-500)}
+.lede{color:var(--chalk-400);font-size:clamp(1.02rem,1.6vw,1.18rem);max-width:36em}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:0 clamp(1.25rem,5vw,3rem)}
+section{padding:clamp(4.5rem,10vw,8.5rem) 0}
+.section-head{margin-bottom:clamp(2.5rem,5vw,4rem);display:grid;gap:1.1rem}
+
+/* ---------- header ---------- */
+header{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--pitch-950) 88%,transparent);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line-500);
+}
+.nav{display:flex;align-items:center;justify-content:space-between;padding:0.9rem clamp(1.25rem,5vw,3rem);max-width:1180px;margin:0 auto}
+.logo{font-family:var(--display);font-weight:800;font-size:1.5rem;letter-spacing:0.06em;text-decoration:none;text-transform:uppercase}
+.logo span{color:var(--glove-500)}
+.nav-links{display:flex;gap:2rem;align-items:center;list-style:none}
+.nav-links a{text-decoration:none;font-size:0.92rem;color:var(--chalk-400);transition:color 0.3s var(--ease)}
+.nav-links a:hover,.nav-links a:focus-visible{color:var(--chalk-100)}
+@media(max-width:720px){.nav-links li:not(:last-child){display:none}}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-block;font-family:var(--body);font-weight:600;font-size:0.95rem;
+  padding:0.85rem 1.9rem;border-radius:4px;text-decoration:none;cursor:pointer;border:0;
+  transition:transform 0.3s var(--ease),background 0.3s var(--ease),color 0.3s var(--ease),border-color 0.3s var(--ease);
+}
+.btn-solid{background:var(--glove-500);color:var(--pitch-950)}
+.btn-solid:hover,.btn-solid:focus-visible{background:var(--glove-600);transform:translateY(-2px)}
+.btn-ghost{background:transparent;color:var(--chalk-100);border:1px solid var(--line-500)}
+.btn-ghost:hover,.btn-ghost:focus-visible{border-color:var(--glove-500);transform:translateY(-2px)}
+:focus-visible{outline:2px solid var(--glove-500);outline-offset:3px}
+
+/* ---------- hero ---------- */
+.hero{
+  min-height:calc(100svh - 62px);
+  display:grid;align-items:center;
+  padding:clamp(3rem,7vw,5rem) 0;
+  position:relative;overflow:hidden;
+}
+.hero-grid{display:grid;grid-template-columns:1.15fr 0.85fr;gap:clamp(2rem,5vw,4.5rem);align-items:center}
+@media(max-width:880px){.hero-grid{grid-template-columns:1fr}.hero-art{order:-1;max-width:420px}}
+.hero h1 .accent{color:var(--glove-500)}
+.hero-copy{display:grid;gap:1.6rem;justify-items:start}
+.hero-actions{display:flex;gap:1rem;flex-wrap:wrap;margin-top:0.4rem}
+.hero-meta{
+  font-family:var(--mono);font-size:0.78rem;letter-spacing:0.14em;text-transform:uppercase;
+  color:var(--chalk-400);display:flex;gap:1.6rem;flex-wrap:wrap;margin-top:1rem;
+}
+.hero-meta strong{color:var(--chalk-100);font-weight:500}
+
+/* staggered entrance */
+.stagger{opacity:0;transform:translateY(26px);animation:rise 0.6s var(--ease) forwards}
+.stagger:nth-child(1){animation-delay:0.05s}
+.stagger:nth-child(2){animation-delay:0.15s}
+.stagger:nth-child(3){animation-delay:0.25s}
+.stagger:nth-child(4){animation-delay:0.35s}
+.stagger:nth-child(5){animation-delay:0.45s}
+@keyframes rise{to{opacity:1;transform:none}}
+
+/* ---------- signature: the save ---------- */
+.hero-art{position:relative}
+.hero-art svg{width:100%;height:auto}
+.net-line{stroke:var(--line-500);stroke-width:1}
+.frame-line{stroke:var(--chalk-100);stroke-width:3;stroke-linecap:square}
+.shot-path{
+  stroke:var(--glove-500);stroke-width:2.5;fill:none;stroke-dasharray:6 7;stroke-linecap:round;
+}
+.ball{fill:var(--chalk-100)}
+.glove-mark{stroke:var(--glove-500);stroke-width:3.5;fill:none;stroke-linecap:round}
+.save-label{
+  font-family:var(--mono);font-size:11px;letter-spacing:0.2em;fill:var(--glove-500);text-transform:uppercase;
+}
+/* draw-on animation */
+.anim .shot-path{stroke-dashoffset:520;animation:draw 1.1s var(--ease) 0.55s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.anim .ball{opacity:0;offset-path:path("M20 300 C 140 240, 240 130, 318 74");animation:travel 1.1s var(--ease) 0.55s forwards}
+@keyframes travel{
+  0%{opacity:1;offset-distance:0%}
+  99%{opacity:1}
+  100%{opacity:1;offset-distance:100%}
+}
+.anim .glove-mark{stroke-dasharray:60;stroke-dashoffset:60;animation:draw2 0.45s var(--ease) 1.6s forwards}
+@keyframes draw2{to{stroke-dashoffset:0}}
+.anim .save-label{opacity:0;animation:fadein 0.5s var(--ease) 1.95s forwards}
+@keyframes fadein{to{opacity:1}}
+
+/* ---------- scroll reveals ---------- */
+.reveal{opacity:0;transform:translateY(30px);transition:opacity 0.6s var(--ease),transform 0.6s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+
+/* ---------- programme section ---------- */
+.rule-top{border-top:1px solid var(--line-500)}
+.prog-list{display:grid;gap:0}
+.prog-row{
+  display:grid;grid-template-columns:minmax(90px,140px) 1fr 1.2fr;gap:clamp(1rem,3vw,3rem);
+  padding:2.2rem 0;border-top:1px solid var(--line-500);align-items:baseline;
+  transition:background 0.3s var(--ease);
+}
+.prog-row:last-child{border-bottom:1px solid var(--line-500)}
+.prog-row:hover{background:linear-gradient(90deg,var(--pitch-900),transparent)}
+.prog-tag{font-family:var(--mono);font-size:0.78rem;letter-spacing:0.18em;color:var(--glove-500);text-transform:uppercase}
+.prog-row p{color:var(--chalk-400);font-size:0.98rem}
+@media(max-width:720px){.prog-row{grid-template-columns:1fr;gap:0.5rem;padding:1.8rem 0}}
+
+/* ---------- performance section ---------- */
+.perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2.5rem,6vw,5rem);align-items:center}
+@media(max-width:880px){.perf-grid{grid-template-columns:1fr}}
+.perf-card{
+  background:var(--pitch-800);border:1px solid var(--line-500);border-radius:8px;
+  padding:clamp(1.5rem,3vw,2.2rem);
+}
+.perf-card-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.6rem;gap:1rem}
+.perf-card-head .name{font-family:var(--display);font-weight:700;font-size:1.25rem;text-transform:uppercase;letter-spacing:0.04em}
+.perf-card-head .date{font-family:var(--mono);font-size:0.75rem;color:var(--chalk-400);letter-spacing:0.1em}
+.rating{display:grid;gap:1.05rem}
+.rating-row{display:grid;grid-template-columns:1fr auto;gap:0.4rem;font-size:0.88rem}
+.rating-row .cat{color:var(--chalk-400)}
+.rating-row .trend{font-family:var(--mono);font-size:0.75rem;color:var(--glove-500)}
+.bar{grid-column:1/-1;height:6px;background:var(--pitch-950);border-radius:3px;overflow:hidden}
+.bar i{
+  display:block;height:100%;background:var(--glove-500);border-radius:3px;
+  width:0;transition:width 0.9s var(--ease);
+}
+.in .bar i{width:var(--w)}
+.perf-copy{display:grid;gap:1.2rem;justify-items:start}
+.perf-points{list-style:none;display:grid;gap:0.9rem;color:var(--chalk-400);font-size:0.98rem}
+.perf-points li{padding-left:1.4rem;position:relative}
+.perf-points li::before{content:"";position:absolute;left:0;top:0.55em;width:8px;height:8px;border:2px solid var(--glove-500);border-radius:50%}
+
+/* ---------- credits section ---------- */
+.credit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.4rem}
+@media(max-width:880px){.credit-grid{grid-template-columns:1fr}}
+.credit-card{
+  background:var(--pitch-800);border:1px solid var(--line-500);border-radius:8px;
+  padding:2rem 1.8rem;display:grid;gap:0.9rem;align-content:start;
+  transition:transform 0.3s var(--ease),border-color 0.3s var(--ease);
+}
+.credit-card:hover{transform:translateY(-4px);border-color:var(--glove-500)}
+.credit-card .k{font-family:var(--mono);font-size:0.75rem;letter-spacing:0.18em;color:var(--glove-500);text-transform:uppercase}
+.credit-card p{color:var(--chalk-400);font-size:0.95rem}
+
+/* ---------- coach section ---------- */
+.coach{background:var(--pitch-900);border-top:1px solid var(--line-500);border-bottom:1px solid var(--line-500)}
+.coach-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(2.5rem,6vw,5rem)}
+@media(max-width:880px){.coach-grid{grid-template-columns:1fr}}
+.coach-quote{
+  font-family:var(--display);font-weight:500;font-size:clamp(1.5rem,3.2vw,2.2rem);
+  line-height:1.15;text-transform:uppercase;letter-spacing:0.02em;
+}
+.coach-quote .accent{color:var(--glove-500)}
+.coach-facts{display:grid;gap:0;align-content:center}
+.fact{display:flex;justify-content:space-between;gap:1.5rem;padding:1.15rem 0;border-top:1px solid var(--line-500);font-size:0.95rem}
+.fact:last-child{border-bottom:1px solid var(--line-500)}
+.fact .k{color:var(--chalk-400)}
+.fact .v{font-family:var(--mono);font-size:0.82rem;letter-spacing:0.08em;text-align:right}
+.coach-name{margin-top:1.6rem;font-size:0.95rem;color:var(--chalk-400)}
+.coach-name strong{color:var(--chalk-100);font-weight:600}
+
+/* ---------- final CTA ---------- */
+.cta{text-align:center}
+.cta .inner{display:grid;gap:1.6rem;justify-items:center}
+.cta h2{max-width:14em}
+.cta .lede{margin:0 auto;text-align:center}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--line-500);padding:2.2rem 0;font-size:0.85rem;color:var(--chalk-400)}
+.foot{display:flex;justify-content:space-between;gap:1.5rem;flex-wrap:wrap;align-items:center}
+.foot .mono{font-family:var(--mono);font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase}
+
+/* ---------- reduced motion ---------- */
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .stagger{animation:none;opacity:1;transform:none}
+  .reveal{transition:none;opacity:1;transform:none}
+  .anim .shot-path,.anim .ball,.anim .glove-mark,.anim .save-label{animation:none}
+  .anim .shot-path{stroke-dashoffset:0}
+  .anim .ball{opacity:1;offset-distance:100%}
+  .anim .glove-mark{stroke-dashoffset:0}
+  .anim .save-label{opacity:1}
+  .bar i{transition:none}
+  .in .bar i{width:var(--w)}
+  .btn,.credit-card{transition:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="nav" aria-label="Main">
+    <a class="logo" href="#top">PP<span>GK</span></a>
+    <ul class="nav-links">
+      <li><a href="#programmes">Programmes</a></li>
+      <li><a href="#performance">Performance</a></li>
+      <li><a href="#credits">How it works</a></li>
+      <li><a class="btn btn-solid" href="#book">Book a session</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main id="top">
+
+  <!-- ============ HERO ============ -->
+  <section class="hero" aria-label="Introduction">
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <span class="eyebrow stagger">Specialist goalkeeper coaching, Malta</span>
+        <h1 class="stagger">Built in the box.<br><span class="accent">Proven on match day.</span></h1>
+        <p class="lede stagger">Premier Performance Goalkeeping develops young goalkeepers through structured individual and group sessions, with every player's progress tracked and shared after each evaluation.</p>
+        <div class="hero-actions stagger">
+          <a class="btn btn-solid" href="#book">Book a session</a>
+          <a class="btn btn-ghost" href="#programmes">See the programmes</a>
+        </div>
+        <div class="hero-meta stagger">
+          <span><strong>1-to-1</strong> and group sessions</span>
+          <span><strong>10</strong> evaluation categories</span>
+          <span>Head Coach <strong>Matthew Towns</strong></span>
+        </div>
+      </div>
+
+      <!-- Signature element: the save, drawn as a training diagram -->
+      <div class="hero-art anim" aria-hidden="true">
+        <svg viewBox="0 0 460 340" role="img" aria-label="Diagram of a shot arcing towards the top corner and being saved">
+          <!-- net -->
+          <g class="net-line">
+            <line x1="60" y1="40" x2="60" y2="300"/><line x1="110" y1="40" x2="110" y2="300"/>
+            <line x1="160" y1="40" x2="160" y2="300"/><line x1="210" y1="40" x2="210" y2="300"/>
+            <line x1="260" y1="40" x2="260" y2="300"/><line x1="310" y1="40" x2="310" y2="300"/>
+            <line x1="360" y1="40" x2="360" y2="300"/>
+            <line x1="20" y1="90" x2="400" y2="90"/><line x1="20" y1="140" x2="400" y2="140"/>
+            <line x1="20" y1="190" x2="400" y2="190"/><line x1="20" y1="245" x2="400" y2="245"/>
+          </g>
+          <!-- goal frame -->
+          <path class="frame-line" d="M20 300 L20 40 L400 40 L400 300" fill="none"/>
+          <!-- shot trajectory to top corner -->
+          <path class="shot-path" d="M20 300 C 140 240, 240 130, 318 74"/>
+          <!-- ball travelling the path -->
+          <circle class="ball" r="9"/>
+          <!-- glove intercept: two strokes forming an open catch -->
+          <g class="glove-mark">
+            <path d="M330 52 q 14 10 10 32"/>
+            <path d="M352 62 q 2 20 -16 28"/>
+          </g>
+          <text class="save-label" x="300" y="120">Save. Reset. Again.</text>
+        </svg>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROGRAMMES ============ -->
+  <section id="programmes" class="rule-top" aria-labelledby="prog-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">Programmes</span>
+        <h2 id="prog-title">Coaching with a plan behind it</h2>
+        <p class="lede">Every session belongs to a programme. Nothing is a one-off drill for the sake of it; each block builds the technical foundations a goalkeeper needs at their stage.</p>
+      </div>
+      <div class="prog-list">
+        <div class="prog-row reveal">
+          <span class="prog-tag">1-to-1</span>
+          <h3>Individual sessions</h3>
+          <p>Focused technical work on the areas a goalkeeper needs most, from shot stopping and handling to footwork and distribution, set at the player's pace.</p>
+        </div>
+        <div class="prog-row reveal reveal-delay-1">
+          <span class="prog-tag">Group</span>
+          <h3>Group sessions</h3>
+          <p>Small-group training that adds realism: crosses, one-on-ones and communication under pressure, with goalkeepers pushing each other on.</p>
+        </div>
+        <div class="prog-row reveal reveal-delay-2">
+          <span class="prog-tag">Programme</span>
+          <h3>Development programmes</h3>
+          <p>Structured blocks of sessions with clear objectives, so parents and players can see what is being worked on and why, week by week.</p>
+        </div>
+        <div class="prog-row reveal reveal-delay-3">
+          <span class="prog-tag">Match prep</span>
+          <h3>Performance development</h3>
+          <p>Longer-term progression for committed goalkeepers, connecting evaluations, development priorities and training focus into one pathway.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PERFORMANCE ============ -->
+  <section id="performance" aria-labelledby="perf-title">
+    <div class="wrap perf-grid">
+      <div class="perf-copy reveal">
+        <span class="eyebrow">Performance tracking</span>
+        <h2 id="perf-title">See the progress, not just the sessions</h2>
+        <p class="lede">After evaluations, coaches rate each goalkeeper across ten categories and record strengths, priorities and notes. Parents see it all in one place.</p>
+        <ul class="perf-points">
+          <li>Ratings across shot stopping, handling, distribution, positioning and more</li>
+          <li>Trend indicators showing what has improved since the last evaluation</li>
+          <li>Coach notes and development priorities written for each player</li>
+        </ul>
+      </div>
+      <div class="perf-card reveal reveal-delay-1" role="img" aria-label="Example evaluation card showing category ratings and trends">
+        <div class="perf-card-head">
+          <span class="name">Evaluation</span>
+          <span class="date">Latest session</span>
+        </div>
+        <div class="rating">
+          <div class="rating-row"><span class="cat">Shot stopping</span><span class="trend">&#9650; Improved</span><span class="bar"><i style="--w:82%"></i></span></div>
+          <div class="rating-row"><span class="cat">Handling</span><span class="trend">&#9650; Improved</span><span class="bar"><i style="--w:74%"></i></span></div>
+          <div class="rating-row"><span class="cat">Distribution</span><span class="trend">&ndash; Unchanged</span><span class="bar"><i style="--w:63%"></i></span></div>
+          <div class="rating-row"><span class="cat">Positioning</span><span class="trend">&#9650; Improved</span><span class="bar"><i style="--w:70%"></i></span></div>
+          <div class="rating-row"><span class="cat">One-on-ones</span><span class="trend">&#9650; Improved</span><span class="bar"><i style="--w:58%"></i></span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CREDITS / HOW IT WORKS ============ -->
+  <section id="credits" class="rule-top" aria-labelledby="credit-title">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">How it works</span>
+        <h2 id="credit-title">Credits in. Sessions booked. Sorted.</h2>
+        <p class="lede">Parents manage everything from one account: buy a session or a package of credits, book the sessions that suit you, and amend when plans change.</p>
+      </div>
+      <div class="credit-grid">
+        <article class="credit-card reveal">
+          <span class="k">Step 1</span>
+          <h3>Buy credits</h3>
+          <p>Purchase a single session or a package. Your credit balance and expiry dates are always visible in your account, so there are no surprises.</p>
+        </article>
+        <article class="credit-card reveal reveal-delay-1">
+          <span class="k">Step 2</span>
+          <h3>Book sessions</h3>
+          <p>See available sessions and book directly. Managing more than one goalkeeper? Book different players onto different sessions from the same account.</p>
+        </article>
+        <article class="credit-card reveal reveal-delay-2">
+          <span class="k">Step 3</span>
+          <h3>Stay in the loop</h3>
+          <p>Confirmations, reminders and evaluation updates arrive automatically. If plans change, eligible bookings can be amended within the permitted window.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COACH / CREDIBILITY ============ -->
+  <section class="coach" aria-labelledby="coach-title">
+    <div class="wrap coach-grid">
+      <div class="reveal">
+        <span class="eyebrow">The coaching</span>
+        <h2 id="coach-title" style="margin:1.1rem 0 1.6rem">Goalkeeping is its own game</h2>
+        <p class="coach-quote">"Goalkeepers are made in the details: <span class="accent">set position, first touch, one more save</span> than the striker expects."</p>
+        <p class="coach-name"><strong>Matthew Towns</strong>, Head Coach, Premier Performance Goalkeeping</p>
+      </div>
+      <div class="coach-facts reveal reveal-delay-1">
+        <div class="fact"><span class="k">Specialism</span><span class="v">Goalkeeping only</span></div>
+        <div class="fact"><span class="k">Based in</span><span class="v">Malta</span></div>
+        <div class="fact"><span class="k">Session types</span><span class="v">1-to-1 / Group / Programme</span></div>
+        <div class="fact"><span class="k">Evaluation categories</span><span class="v">10 per player</span></div>
+        <div class="fact"><span class="k">Progress shared with</span><span class="v">Parents and players</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FINAL CTA ============ -->
+  <section id="book" class="cta" aria-labelledby="cta-title">
+    <div class="wrap inner reveal">
+      <span class="eyebrow" style="justify-content:center">Get started</span>
+      <h2 id="cta-title">Give your goalkeeper a coach of their own</h2>
+      <p class="lede">Create an account, add your player's profile and book their first session in minutes.</p>
+      <div class="hero-actions" style="justify-content:center">
+        <a class="btn btn-solid" href="https://dev.ppgk.app/register">Create an account</a>
+        <a class="btn btn-ghost" href="#programmes">Explore programmes first</a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span class="mono">PPGK &middot; Premier Performance Goalkeeping</span>
+    <span>Specialist goalkeeper coaching, Malta</span>
+    <span class="mono">ppgk.app</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var targets = document.querySelectorAll('.reveal');
+  if (reduce || !('IntersectionObserver' in window)) {
+    targets.forEach(function(el){ el.classList.add('in'); });
+    return;
+  }
+  var io = new IntersectionObserver(function(entries){
+    entries.forEach(function(entry){
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.18, rootMargin: '0px 0px -8% 0px' });
+  targets.forEach(function(el){ io.observe(el); });
+})();
+</script>
+
+</body>
+</html>
