@@ -11,13 +11,13 @@
     <script>
       try {
         document.documentElement.dataset.theme =
-          localStorage.getItem('ppgk-theme') || 'classic';
+          localStorage.getItem('ppgk-theme') || 'midnight';
       } catch (_) {}
     </script>
-    <!-- Google Fonts: loaded for Floodlit theme (Classic uses system fonts) -->
+    <!-- Google Fonts: shared across all themes (Big Shoulders Display + Instrument Sans) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   </head>
   <body>
     <div id="root"></div>

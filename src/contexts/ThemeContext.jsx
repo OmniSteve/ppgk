@@ -1,12 +1,12 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 
-const ThemeContext = createContext({ theme: 'classic', setTheme: () => {} });
+const ThemeContext = createContext({ theme: 'midnight', setTheme: () => {} });
 
 export function ThemeProvider({ children }) {
   const [theme, setThemeState] = useState(
     () => {
-      try { return localStorage.getItem('ppgk-theme') || 'classic'; }
-      catch (_) { return 'classic'; }
+      try { return localStorage.getItem('ppgk-theme') || 'midnight'; }
+      catch (_) { return 'midnight'; }
     }
   );
 

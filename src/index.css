@@ -62,7 +62,7 @@
     --font-display:  'Big Shoulders Display', sans-serif;
     --font-heading:  'Big Shoulders Display', sans-serif;
     --font-body:     'Instrument Sans', sans-serif;
-    --font-mono:     'Spline Sans Mono', monospace;
+    --font-mono:     'Instrument Sans', sans-serif;
   }
 
   [data-theme="floodlit"] {
@@ -124,7 +124,7 @@
     --font-display:  'Big Shoulders Display', sans-serif;
     --font-heading:  'Big Shoulders Display', sans-serif;
     --font-body:     'Instrument Sans', sans-serif;
-    --font-mono:     'Spline Sans Mono', monospace;
+    --font-mono:     'Instrument Sans', sans-serif;
   }
 
   [data-theme="midnight"] {
@@ -186,7 +186,7 @@
     --font-display:  'Big Shoulders Display', sans-serif;
     --font-heading:  'Big Shoulders Display', sans-serif;
     --font-body:     'Instrument Sans', sans-serif;
-    --font-mono:     'Spline Sans Mono', monospace;
+    --font-mono:     'Instrument Sans', sans-serif;
   }
 
   * {
@@ -208,12 +208,13 @@
     text-transform: uppercase;
   }
 
-  /* Floodlit: applied to metadata labels (refs, dates, credit balances, status tags) */
+  /* Applied to metadata labels (refs, dates, credit balances, status tags) */
   .text-label-mono {
     font-family: var(--font-mono);
     font-size: 0.75rem;
     font-weight: 500;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
   }
 }
 
