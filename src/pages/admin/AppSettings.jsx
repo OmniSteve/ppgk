@@ -97,6 +97,7 @@ export default function AppSettings() {
           {[
             { id: 'classic',   label: 'Classic dark',    desc: 'Navy background with blue accent — the original PPGK look.' },
             { id: 'floodlit',  label: 'Floodlit green',  desc: 'Dark pitch green with amber accent and display typography.' },
+            { id: 'midnight',  label: 'Midnight (black)', desc: 'Neutral black with amber accents.' },
           ].map((opt) => (
             <button
               key={opt.id}

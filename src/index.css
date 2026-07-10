@@ -58,12 +58,11 @@
     --chart-4:                 280 65% 60%;
     --chart-5:                 340 75% 55%;
 
-    /* ── Typography (system fonts — layout unchanged from before) ─────────── */
-    --font-heading:  ui-sans-serif, system-ui, sans-serif;
-    --font-body:     ui-sans-serif, system-ui, sans-serif;
-    --font-display:  ui-sans-serif, system-ui, sans-serif;
-    --font-mono:     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
-                     "Liberation Mono", "Courier New", monospace;
+    /* ── Typography ─────────────────────────────────────────────────────────── */
+    --font-display:  'Big Shoulders Display', sans-serif;
+    --font-heading:  'Big Shoulders Display', sans-serif;
+    --font-body:     'Instrument Sans', sans-serif;
+    --font-mono:     'Spline Sans Mono', monospace;
   }
 
   [data-theme="floodlit"] {
@@ -121,7 +120,69 @@
     --chart-4:                 280 65% 60%;
     --chart-5:                 5 70% 59%;
 
-    /* ── Typography (Google Fonts loaded in index.html) ──────────────────── */
+    /* ── Typography ─────────────────────────────────────────────────────────── */
+    --font-display:  'Big Shoulders Display', sans-serif;
+    --font-heading:  'Big Shoulders Display', sans-serif;
+    --font-body:     'Instrument Sans', sans-serif;
+    --font-mono:     'Spline Sans Mono', monospace;
+  }
+
+  [data-theme="midnight"] {
+    /* ── Backgrounds ─────────────────────────────────────────────────────── */
+    --background:              240 3% 6%;     /* #0d0d0f — near-black         */
+    --foreground:              100 19% 94%;   /* #eef2ec — warm chalk white   */
+    --card:                    240 2% 11%;    /* #1a1a1d                      */
+    --card-foreground:         100 19% 94%;
+    --popover:                 240 2% 11%;
+    --popover-foreground:      100 19% 94%;
+
+    /* ── Primary (glove amber — same as Floodlit) ───────────────────────── */
+    --primary:                 33 87% 59%;    /* #f2a03d amber                */
+    --primary-foreground:      150 29% 6%;    /* dark text on amber           */
+    --primary-hover:           34 75% 49%;    /* #d9871f                      */
+
+    /* ── Secondary / muted ───────────────────────────────────────────────── */
+    --secondary:               240 2% 11%;
+    --secondary-foreground:    100 19% 94%;
+    --muted:                   240 2% 11%;
+    --muted-foreground:        137 10% 66%;   /* #9fb0a4                      */
+    --accent:                  240 2% 15%;    /* #242427                      */
+    --accent-foreground:       100 19% 94%;
+
+    /* ── Status colours (same as Floodlit) ──────────────────────────────── */
+    --destructive:             5 70% 59%;
+    --destructive-foreground:  0 0% 100%;
+    --success:                 150 39% 49%;
+    --success-foreground:      150 29% 6%;
+    --warning:                 41 82% 51%;
+    --warning-foreground:      150 29% 6%;
+    --info:                    204 46% 60%;
+    --info-foreground:         150 29% 6%;
+
+    /* ── Borders / inputs ────────────────────────────────────────────────── */
+    --border:                  240 2% 18%;    /* #2c2c30                      */
+    --input:                   240 2% 18%;
+    --ring:                    33 87% 59%;
+    --radius:                  0.5rem;
+
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    --sidebar-background:      240 2% 8%;     /* #141416                      */
+    --sidebar-foreground:      100 19% 94%;
+    --sidebar-primary:         33 87% 59%;
+    --sidebar-primary-foreground: 150 29% 6%;
+    --sidebar-accent:          240 2% 13%;    /* #202023                      */
+    --sidebar-accent-foreground: 100 19% 94%;
+    --sidebar-border:          240 2% 18%;
+    --sidebar-ring:            33 87% 59%;
+
+    /* ── Charts ──────────────────────────────────────────────────────────── */
+    --chart-1:                 33 87% 59%;
+    --chart-2:                 150 39% 49%;
+    --chart-3:                 204 46% 60%;
+    --chart-4:                 280 65% 60%;
+    --chart-5:                 5 70% 59%;
+
+    /* ── Typography ─────────────────────────────────────────────────────────── */
     --font-display:  'Big Shoulders Display', sans-serif;
     --font-heading:  'Big Shoulders Display', sans-serif;
     --font-body:     'Instrument Sans', sans-serif;

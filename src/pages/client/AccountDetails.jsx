@@ -96,8 +96,9 @@ export default function AccountDetails() {
         <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Appearance</h2>
         <div className="space-y-2">
           {[
-            { id: 'classic',  label: 'Classic dark',   desc: 'Navy background with blue accent — the original PPGK look.' },
-            { id: 'floodlit', label: 'Floodlit green', desc: 'Dark pitch green with amber accent and display typography.' },
+            { id: 'classic',  label: 'Classic dark',    desc: 'Navy background with blue accent — the original PPGK look.' },
+            { id: 'floodlit', label: 'Floodlit green',  desc: 'Dark pitch green with amber accent and display typography.' },
+            { id: 'midnight', label: 'Midnight (black)', desc: 'Neutral black with amber accents.' },
           ].map((opt) => (
             <button
               key={opt.id}
