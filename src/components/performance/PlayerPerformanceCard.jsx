@@ -36,8 +36,8 @@ export default function PlayerPerformanceCard({ record, previous, canManage, onE
         <div>
           <p className="text-muted-foreground text-xs font-semibold">{formatDate(record.evaluationDate)}</p>
           <div className="flex items-center gap-3 mt-1 flex-wrap">
-            <span className="text-2xl font-black text-foreground leading-none text-label-mono">
-              {record.overallRating}<span className="text-muted-foreground text-sm">/5</span>
+            <span className="text-4xl font-black text-foreground leading-none">
+              {record.overallRating}<span className="text-muted-foreground text-lg">/5</span>
             </span>
             <RatingDisplay value={record.overallRating} size="md" />
             {previous && <TrendIndicator current={record.overallRating} previous={previous.overallRating} />}

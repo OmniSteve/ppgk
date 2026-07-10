@@ -39,8 +39,8 @@ export default function PerformanceSummary({ chronological }) {
         <div>
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Latest Evaluation</p>
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-3xl font-black text-foreground leading-none text-label-mono">
-              {latest.overallRating}<span className="text-muted-foreground text-lg">/5</span>
+            <span className="text-5xl font-black text-foreground leading-none">
+              {latest.overallRating}<span className="text-muted-foreground text-2xl">/5</span>
             </span>
             <RatingDisplay value={latest.overallRating} size="md" />
             {previous && <TrendIndicator current={latest.overallRating} previous={previous.overallRating} showLabel />}
@@ -51,8 +51,8 @@ export default function PerformanceSummary({ chronological }) {
         {avgOverall !== null && (
           <div className="sm:text-right">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Average Overall</p>
-            <p className="text-2xl font-black text-primary leading-none text-label-mono">
-              {avgOverall}<span className="text-muted-foreground text-base">/5</span>
+            <p className="text-4xl font-black text-primary leading-none">
+              {avgOverall}<span className="text-muted-foreground text-xl">/5</span>
             </p>
             <p className="text-muted-foreground text-xs mt-1.5">{chronological.length} evaluations</p>
           </div>
