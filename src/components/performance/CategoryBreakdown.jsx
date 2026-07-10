@@ -20,8 +20,8 @@ export default function CategoryBreakdown({ records }) {
   if (!records || records.length === 0) return null;
 
   return (
-    <div className="bg-white/5 rounded-2xl border border-white/10 p-5 space-y-3">
-      <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide">
+    <div className="bg-card rounded-2xl border border-border p-5 space-y-3">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
         Category Averages{records.length > 1 ? ` · ${records.length} evaluations` : ''}
       </p>
       {CATEGORY_FIELDS.map(([field, label]) => (

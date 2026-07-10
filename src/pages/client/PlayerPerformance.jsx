@@ -22,7 +22,7 @@ export default function ClientPlayerPerformance() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -30,22 +30,22 @@ export default function ClientPlayerPerformance() {
   if (notFound || !player) {
     return (
       <div className="max-w-2xl mx-auto text-center py-16 space-y-3">
-        <User size={32} className="text-slate-500 mx-auto" />
-        <p className="text-slate-400">Player not found</p>
-        <Link to="/players" className="text-[#2563EB] text-sm font-semibold hover:underline">Back to Players</Link>
+        <User size={32} className="text-muted-foreground mx-auto" />
+        <p className="text-muted-foreground">Player not found</p>
+        <Link to="/players" className="text-primary text-sm font-semibold hover:underline">Back to Players</Link>
       </div>
     );
   }
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <Link to="/players" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors print:hidden">
+      <Link to="/players" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors print:hidden">
         <ChevronLeft size={16} />Back to Players
       </Link>
 
       <div>
-        <h1 className="text-2xl font-black text-white">{player.firstName} {player.lastName} — Performance</h1>
-        <p className="text-slate-400 text-sm">Evaluations shared by your coach</p>
+        <h1 className="text-2xl font-black text-foreground">{player.firstName} {player.lastName} — Performance</h1>
+        <p className="text-muted-foreground text-sm">Evaluations shared by your coach</p>
       </div>
 
       <PlayerPerformanceList playerId={id} playerName={`${player.firstName} ${player.lastName}`} canManage={false} />

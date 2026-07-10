@@ -63,54 +63,54 @@ export default function RescheduleBooking() {
     }
   };
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" /></div>;
 
   if (success) return (
     <div className="max-w-md mx-auto py-16 text-center space-y-4">
-      <CheckCircle size={48} className="text-green-400 mx-auto" />
-      <h2 className="text-2xl font-black text-white">Booking rescheduled!</h2>
-      <p className="text-slate-400">A confirmation email has been sent. Redirecting…</p>
+      <CheckCircle size={48} className="text-success mx-auto" />
+      <h2 className="text-2xl font-black text-foreground">Booking rescheduled!</h2>
+      <p className="text-muted-foreground">A confirmation email has been sent. Redirecting…</p>
     </div>
   );
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <Link to={`/bookings/${id}`} className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
+      <Link to={`/bookings/${id}`} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
         <ChevronLeft size={16} />Back to Booking
       </Link>
 
       <div>
-        <h1 className="text-2xl font-black text-white">Reschedule Booking</h1>
-        {booking && <p className="text-slate-400 text-sm mt-1">{booking.sessionName} · {booking.playerName}</p>}
+        <h1 className="text-2xl font-black text-foreground">Reschedule Booking</h1>
+        {booking && <p className="text-muted-foreground text-sm mt-1">{booking.sessionName} · {booking.playerName}</p>}
       </div>
 
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-        <AlertCircle size={16} className="text-amber-400 flex-shrink-0 mt-0.5" />
-        <p className="text-amber-300 text-sm">You can reschedule a booking once per 7-day period from the original booking date. This action cannot be reversed through the portal.</p>
+      <div className="bg-warning/20 border border-warning/30 rounded-xl p-4 flex items-start gap-3">
+        <AlertCircle size={16} className="text-warning flex-shrink-0 mt-0.5" />
+        <p className="text-warning text-sm">You can reschedule a booking once per 7-day period from the original booking date. This action cannot be reversed through the portal.</p>
       </div>
 
-      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>}
+      {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-4 text-destructive text-sm">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-5">
-          <h2 className="font-bold text-white mb-4">Select Replacement Session</h2>
+        <div className="bg-card rounded-2xl border border-border p-5">
+          <h2 className="font-bold text-foreground mb-4">Select Replacement Session</h2>
           {availableSessions.length === 0 ? (
             <div className="text-center py-8">
-              <Calendar size={32} className="text-slate-500 mx-auto mb-2" />
-              <p className="text-slate-400 text-sm">No available sessions for rescheduling.</p>
+              <Calendar size={32} className="text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground text-sm">No available sessions for rescheduling.</p>
             </div>
           ) : (
             <div className="space-y-2">
               {availableSessions.map((s) => (
-                <label key={s.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selected === s.id ? 'border-[#2563EB] bg-[#2563EB]/10' : 'border-white/10 hover:border-white/20'}`}>
+                <label key={s.id} className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all ${selected === s.id ? 'border-primary bg-primary/10' : 'border-border hover:border-muted-foreground/40'}`}>
                   <div className="flex items-center gap-3">
-                    <input type="radio" name="session" value={s.id} checked={selected === s.id} onChange={() => setSelected(s.id)} className="accent-[#2563EB]" />
+                    <input type="radio" name="session" value={s.id} checked={selected === s.id} onChange={() => setSelected(s.id)} className="accent-primary" />
                     <div>
-                      <p className="font-semibold text-white text-sm">{s.name}</p>
-                      <p className="text-slate-400 text-xs">{s.date ? new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' }) : '—'} · {s.startTime}</p>
+                      <p className="font-semibold text-foreground text-sm">{s.name}</p>
+                      <p className="text-muted-foreground text-xs">{s.date ? new Date(s.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'short' }) : '—'} · {s.startTime}</p>
                     </div>
                   </div>
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.spotsRemaining <= 3 ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'}`}>
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${s.spotsRemaining <= 3 ? 'bg-warning/20 text-warning' : 'bg-success/20 text-success'}`}>
                     {s.spotsRemaining} spots
                   </span>
                 </label>
@@ -120,8 +120,8 @@ export default function RescheduleBooking() {
         </div>
 
         <div className="flex gap-3">
-          <Link to={`/bookings/${id}`} className="flex-1 border border-white/20 text-slate-300 font-semibold py-3 rounded-xl text-center text-sm hover:bg-white/5 transition-colors">Cancel</Link>
-          <button type="submit" disabled={submitting || !selected} className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+          <Link to={`/bookings/${id}`} className="flex-1 border border-border text-foreground font-semibold py-3 rounded-xl text-center text-sm hover:bg-accent transition-colors">Cancel</Link>
+          <button type="submit" disabled={submitting || !selected} className="flex-1 bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
             {submitting ? <><Loader2 size={16} className="animate-spin" /> Rescheduling…</> : 'Confirm Reschedule'}
           </button>
         </div>

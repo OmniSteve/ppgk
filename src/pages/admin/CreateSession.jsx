@@ -3,13 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
-const Input = (props) => <input className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors" {...props} />;
-const Select = ({ children, ...props }) => <select className="w-full bg-[#0D1B2A] border border-white/20 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-[#2563EB] transition-colors" {...props}>{children}</select>;
-const Textarea = (props) => <textarea className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors resize-none" rows={3} {...props} />;
-const Label = ({ children, required }) => <label className="block text-slate-300 text-sm font-medium mb-1.5">{children}{required && <span className="text-red-400 ml-1">*</span>}</label>;
+const Input = (props) => <input className="w-full bg-card border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" {...props} />;
+const Select = ({ children, ...props }) => <select className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-sm text-foreground focus:outline-none focus:border-primary transition-colors" {...props}>{children}</select>;
+const Textarea = (props) => <textarea className="w-full bg-card border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors resize-none" rows={3} {...props} />;
+const Label = ({ children, required }) => <label className="block text-foreground text-sm font-medium mb-1.5">{children}{required && <span className="text-destructive ml-1">*</span>}</label>;
 const Section = ({ title, children }) => (
-  <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-    <h2 className="text-slate-400 text-xs font-semibold uppercase tracking-wide">{title}</h2>
+  <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+    <h2 className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">{title}</h2>
     {children}
   </div>
 );
@@ -73,13 +73,13 @@ export default function CreateSession() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <Link to="/admin/sessions" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
+      <Link to="/admin/sessions" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
         <ChevronLeft size={16} />
         Back to Sessions
       </Link>
-      <h1 className="text-2xl font-black text-white">Create Session</h1>
+      <h1 className="text-2xl font-black text-foreground">Create Session</h1>
 
-      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>}
+      {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-4 text-destructive text-sm">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-5">
         <Section title="Session Details">
@@ -162,8 +162,8 @@ export default function CreateSession() {
         </Section>
 
         <div className="flex gap-3">
-          <Link to="/admin/sessions" className="flex-1 border border-white/20 text-slate-300 font-semibold py-3 rounded-xl text-center text-sm hover:bg-white/5 transition-colors">Cancel</Link>
-          <button type="submit" disabled={loading} className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+          <Link to="/admin/sessions" className="flex-1 border border-border text-foreground font-semibold py-3 rounded-xl text-center text-sm hover:bg-accent transition-colors">Cancel</Link>
+          <button type="submit" disabled={loading} className="flex-1 bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
             {loading ? <><Loader2 size={16} className="animate-spin" /> Creating…</> : 'Create Session'}
           </button>
         </div>

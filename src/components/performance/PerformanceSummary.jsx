@@ -34,32 +34,32 @@ export default function PerformanceSummary({ chronological }) {
   const avgOverall = chronological.length > 1 ? average(chronological, 'overallRating') : null;
 
   return (
-    <div className="bg-[#0D1B2A] rounded-2xl border border-white/10 p-5 space-y-4">
+    <div className="bg-sidebar rounded-2xl border border-border p-5 space-y-4">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Latest Evaluation</p>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Latest Evaluation</p>
           <div className="flex items-center gap-3 flex-wrap">
-            <span className="text-3xl font-black text-white leading-none">
-              {latest.overallRating}<span className="text-slate-500 text-lg">/5</span>
+            <span className="text-3xl font-black text-foreground leading-none text-label-mono">
+              {latest.overallRating}<span className="text-muted-foreground text-lg">/5</span>
             </span>
             <RatingDisplay value={latest.overallRating} size="md" />
             {previous && <TrendIndicator current={latest.overallRating} previous={previous.overallRating} showLabel />}
           </div>
-          <p className="text-slate-400 text-xs mt-1.5">{formatDate(latest.evaluationDate)}</p>
+          <p className="text-muted-foreground text-xs mt-1.5">{formatDate(latest.evaluationDate)}</p>
         </div>
 
         {avgOverall !== null && (
           <div className="sm:text-right">
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Average Overall</p>
-            <p className="text-2xl font-black text-[#2563EB] leading-none">
-              {avgOverall}<span className="text-slate-500 text-base">/5</span>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1.5">Average Overall</p>
+            <p className="text-2xl font-black text-primary leading-none text-label-mono">
+              {avgOverall}<span className="text-muted-foreground text-base">/5</span>
             </p>
-            <p className="text-slate-500 text-xs mt-1.5">{chronological.length} evaluations</p>
+            <p className="text-muted-foreground text-xs mt-1.5">{chronological.length} evaluations</p>
           </div>
         )}
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2.5 pt-3 border-t border-white/10">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2.5 pt-3 border-t border-border">
         {CATEGORY_FIELDS.map(([field, label]) => (
           <div key={field} className="flex items-center gap-2 flex-wrap">
             <RatingDisplay value={latest[field]} label={label} size="sm" />

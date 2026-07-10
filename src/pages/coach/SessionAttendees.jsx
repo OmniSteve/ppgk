@@ -19,57 +19,57 @@ export default function SessionAttendees() {
     }).catch(console.error).finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" /></div>;
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <Link to="/coach/sessions" className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors">
+      <Link to="/coach/sessions" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
         <ChevronLeft size={16} />Back to Sessions
       </Link>
 
       {session && (
-        <div className="bg-[#0D1B2A] rounded-2xl p-5 border border-white/10">
-          <h1 className="text-white font-black text-xl">{session.title || session.name}</h1>
-          <p className="text-slate-400 text-sm mt-1">{session.sessionDate ? new Date(session.sessionDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {session.startTime} – {session.endTime}</p>
-          <p className="text-[#2563EB] text-sm mt-1">{attendees.length} / {session.capacity} players</p>
+        <div className="bg-sidebar rounded-2xl p-5 border border-border">
+          <h1 className="text-foreground font-black text-xl">{session.title || session.name}</h1>
+          <p className="text-muted-foreground text-sm mt-1">{session.sessionDate ? new Date(session.sessionDate).toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '—'} · {session.startTime} – {session.endTime}</p>
+          <p className="text-primary text-sm mt-1 text-label-mono">{attendees.length} / {session.capacity} players</p>
         </div>
       )}
 
       <div className="flex justify-end">
-        <Link to={`/coach/sessions/${id}/attendance`} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-5 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2">
+        <Link to={`/coach/sessions/${id}/attendance`} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-5 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2">
           <ClipboardList size={16} />Record Attendance
         </Link>
       </div>
 
       {attendees.length === 0 ? (
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-12 text-center">
-          <User size={32} className="text-slate-500 mx-auto mb-2" />
-          <p className="text-slate-400">No bookings yet</p>
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <User size={32} className="text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">No bookings yet</p>
         </div>
       ) : (
-        <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/10">
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border">
           {attendees.map((a) => (
             <div key={a.bookingId} className="p-5">
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex items-center justify-center">
-                    <span className="font-bold text-white text-sm">{a.firstName?.[0]}{a.lastName?.[0]}</span>
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                    <span className="font-bold text-foreground text-sm">{a.firstName?.[0]}{a.lastName?.[0]}</span>
                   </div>
                   <div>
-                    <p className="font-bold text-white text-sm">{a.firstName} {a.lastName}</p>
-                    <p className="text-slate-400 text-xs">{a.ageGroup} · {a.experienceLevel}</p>
-                    <p className="text-slate-500 text-xs mt-0.5">Parent: {a.parentName}</p>
+                    <p className="font-bold text-foreground text-sm">{a.firstName} {a.lastName}</p>
+                    <p className="text-muted-foreground text-xs">{a.ageGroup} · {a.experienceLevel}</p>
+                    <p className="text-muted-foreground text-xs mt-0.5">Parent: {a.parentName}</p>
                   </div>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  a.bookingStatus === 'confirmed' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'
+                  a.bookingStatus === 'confirmed' ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'
                 }`}>{a.bookingStatus?.replace(/_/g, ' ')}</span>
               </div>
 
               {(a.medicalInfo || a.allergies) && (
-                <div className="mt-3 bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex items-start gap-2">
-                  <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
-                  <div className="text-xs text-amber-300">
+                <div className="mt-3 bg-warning/20 border border-warning/30 rounded-xl p-3 flex items-start gap-2">
+                  <AlertTriangle size={14} className="text-warning flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-warning">
                     {a.medicalInfo && <p><strong>Medical:</strong> {a.medicalInfo}</p>}
                     {a.allergies && <p><strong>Allergies:</strong> {a.allergies}</p>}
                   </div>
@@ -77,7 +77,7 @@ export default function SessionAttendees() {
               )}
 
               {a.emergencyPhone && (
-                <div className="mt-2 flex items-center gap-1.5 text-slate-500 text-xs">
+                <div className="mt-2 flex items-center gap-1.5 text-muted-foreground text-xs">
                   <Phone size={12} />Emergency: {a.emergencyContactName} — {a.emergencyPhone}
                 </div>
               )}
@@ -86,7 +86,7 @@ export default function SessionAttendees() {
                 <Link
                   to={`/coach/players/${a.playerId}/performance`}
                   state={{ player: { firstName: a.firstName, lastName: a.lastName, clientId: a.clientId } }}
-                  className="flex items-center gap-1.5 text-xs font-semibold text-[#2563EB] hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 text-xs font-semibold text-primary hover:text-foreground transition-colors"
                 >
                   <TrendingUp size={13} />Performance
                 </Link>

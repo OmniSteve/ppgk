@@ -14,7 +14,7 @@ export default function TrendIndicator({ current, previous, size = 12, showLabel
   if (diff === 0) {
     if (!showLabel) return null;
     return (
-      <span className="inline-flex items-center gap-1 text-slate-400 text-xs font-semibold">
+      <span className="inline-flex items-center gap-1 text-muted-foreground text-xs font-semibold">
         No change from previous evaluation
       </span>
     );
@@ -22,7 +22,7 @@ export default function TrendIndicator({ current, previous, size = 12, showLabel
 
   const improved = diff > 0;
   const Icon = improved ? ArrowUp : ArrowDown;
-  const colorCls = improved ? 'text-green-400' : 'text-red-400';
+  const colorCls = improved ? 'text-success' : 'text-destructive';
 
   if (showLabel) {
     return (

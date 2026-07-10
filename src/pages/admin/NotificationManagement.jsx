@@ -57,44 +57,44 @@ export default function NotificationManagement() {
     }
   };
 
-  const inp = 'w-full bg-white/5 border border-white/20 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors';
+  const inp = 'w-full bg-card border border-border rounded-xl px-4 py-2.5 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors';
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-white">Notifications</h1>
-          <p className="text-slate-400 text-sm">Log and email templates</p>
+          <h1 className="text-2xl font-black text-foreground">Notifications</h1>
+          <p className="text-muted-foreground text-sm">Log and email templates</p>
         </div>
         {tab === 'templates' && (
-          <button onClick={() => { setForm(defaultTemplate); setEditingTemplate('new'); setError(''); }} className="bg-[#2563EB] hover:bg-[#1D4ED8] text-white font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors">
+          <button onClick={() => { setForm(defaultTemplate); setEditingTemplate('new'); setError(''); }} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors">
             <Plus size={15} />New Template
           </button>
         )}
       </div>
 
-      <div className="flex bg-white/5 rounded-xl p-1 gap-1">
+      <div className="flex bg-card rounded-xl p-1 gap-1 border border-border">
         {['log', 'templates'].map((t) => (
-          <button key={t} onClick={() => setTab(t)} className={`flex-1 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-[#2563EB] text-white' : 'text-slate-400 hover:text-white'}`}>{t === 'log' ? 'Notification Log' : 'Email Templates'}</button>
+          <button key={t} onClick={() => setTab(t)} className={`flex-1 py-2 rounded-lg text-sm font-semibold capitalize transition-all ${tab === t ? 'bg-primary text-foreground' : 'text-muted-foreground hover:text-foreground'}`}>{t === 'log' ? 'Notification Log' : 'Email Templates'}</button>
         ))}
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" /></div>
+        <div className="flex items-center justify-center h-48"><div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" /></div>
       ) : tab === 'log' ? (
         <>
-          <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/5">
+          <div className="bg-card rounded-2xl border border-border divide-y divide-border">
             {notifications.length === 0 ? (
-              <div className="p-16 text-center"><Bell size={36} className="text-slate-500 mx-auto mb-2" /><p className="text-slate-400">No notifications sent yet</p></div>
+              <div className="p-16 text-center"><Bell size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No notifications sent yet</p></div>
             ) : notifications.map((n) => (
-              <div key={n.id} className="flex items-start gap-4 px-5 py-4 hover:bg-white/5 transition-colors">
-                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${n.status === 'sent' ? 'bg-green-400' : n.status === 'failed' ? 'bg-red-400' : 'bg-amber-400'}`} />
+              <div key={n.id} className="flex items-start gap-4 px-5 py-4 hover:bg-accent transition-colors">
+                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${n.status === 'sent' ? 'bg-success' : n.status === 'failed' ? 'bg-destructive' : 'bg-warning'}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white text-sm">{n.subject}</p>
-                  <p className="text-slate-400 text-xs mt-0.5">To: {n.recipientEmail} · {new Date(n.sentAt || n.createdAt).toLocaleString('en-MT')}</p>
-                  {n.errorMessage && <p className="text-red-400 text-xs mt-0.5">{n.errorMessage}</p>}
+                  <p className="font-bold text-foreground text-sm">{n.subject}</p>
+                  <p className="text-muted-foreground text-xs mt-0.5">To: {n.recipientEmail} · {new Date(n.sentAt || n.createdAt).toLocaleString('en-MT')}</p>
+                  {n.errorMessage && <p className="text-destructive text-xs mt-0.5">{n.errorMessage}</p>}
                 </div>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${n.status === 'sent' ? 'bg-green-500/20 text-green-400' : n.status === 'failed' ? 'bg-red-500/20 text-red-400' : 'bg-amber-500/20 text-amber-400'}`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${n.status === 'sent' ? 'bg-success/20 text-success' : n.status === 'failed' ? 'bg-destructive/20 text-destructive' : 'bg-warning/20 text-warning'}`}>
                   {n.status}
                 </span>
               </div>
@@ -102,10 +102,10 @@ export default function NotificationManagement() {
           </div>
           {total > 25 && (
             <div className="flex items-center justify-between">
-              <p className="text-slate-400 text-sm">Page {page} of {Math.ceil(total / 25)}</p>
+              <p className="text-muted-foreground text-sm">Page {page} of {Math.ceil(total / 25)}</p>
               <div className="flex gap-2">
-                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded-xl border border-white/10 text-sm text-slate-400 disabled:opacity-40 transition-colors">Previous</button>
-                <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / 25)} className="px-4 py-2 rounded-xl border border-white/10 text-sm text-slate-400 disabled:opacity-40 transition-colors">Next</button>
+                <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground disabled:opacity-40 transition-colors">Previous</button>
+                <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / 25)} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground disabled:opacity-40 transition-colors">Next</button>
               </div>
             </div>
           )}
@@ -113,53 +113,53 @@ export default function NotificationManagement() {
       ) : (
         <>
           {editingTemplate && (
-            <div className="bg-white/5 rounded-2xl border border-[#2563EB]/30 p-6 space-y-4">
+            <div className="bg-card rounded-2xl border border-primary/30 p-6 space-y-4">
               <div className="flex items-center justify-between">
-                <h2 className="font-bold text-white">{editingTemplate === 'new' ? 'New Template' : 'Edit Template'}</h2>
-                <button onClick={() => setEditingTemplate(null)} className="text-slate-400 hover:text-white"><X size={18} /></button>
+                <h2 className="font-bold text-foreground">{editingTemplate === 'new' ? 'New Template' : 'Edit Template'}</h2>
+                <button onClick={() => setEditingTemplate(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
               </div>
-              {error && <p className="text-red-400 text-sm">{error}</p>}
+              {error && <p className="text-destructive text-sm">{error}</p>}
               <div className="grid grid-cols-2 gap-4">
-                <div><label className="block text-slate-400 text-xs mb-1">Template Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inp} /></div>
+                <div><label className="block text-muted-foreground text-xs mb-1">Template Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inp} /></div>
                 <div>
-                  <label className="block text-slate-400 text-xs mb-1">Event Trigger</label>
+                  <label className="block text-muted-foreground text-xs mb-1">Event Trigger</label>
                   <select value={form.eventTrigger} onChange={(e) => setForm({ ...form, eventTrigger: e.target.value })} className={inp}>
                     <option value="">Select trigger…</option>
                     {triggers.map((t) => <option key={t} value={t}>{t.replace(/_/g, ' ')}</option>)}
                   </select>
                 </div>
               </div>
-              <div><label className="block text-slate-400 text-xs mb-1">Subject Line</label><input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inp} placeholder="Use {{variable}} for dynamic values" /></div>
-              <div><label className="block text-slate-400 text-xs mb-1">Body HTML</label><textarea value={form.bodyHtml} onChange={(e) => setForm({ ...form, bodyHtml: e.target.value })} className={inp + ' resize-none font-mono text-xs'} rows={8} placeholder="HTML content — use {{variable}} placeholders" /></div>
+              <div><label className="block text-muted-foreground text-xs mb-1">Subject Line</label><input value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })} className={inp} placeholder="Use {{variable}} for dynamic values" /></div>
+              <div><label className="block text-muted-foreground text-xs mb-1">Body HTML</label><textarea value={form.bodyHtml} onChange={(e) => setForm({ ...form, bodyHtml: e.target.value })} className={inp + ' resize-none font-mono text-xs'} rows={8} placeholder="HTML content — use {{variable}} placeholders" /></div>
               <label className="flex items-center gap-2 cursor-pointer">
-                <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="accent-[#2563EB]" />
-                <span className="text-slate-300 text-sm">Active</span>
+                <input type="checkbox" checked={form.active} onChange={(e) => setForm({ ...form, active: e.target.checked })} className="accent-primary" />
+                <span className="text-foreground text-sm">Active</span>
               </label>
               <div className="flex gap-3">
-                <button onClick={() => setEditingTemplate(null)} className="flex-1 border border-white/20 text-slate-300 font-semibold py-2.5 rounded-xl text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                <button onClick={saveTemplate} disabled={saving} className="flex-1 bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
+                <button onClick={() => setEditingTemplate(null)} className="flex-1 border border-border text-foreground font-semibold py-2.5 rounded-xl text-sm hover:bg-accent transition-colors">Cancel</button>
+                <button onClick={saveTemplate} disabled={saving} className="flex-1 bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
                   {saving ? <><Loader2 size={14} className="animate-spin" />Saving…</> : 'Save Template'}
                 </button>
               </div>
             </div>
           )}
-          <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/5">
+          <div className="bg-card rounded-2xl border border-border divide-y divide-border">
             {templates.length === 0 ? (
-              <div className="p-16 text-center"><p className="text-slate-400">No templates configured</p></div>
+              <div className="p-16 text-center"><p className="text-muted-foreground">No templates configured</p></div>
             ) : templates.map((t) => (
-              <div key={t.id} className="flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition-colors">
+              <div key={t.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-white text-sm">{t.name}</p>
-                  <p className="text-slate-400 text-xs">{t.eventTrigger?.replace(/_/g, ' ')} · {t.subject}</p>
+                  <p className="font-bold text-foreground text-sm">{t.name}</p>
+                  <p className="text-muted-foreground text-xs">{t.eventTrigger?.replace(/_/g, ' ')} · {t.subject}</p>
                 </div>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${t.active ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${t.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                   {t.active ? 'Active' : 'Inactive'}
                 </span>
                 <div className="flex gap-2 flex-shrink-0">
-                  <button onClick={() => testSend(t.id)} className="w-8 h-8 rounded-lg bg-white/10 hover:bg-green-500/20 flex items-center justify-center text-slate-400 hover:text-green-400 transition-all">
+                  <button onClick={() => testSend(t.id)} className="w-8 h-8 rounded-lg bg-accent hover:bg-success/20 flex items-center justify-center text-muted-foreground hover:text-success transition-all">
                     <Send size={13} />
                   </button>
-                  <button onClick={() => { setForm({ ...t }); setEditingTemplate(t.id); setError(''); }} className="w-8 h-8 rounded-lg bg-white/10 hover:bg-[#2563EB] flex items-center justify-center text-slate-400 hover:text-white transition-all">
+                  <button onClick={() => { setForm({ ...t }); setEditingTemplate(t.id); setError(''); }} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                     <Edit2 size={13} />
                   </button>
                 </div>

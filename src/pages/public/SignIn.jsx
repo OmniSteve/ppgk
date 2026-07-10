@@ -28,51 +28,51 @@ export default function SignIn() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0D1B2A] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-sidebar flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-[#2563EB] flex items-center justify-center mx-auto mb-4">
-            <span className="text-white font-black text-xl">GK</span>
+          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
+            <span className="text-foreground font-black text-xl">GK</span>
           </div>
-          <h1 className="text-white font-black text-3xl mb-2">Welcome back</h1>
-          <p className="text-slate-400">Sign in to your account</p>
+          <h1 className="text-foreground font-black text-3xl mb-2 text-display">Welcome back</h1>
+          <p className="text-muted-foreground">Sign in to your account</p>
         </div>
 
-        <div className="bg-[#0F2237] rounded-2xl p-8 border border-white/10 shadow-xl">
+        <div className="bg-[#0F2237] rounded-2xl p-8 border border-border shadow-xl">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-lg p-3 mb-6">
+            <div className="bg-destructive/20 border border-destructive/30 text-destructive text-sm rounded-lg p-3 mb-6">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">Email address</label>
+              <label className="block text-foreground text-sm font-medium mb-2">Email address</label>
               <input
                 type="email"
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-[#0D1B2A] border border-white/20 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors"
+                className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label className="block text-slate-300 text-sm font-medium mb-2">Password</label>
+              <label className="block text-foreground text-sm font-medium mb-2">Password</label>
               <div className="relative">
                 <input
                   type={showPassword ? 'text' : 'password'}
                   required
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full bg-[#0D1B2A] border border-white/20 rounded-xl px-4 py-3 pr-12 text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors"
+                  className="w-full bg-sidebar border border-border rounded-xl px-4 py-3 pr-12 text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors"
                   placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                 </button>
@@ -80,7 +80,7 @@ export default function SignIn() {
             </div>
 
             <div className="flex justify-end">
-              <Link to="/forgot-password" className="text-[#2563EB] text-sm hover:underline">
+              <Link to="/forgot-password" className="text-primary text-sm hover:underline">
                 Forgot password?
               </Link>
             </div>
@@ -88,15 +88,15 @@ export default function SignIn() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+              className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-foreground font-bold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               {loading ? <><Loader2 size={18} className="animate-spin" /> Signing in…</> : 'Sign In'}
             </button>
           </form>
 
-          <p className="text-center text-slate-400 text-sm mt-6">
+          <p className="text-center text-muted-foreground text-sm mt-6">
             Don't have an account?{' '}
-            <Link to="/register" className="text-[#2563EB] font-medium hover:underline">
+            <Link to="/register" className="text-primary font-medium hover:underline">
               Create one
             </Link>
           </p>

@@ -11,13 +11,13 @@ export default function CoachPlayerPerformance() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-slate-400 hover:text-white text-sm font-medium transition-colors print:hidden">
+      <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors print:hidden">
         <ChevronLeft size={16} />Back
       </button>
 
       <div>
-        <h1 className="text-2xl font-black text-white">{playerName || 'Player'} — Performance</h1>
-        <p className="text-slate-400 text-sm">Goalkeeper evaluation history and progress</p>
+        <h1 className="text-2xl font-black text-foreground">{playerName || 'Player'} — Performance</h1>
+        <p className="text-muted-foreground text-sm">Goalkeeper evaluation history and progress</p>
       </div>
 
       <PlayerPerformanceList

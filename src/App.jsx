@@ -13,6 +13,9 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from 'react-
 import PageNotFound from '@/lib/PageNotFound';
 
 
+// Theme
+import { ThemeProvider } from '@/contexts/ThemeContext';
+
 // Real application auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -87,8 +90,8 @@ const AppRoutes = () => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#0F172A]">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
@@ -168,6 +171,7 @@ const AppRoutes = () => {
 
 function App() {
   return (
+    <ThemeProvider>
       <AuthProvider>
         <QueryClientProvider client={queryClientInstance}>
           <Router>
@@ -178,6 +182,7 @@ function App() {
           <Toaster />
         </QueryClientProvider>
       </AuthProvider>
+    </ThemeProvider>
   );
 }
 

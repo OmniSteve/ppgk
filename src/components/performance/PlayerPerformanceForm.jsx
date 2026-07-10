@@ -3,8 +3,8 @@ import { X, Save } from 'lucide-react';
 import RatingInput from './RatingInput';
 import { createPerformanceRecord, updatePerformanceRecord } from '@/services/playerPerformance';
 
-const inputCls = 'w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors';
-const labelCls = 'block text-xs font-semibold text-slate-400 mb-1';
+const inputCls = 'w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors';
+const labelCls = 'block text-xs font-semibold text-muted-foreground mb-1';
 
 const RATING_FIELDS = [
   ['overallRating', 'Overall'],
@@ -76,14 +76,14 @@ export default function PlayerPerformanceForm({ playerId, clientId, playerName, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="bg-[#0F172A] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 bg-[#0F172A]">
-          <h2 className="font-bold text-white text-lg">{isEdit ? 'Edit' : 'New'} Evaluation{playerName ? ` — ${playerName}` : ''}</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-colors"><X size={15} /></button>
+      <div className="bg-background border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-background">
+          <h2 className="font-bold text-foreground text-lg">{isEdit ? 'Edit' : 'New'} Evaluation{playerName ? ` — ${playerName}` : ''}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><X size={15} /></button>
         </div>
 
         <div className="p-5 space-y-5">
-          {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">{error}</div>}
+          {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-3 text-destructive text-sm">{error}</div>}
 
           <div>
             <label className={labelCls}>Evaluation Date</label>
@@ -92,7 +92,7 @@ export default function PlayerPerformanceForm({ playerId, clientId, playerName, 
 
           <div>
             <p className={labelCls}>Ratings</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-white/5 border border-white/10 rounded-xl p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-accent border border-border rounded-xl p-4">
               {RATING_FIELDS.map(([key, label]) => (
                 <RatingInput key={key} label={label} value={form[key]} onChange={setRating(key)} />
               ))}
@@ -109,15 +109,15 @@ export default function PlayerPerformanceForm({ playerId, clientId, playerName, 
               type="checkbox"
               checked={form.isVisibleToClient}
               onChange={(e) => setForm((f) => ({ ...f, isVisibleToClient: e.target.checked }))}
-              className="w-4 h-4 rounded accent-[#2563EB]"
+              className="w-4 h-4 rounded accent-primary"
             />
-            <span className="text-sm text-slate-300">Visible to client/parent</span>
+            <span className="text-sm text-foreground">Visible to client/parent</span>
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-5 border-t border-white/10 sticky bottom-0 bg-[#0F172A]">
-          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-white/10 text-sm text-slate-400 hover:border-white/30 transition-colors">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2">
+        <div className="flex items-center justify-end gap-3 p-5 border-t border-border sticky bottom-0 bg-background">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:border-muted-foreground/40 transition-colors">Cancel</button>
+          <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-foreground text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2">
             <Save size={14} />{saving ? 'Saving…' : 'Save Evaluation'}
           </button>
         </div>

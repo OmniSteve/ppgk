@@ -24,14 +24,14 @@ const navItems = [
 function SidebarNav({ user, location, onLinkClick, onSignOut }) {
   return (
     <div className="flex flex-col h-full">
-      <div className="p-6 border-b border-white/10">
+      <div className="p-6 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#2563EB] flex items-center justify-center">
-            <span className="text-white font-bold text-sm">GK</span>
+          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+            <span className="text-foreground font-bold text-sm">GK</span>
           </div>
           <div>
-            <p className="text-white font-bold text-sm leading-tight">Premier Performance</p>
-            <p className="text-[#2563EB] text-xs font-medium">Goalkeeping</p>
+            <p className="text-foreground font-bold text-sm leading-tight">Premier Performance</p>
+            <p className="text-primary text-xs font-medium">Goalkeeping</p>
           </div>
         </div>
       </div>
@@ -45,7 +45,7 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
               to={item.href}
               onClick={onLinkClick}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                active ? 'bg-[#2563EB] text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                active ? 'bg-primary text-foreground' : 'text-foreground hover:bg-accent hover:text-foreground'
               }`}
             >
               <item.icon size={18} />
@@ -55,15 +55,15 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
         })}
 
         {(user?.role === 'admin' || user?.role === 'coach' || user?.role === 'head_coach') && (
-          <div className="pt-4 mt-4 border-t border-white/10">
+          <div className="pt-4 mt-4 border-t border-border">
             {(user?.role === 'coach' || user?.role === 'head_coach') && (
-              <Link to="/coach" onClick={onLinkClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+              <Link to="/coach" onClick={onLinkClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-accent hover:text-foreground transition-all">
                 <Briefcase size={18} />
                 Coach Area
               </Link>
             )}
             {user?.role === 'admin' && (
-              <Link to="/admin" onClick={onLinkClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/10 hover:text-white transition-all">
+              <Link to="/admin" onClick={onLinkClick} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-foreground hover:bg-accent hover:text-foreground transition-all">
                 <Shield size={18} />
                 Admin Area
               </Link>
@@ -72,21 +72,21 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
         )}
       </nav>
 
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 border-t border-border">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-8 h-8 rounded-full bg-[#2563EB]/20 flex items-center justify-center">
-            <span className="text-[#2563EB] text-xs font-bold">
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+            <span className="text-primary text-xs font-bold">
               {user?.firstName?.[0]}{user?.lastName?.[0]}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{user?.firstName} {user?.lastName}</p>
-            <p className="text-slate-400 text-xs truncate">{user?.email}</p>
+            <p className="text-foreground text-sm font-medium truncate">{user?.firstName} {user?.lastName}</p>
+            <p className="text-muted-foreground text-xs truncate">{user?.email}</p>
           </div>
         </div>
         <button
           onClick={onSignOut}
-          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-white/10 hover:text-white transition-all"
+          className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-all"
         >
           <LogOut size={16} />
           Sign Out
@@ -108,9 +108,9 @@ export default function ClientLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-[#0F172A] flex">
+    <div className="min-h-screen bg-background flex">
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex flex-col w-64 bg-[#0D1B2A] fixed inset-y-0 left-0 z-30 print:hidden">
+      <aside className="hidden lg:flex flex-col w-64 bg-sidebar fixed inset-y-0 left-0 z-30 print:hidden">
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
@@ -118,10 +118,10 @@ export default function ClientLayout({ children }) {
       {sidebarOpen && (
         <div className="lg:hidden fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative z-50 flex flex-col w-72 bg-[#0D1B2A]">
+          <aside className="relative z-50 flex flex-col w-72 bg-sidebar">
             <button
               onClick={() => setSidebarOpen(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
             >
               <X size={20} />
             </button>
@@ -133,14 +133,14 @@ export default function ClientLayout({ children }) {
       {/* Main Content */}
       <div className="flex-1 lg:ml-64 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile Header */}
-        <header className="lg:hidden print:hidden bg-[#0D1B2A] px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-white/10">
+        <header className="lg:hidden print:hidden bg-sidebar px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-[#2563EB] flex items-center justify-center">
-              <span className="text-white font-bold text-xs">GK</span>
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+              <span className="text-foreground font-bold text-xs">GK</span>
             </div>
-            <span className="text-white font-bold text-sm">Premier Performance</span>
+            <span className="text-foreground font-bold text-sm">Premier Performance</span>
           </div>
-          <button onClick={() => setSidebarOpen(true)} className="text-slate-300 hover:text-white p-1">
+          <button onClick={() => setSidebarOpen(true)} className="text-foreground hover:text-foreground p-1">
             <Menu size={22} />
           </button>
         </header>

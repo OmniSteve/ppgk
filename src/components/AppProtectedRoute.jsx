@@ -14,8 +14,8 @@ export default function AppProtectedRoute({ allowedRoles = [] }) {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-[#0F172A]">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+      <div className="fixed inset-0 flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
   }

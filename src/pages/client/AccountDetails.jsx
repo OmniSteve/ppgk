@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, CheckCircle } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import { useTheme } from '@/contexts/ThemeContext';
 
-const inputCls = 'w-full bg-white/5 border border-white/20 rounded-xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors';
-const labelCls = 'block text-sm font-medium text-slate-300 mb-1.5';
+const inputCls = 'w-full bg-card border border-border rounded-xl px-4 py-3 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors';
+const labelCls = 'block text-sm font-medium text-foreground mb-1.5';
 
 export default function AccountDetails() {
   const { user, updateUser } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [form, setForm] = useState({ firstName: '', lastName: '', email: '', phone: '', emergencyContactName: '', emergencyContactPhone: '', emergencyContactRelation: '' });
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -54,14 +56,14 @@ export default function AccountDetails() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
-      <h1 className="text-2xl font-black text-white">Account Details</h1>
+      <h1 className="text-2xl font-black text-foreground">Account Details</h1>
 
-      {success && <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4 flex items-center gap-2 text-green-400 text-sm"><CheckCircle size={16} />Details saved successfully.</div>}
-      {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-4 text-red-400 text-sm">{error}</div>}
+      {success && <div className="bg-success/20 border border-success/30 rounded-xl p-4 flex items-center gap-2 text-success text-sm"><CheckCircle size={16} />Details saved successfully.</div>}
+      {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-4 text-destructive text-sm">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-5">
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-          <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Personal Information</h2>
+        <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+          <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Personal Information</h2>
           <div className="grid grid-cols-2 gap-4">
             <div><label className={labelCls}>First name</label><input value={form.firstName} onChange={set('firstName')} className={inputCls} /></div>
             <div><label className={labelCls}>Last name</label><input value={form.lastName} onChange={set('lastName')} className={inputCls} /></div>
@@ -70,8 +72,8 @@ export default function AccountDetails() {
           <div><label className={labelCls}>Mobile number</label><input type="tel" value={form.phone} onChange={set('phone')} className={inputCls} /></div>
         </div>
 
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-6 space-y-4">
-          <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500">Emergency Contact</h2>
+        <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+          <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Emergency Contact</h2>
           <div className="grid grid-cols-2 gap-4">
             <div><label className={labelCls}>Name</label><input value={form.emergencyContactName} onChange={set('emergencyContactName')} className={inputCls} /></div>
             <div><label className={labelCls}>Phone</label><input type="tel" value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} className={inputCls} /></div>
@@ -79,16 +81,43 @@ export default function AccountDetails() {
           </div>
         </div>
 
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-6">
-          <h2 className="font-bold text-xs uppercase tracking-wide text-slate-500 mb-4">Security</h2>
-          <p className="text-slate-400 text-sm mb-3">To change your password, use the forgot password flow from the sign-in page.</p>
-          <a href="/forgot-password" className="text-[#2563EB] text-sm font-semibold hover:underline">Change Password →</a>
+        <div className="bg-card rounded-2xl border border-border p-6">
+          <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground mb-4">Security</h2>
+          <p className="text-muted-foreground text-sm mb-3">To change your password, use the forgot password flow from the sign-in page.</p>
+          <a href="/forgot-password" className="text-primary text-sm font-semibold hover:underline">Change Password →</a>
         </div>
 
-        <button type="submit" disabled={loading} className="w-full bg-[#2563EB] hover:bg-[#1D4ED8] disabled:opacity-50 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
+        <button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 text-foreground font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2">
           {loading ? <><Loader2 size={16} className="animate-spin" /> Saving…</> : 'Save Changes'}
         </button>
       </form>
+
+      <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
+        <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Appearance</h2>
+        <div className="space-y-2">
+          {[
+            { id: 'classic',  label: 'Classic dark',   desc: 'Navy background with blue accent — the original PPGK look.' },
+            { id: 'floodlit', label: 'Floodlit green', desc: 'Dark pitch green with amber accent and display typography.' },
+          ].map((opt) => (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => setTheme(opt.id)}
+              className={`w-full flex items-start gap-3 p-4 rounded-xl border text-left transition-all ${
+                theme === opt.id ? 'border-primary bg-primary/10' : 'border-border hover:border-border'
+              }`}
+            >
+              <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 ${
+                theme === opt.id ? 'border-primary bg-primary' : 'border-border'
+              }`} />
+              <div>
+                <p className={`text-sm font-semibold ${theme === opt.id ? 'text-primary' : 'text-foreground'}`}>{opt.label}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{opt.desc}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

@@ -6,8 +6,8 @@ import { apiClient } from '@/services/apiClient';
 const EXPERIENCE_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Elite'];
 const AGE_GROUPS = ['U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14', 'U15', 'U16', 'U17', 'U18', 'Senior'];
 
-const inputCls = 'w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors';
-const labelCls = 'block text-xs font-semibold text-slate-400 mb-1';
+const inputCls = 'w-full px-3 py-2 bg-card border border-border rounded-lg text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors';
+const labelCls = 'block text-xs font-semibold text-muted-foreground mb-1';
 
 function EditModal({ player, onClose, onSaved }) {
   const [form, setForm] = useState({
@@ -46,14 +46,14 @@ function EditModal({ player, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="bg-[#0F172A] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-5 border-b border-white/10 sticky top-0 bg-[#0F172A]">
-          <h2 className="font-bold text-white text-lg">Edit Player — {player.firstName} {player.lastName}</h2>
-          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-slate-400 hover:text-white transition-colors"><X size={15} /></button>
+      <div className="bg-background border border-border rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-5 border-b border-border sticky top-0 bg-background">
+          <h2 className="font-bold text-foreground text-lg">Edit Player — {player.firstName} {player.lastName}</h2>
+          <button onClick={onClose} className="w-8 h-8 rounded-lg bg-card flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"><X size={15} /></button>
         </div>
 
         <div className="p-5 space-y-5">
-          {error && <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-3 text-red-400 text-sm">{error}</div>}
+          {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-3 text-destructive text-sm">{error}</div>}
 
           <div className="grid grid-cols-2 gap-4">
             <div><label className={labelCls}>First Name</label><input className={inputCls} value={form.firstName} onChange={set('firstName')} /></div>
@@ -94,16 +94,16 @@ function EditModal({ player, onClose, onSaved }) {
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-4">
-            <p className="text-xs font-semibold text-amber-400 mb-3 flex items-center gap-1.5"><AlertTriangle size={13} />Medical Information</p>
+          <div className="border-t border-border pt-4">
+            <p className="text-xs font-semibold text-warning mb-3 flex items-center gap-1.5"><AlertTriangle size={13} />Medical Information</p>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={labelCls}>Medical Info</label><textarea className={inputCls} rows={3} value={form.medicalInfo} onChange={set('medicalInfo')} /></div>
               <div><label className={labelCls}>Allergies</label><textarea className={inputCls} rows={3} value={form.allergies} onChange={set('allergies')} /></div>
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-4">
-            <p className="text-xs font-semibold text-slate-400 mb-3">Emergency Contact</p>
+          <div className="border-t border-border pt-4">
+            <p className="text-xs font-semibold text-muted-foreground mb-3">Emergency Contact</p>
             <div className="grid grid-cols-2 gap-4">
               <div><label className={labelCls}>Name</label><input className={inputCls} value={form.emergencyContactName} onChange={set('emergencyContactName')} /></div>
               <div><label className={labelCls}>Phone</label><input className={inputCls} value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} /></div>
@@ -114,9 +114,9 @@ function EditModal({ player, onClose, onSaved }) {
           <div><label className={labelCls}>Notes</label><textarea className={inputCls} rows={2} value={form.notes} onChange={set('notes')} /></div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 p-5 border-t border-white/10 sticky bottom-0 bg-[#0F172A]">
-          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-white/10 text-sm text-slate-400 hover:border-white/30 transition-colors">Cancel</button>
-          <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2">
+        <div className="flex items-center justify-end gap-3 p-5 border-t border-border sticky bottom-0 bg-background">
+          <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:border-muted-foreground/40 transition-colors">Cancel</button>
+          <button onClick={handleSave} disabled={saving} className="px-5 py-2 rounded-xl bg-primary hover:bg-primary-hover text-foreground text-sm font-bold transition-colors disabled:opacity-50 flex items-center gap-2">
             <Save size={14} />{saving ? 'Saving…' : 'Save Changes'}
           </button>
         </div>
@@ -152,54 +152,54 @@ export default function PlayerManagement() {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-black text-white">Players</h1>
-          <p className="text-slate-400 text-sm">{total} player profiles on file</p>
+          <h1 className="text-2xl font-black text-foreground">Players</h1>
+          <p className="text-muted-foreground text-sm">{total} player profiles on file</p>
         </div>
-        <button onClick={load} className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all">
+        <button onClick={load} className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-all">
           <RefreshCw size={15} />
         </button>
       </div>
 
       <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by name, club or parent…" className="w-full pl-9 pr-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-[#2563EB] transition-colors" />
+        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by name, club or parent…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
       </div>
 
       {loading ? (
         <div className="flex items-center justify-center h-48">
-          <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
         </div>
       ) : (
-        <div className="bg-white/5 rounded-2xl border border-white/10 divide-y divide-white/5">
+        <div className="bg-card rounded-2xl border border-border divide-y divide-border">
           {players.length === 0 ? (
             <div className="p-16 text-center">
-              <User size={36} className="text-slate-500 mx-auto mb-2" />
-              <p className="text-slate-400">No players found</p>
+              <User size={36} className="text-muted-foreground mx-auto mb-2" />
+              <p className="text-muted-foreground">No players found</p>
             </div>
           ) : players.map((p) => (
-            <div key={p.id} className="w-full flex items-center gap-4 px-5 py-4 hover:bg-white/5 transition-colors">
+            <div key={p.id} className="w-full flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
               <button
                 onClick={() => setEditing(p)}
                 className="flex items-center gap-4 flex-1 min-w-0 text-left"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#2563EB]/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-[#2563EB] font-bold text-sm">{p.firstName?.[0]}{p.lastName?.[0]}</span>
+                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                  <span className="text-primary font-bold text-sm">{p.firstName?.[0]}{p.lastName?.[0]}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="font-bold text-white text-sm">{p.firstName} {p.lastName}</p>
+                    <p className="font-bold text-foreground text-sm">{p.firstName} {p.lastName}</p>
                     {(p.medicalInfo || p.allergies) && (
-                      <AlertTriangle size={13} className="text-amber-400 flex-shrink-0" title="Medical info / allergies on file" />
+                      <AlertTriangle size={13} className="text-warning flex-shrink-0" title="Medical info / allergies on file" />
                     )}
                   </div>
-                  <p className="text-slate-400 text-xs mt-0.5">
+                  <p className="text-muted-foreground text-xs mt-0.5">
                     {p.dateOfBirth ? `DOB: ${p.dateOfBirth}` : 'No DOB'} · {p.currentClub || 'No club'} · Parent: {p.parentName || '—'}
                   </p>
                 </div>
               </button>
               <div className="text-right flex-shrink-0">
-                <p className="text-slate-300 text-xs font-medium">{p.experienceLevel || '—'}</p>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-slate-500/20 text-slate-400'}`}>
+                <p className="text-foreground text-xs font-medium">{p.experienceLevel || '—'}</p>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === 'active' ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                   {p.status || 'unknown'}
                 </span>
               </div>
@@ -207,7 +207,7 @@ export default function PlayerManagement() {
                 to={`/admin/players/${p.id}/performance`}
                 state={{ player: p }}
                 title="Performance evaluations"
-                className="w-9 h-9 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all flex-shrink-0"
+                className="w-9 h-9 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-all flex-shrink-0"
               >
                 <TrendingUp size={15} />
               </Link>
@@ -218,10 +218,10 @@ export default function PlayerManagement() {
 
       {total > 20 && (
         <div className="flex items-center justify-between">
-          <p className="text-slate-400 text-sm">Page {page} of {Math.ceil(total / 20)}</p>
+          <p className="text-muted-foreground text-sm">Page {page} of {Math.ceil(total / 20)}</p>
           <div className="flex gap-2">
-            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded-xl border border-white/10 text-sm text-slate-400 hover:border-white/30 disabled:opacity-40 transition-colors">Previous</button>
-            <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / 20)} className="px-4 py-2 rounded-xl border border-white/10 text-sm text-slate-400 hover:border-white/30 disabled:opacity-40 transition-colors">Next</button>
+            <button onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:border-muted-foreground/40 disabled:opacity-40 transition-colors">Previous</button>
+            <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / 20)} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:border-muted-foreground/40 disabled:opacity-40 transition-colors">Next</button>
           </div>
         </div>
       )}

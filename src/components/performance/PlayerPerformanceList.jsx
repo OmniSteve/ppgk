@@ -133,17 +133,17 @@ export default function PlayerPerformanceList({ playerId, clientId, playerName, 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-48">
-        <div className="w-8 h-8 border-4 border-white/10 border-t-[#2563EB] rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-red-500/10 border border-red-500/30 rounded-2xl p-6 text-center flex flex-col items-center gap-2">
-        <AlertCircle size={22} className="text-red-400" />
-        <p className="text-red-400 text-sm">{error}</p>
-        <button onClick={load} className="text-xs text-slate-300 underline mt-1">Try again</button>
+      <div className="bg-destructive/20 border border-destructive/30 rounded-2xl p-6 text-center flex flex-col items-center gap-2">
+        <AlertCircle size={22} className="text-destructive" />
+        <p className="text-destructive text-sm">{error}</p>
+        <button onClick={load} className="text-xs text-foreground underline mt-1">Try again</button>
       </div>
     );
   }
@@ -153,21 +153,21 @@ export default function PlayerPerformanceList({ playerId, clientId, playerName, 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-3 flex-wrap">
-        <h2 className="text-lg font-bold text-white">Performance Evaluations</h2>
+        <h2 className="text-lg font-bold text-foreground">Performance Evaluations</h2>
         <div className="flex items-center gap-2 print:hidden">
           {records.length > 0 && (
             <>
               <button
                 onClick={() => window.print()}
                 title="Print this page"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all"
+                className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-all"
               >
                 <Printer size={15} />
               </button>
               <button
                 onClick={() => downloadCsv(displayRecords, playerName)}
                 title="Export as CSV"
-                className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white hover:border-white/30 transition-all"
+                className="w-9 h-9 rounded-xl bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-all"
               >
                 <Download size={15} />
               </button>
@@ -178,7 +178,7 @@ export default function PlayerPerformanceList({ playerId, clientId, playerName, 
               onClick={() => { setEditingRecord(null); setFormOpen(true); }}
               disabled={!canCreate}
               title={!canCreate ? 'Player details unavailable on this page — open Performance from the players list' : undefined}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-sm font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-foreground text-sm font-bold transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus size={15} />Add Evaluation
             </button>
@@ -190,21 +190,21 @@ export default function PlayerPerformanceList({ playerId, clientId, playerName, 
       <CategoryBreakdown records={records} />
 
       {records.length === 0 ? (
-        <div className="bg-white/5 rounded-2xl border border-white/10 p-12 text-center">
-          <ClipboardList size={32} className="text-slate-500 mx-auto mb-2" />
-          <p className="text-slate-400">No performance evaluations yet</p>
-          {canManage && <p className="text-slate-500 text-xs mt-1">Add the first evaluation to start tracking progress.</p>}
+        <div className="bg-card rounded-2xl border border-border p-12 text-center">
+          <ClipboardList size={32} className="text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">No performance evaluations yet</p>
+          {canManage && <p className="text-muted-foreground text-xs mt-1">Add the first evaluation to start tracking progress.</p>}
         </div>
       ) : (
         <>
           {records.length > 1 && (
             <div className="flex items-center justify-end gap-2 print:hidden">
-              <label htmlFor="performance-sort" className="text-xs text-slate-400 font-semibold">Sort by</label>
+              <label htmlFor="performance-sort" className="text-xs text-muted-foreground font-semibold">Sort by</label>
               <select
                 id="performance-sort"
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-xs text-white focus:outline-none focus:border-[#2563EB] transition-colors"
+                className="px-3 py-1.5 bg-card border border-border rounded-lg text-xs text-foreground focus:outline-none focus:border-primary transition-colors"
               >
                 {SORT_OPTIONS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </select>

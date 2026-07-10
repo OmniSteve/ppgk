@@ -4,7 +4,7 @@ import { Star } from 'lucide-react';
 export default function RatingInput({ label, value, onChange }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-400 mb-1">{label}</label>
+      <label className="block text-xs font-semibold text-muted-foreground mb-1">{label}</label>
       <div className="flex items-center gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
@@ -17,11 +17,11 @@ export default function RatingInput({ label, value, onChange }) {
           >
             <Star
               size={22}
-              className={n <= (value || 0) ? 'text-amber-400 fill-amber-400' : 'text-slate-600 hover:text-slate-400'}
+              className={n <= (value || 0) ? 'text-amber-400 fill-amber-400' : 'text-muted-foreground hover:text-foreground'}
             />
           </button>
         ))}
-        <span className="ml-1.5 text-xs text-slate-500">{value ? `${value}/5` : '—'}</span>
+        <span className="ml-1.5 text-xs text-muted-foreground text-label-mono">{value ? `${value}/5` : '—'}</span>
       </div>
     </div>
   );
