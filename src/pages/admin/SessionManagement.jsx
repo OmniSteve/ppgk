@@ -88,16 +88,16 @@ export default function SessionManagement() {
             </div>
             <div className="flex-1 min-w-0">
               <p className="font-bold text-foreground text-sm truncate">{s.title}</p>
-              <div className="flex items-center gap-3 text-muted-foreground text-xs mt-0.5">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs mt-0.5 min-w-0">
                 <span className="flex items-center gap-1"><Clock size={11} />{s.startTime}</span>
-                <span className="flex items-center gap-1"><MapPin size={11} />{s.locationName}</span>
+                <span className="flex items-center gap-1 min-w-0 truncate"><MapPin size={11} className="flex-shrink-0" />{s.locationName}</span>
                 <span className="flex items-center gap-1 text-label-mono"><Users size={11} />{s.bookedCount}/{s.capacity}</span>
               </div>
             </div>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[s.status] || 'bg-accent text-muted-foreground'}`}>
                 {s.status?.replace(/_/g, ' ')}
               </span>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <Link to={`/admin/sessions/${s.id}/edit`} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                   <Edit2 size={14} />
                 </Link>
