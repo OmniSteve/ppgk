@@ -1,8 +1,55 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  Menu,
+  X,
+  ShieldCheck,
+  TrendingUp,
+  ClipboardCheck,
+  CalendarCheck,
+  Users,
+  UserCheck,
+  Wallet,
+  UserPlus,
+  Mail,
+  ArrowRight,
+} from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import './LandingPage.css';
 
+// Anchors point to on-page sections; `route` entries are real application routes.
+const NAV_LINKS = [
+  { label: 'Home', href: '#top' },
+  { label: 'Coaching', href: '#coaching' },
+  { label: 'Sessions', href: '/sessions', route: true },
+  { label: 'Player Development', href: '#development' },
+  { label: 'Packages', href: '#packages' },
+  { label: 'Contact', href: '#contact' },
+];
+
+const roleHome = (role) => {
+  if (role === 'admin') return '/admin';
+  if (role === 'coach' || role === 'head_coach') return '/coach';
+  return '/dashboard';
+};
+
+const NavItem = ({ link, onClick }) =>
+  link.route ? (
+    <Link to={link.href} onClick={onClick}>
+      {link.label}
+    </Link>
+  ) : (
+    <a href={link.href} onClick={onClick}>
+      {link.label}
+    </a>
+  );
+
 export default function LandingPage() {
+  const { user } = useAuth();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const shouldReduceMotion = useReducedMotion();
+
   // Scroll-reveal: observe .reveal elements and add .in when they enter the viewport.
   // On reduced-motion or no IntersectionObserver support, mark all visible immediately.
   useEffect(() => {
@@ -27,41 +74,112 @@ export default function LandingPage() {
     return () => io.disconnect();
   }, []);
 
+  // Lock background scroll while the mobile menu is open.
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+  const closeMobile = () => setMobileOpen(false);
+  const dashboardHref = user ? roleHome(user.role) : null;
+
   return (
     <div className="ppgk-landing">
 
       <header>
         <nav className="nav" aria-label="Main">
           <a className="logo" href="#top">PP<span>GK</span></a>
+
           <ul className="nav-links">
-            <li><a href="#programmes">Programmes</a></li>
-            <li><a href="#performance">Performance</a></li>
-            <li><a href="#credits">How it works</a></li>
-            <li><a className="btn btn-solid" href="#book">Book a session</a></li>
+            {NAV_LINKS.map((link) => (
+              <li key={link.label}>
+                <NavItem link={link} />
+              </li>
+            ))}
+            <li>
+              {dashboardHref ? (
+                <Link to={dashboardHref}>Dashboard</Link>
+              ) : (
+                <Link to="/signin">Sign In</Link>
+              )}
+            </li>
+            <li><Link className="btn btn-solid" to="/sessions">Book a session</Link></li>
           </ul>
+
+          <div className="nav-mobile-actions">
+            <Link className="btn btn-solid btn-sm" to="/sessions">Book a session</Link>
+            <button
+              type="button"
+              className="menu-toggle"
+              aria-expanded={mobileOpen}
+              aria-controls="mobile-menu"
+              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              onClick={() => setMobileOpen((open) => !open)}
+            >
+              {mobileOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
+            </button>
+          </div>
         </nav>
+
+        <AnimatePresence initial={false}>
+          {mobileOpen && (
+            <motion.div
+              id="mobile-menu"
+              className="mobile-menu"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <ul>
+                {NAV_LINKS.map((link) => (
+                  <li key={link.label}>
+                    <NavItem link={link} onClick={closeMobile} />
+                  </li>
+                ))}
+                <li>
+                  {dashboardHref ? (
+                    <Link to={dashboardHref} onClick={closeMobile}>Dashboard</Link>
+                  ) : (
+                    <Link to="/signin" onClick={closeMobile}>Sign In</Link>
+                  )}
+                </li>
+              </ul>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main id="top">
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
         <section className="hero" aria-label="Introduction">
+          <div className="hero-glow" aria-hidden="true" />
           <div className="wrap hero-grid">
 
             <div className="hero-copy">
               <span className="eyebrow stagger">Specialist goalkeeper coaching, Malta</span>
               <h1 className="stagger">
-                Built in the box.<br />
-                <span className="accent">Proven on match day.</span>
+                Develop the goalkeeper.<br />
+                <span className="accent">Build the performance.</span>
               </h1>
               <p className="lede stagger">
-                Premier Performance Goalkeeping develops young goalkeepers through structured
-                individual and group sessions, with every player's progress tracked and shared
-                after each evaluation.
+                Premier Performance Goalkeeping improves technique, confidence, decision-making
+                and match performance through structured individual and group sessions, with
+                every player's progress tracked and shared after each evaluation.
               </p>
               <div className="hero-actions stagger">
-                <a className="btn btn-solid" href="#book">Book a session</a>
-                <a className="btn btn-ghost" href="#programmes">See the programmes</a>
+                <Link className="btn btn-solid" to="/sessions">
+                  View upcoming sessions
+                  <ArrowRight size={16} aria-hidden="true" />
+                </Link>
+                <a className="btn btn-ghost" href="#coach">Learn about PPGK</a>
+              </div>
+              <div className="hero-platform stagger">
+                <span><CalendarCheck size={15} aria-hidden="true" /> Book sessions online</span>
+                <span><TrendingUp size={15} aria-hidden="true" /> Track player progress</span>
               </div>
               <div className="hero-meta stagger">
                 <span><strong>1-to-1</strong> and group sessions</span>
@@ -109,65 +227,73 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── PROGRAMMES ──────────────────────────────────────────────────── */}
-        <section id="programmes" className="rule-top" aria-labelledby="prog-title">
+        {/* ── COACHING BENEFITS ──────────────────────────────────────────── */}
+        <section id="coaching" className="rule-top" aria-labelledby="coaching-title">
           <div className="wrap">
             <div className="section-head reveal">
-              <span className="eyebrow">Programmes</span>
-              <h2 id="prog-title">Coaching with a plan behind it</h2>
+              <span className="eyebrow">Coaching</span>
+              <h2 id="coaching-title">Coaching with a plan behind it</h2>
               <p className="lede">
-                Every session belongs to a programme. Nothing is a one-off drill for the sake
-                of it; each block builds the technical foundations a goalkeeper needs at their
-                stage.
+                Every session belongs to a programme. Nothing is a one-off drill for the sake of
+                it &mdash; each block builds the technical foundations a goalkeeper needs at
+                their stage, with progress reviewed as they go.
               </p>
             </div>
-            <div className="prog-list">
-              <div className="prog-row reveal">
-                <span className="prog-tag">1-to-1</span>
-                <h3>Individual sessions</h3>
+            <div className="feature-grid">
+              <article className="feature-card reveal">
+                <span className="feature-icon"><ShieldCheck size={22} aria-hidden="true" /></span>
+                <h3>Specialist goalkeeper coaching</h3>
                 <p>
-                  Focused technical work on the areas a goalkeeper needs most, from shot
-                  stopping and handling to footwork and distribution, set at the player's pace.
+                  Goalkeeping is its own game. Sessions are led by a dedicated goalkeeper coach,
+                  not folded into general outfield training.
                 </p>
-              </div>
-              <div className="prog-row reveal reveal-delay-1">
-                <span className="prog-tag">Group</span>
-                <h3>Group sessions</h3>
+              </article>
+              <article className="feature-card reveal reveal-delay-1">
+                <span className="feature-icon"><TrendingUp size={22} aria-hidden="true" /></span>
+                <h3>Structured player development</h3>
                 <p>
-                  Small-group training that adds realism: crosses, one-on-ones and
-                  communication under pressure, with goalkeepers pushing each other on.
+                  Individual and group sessions sit inside development programmes, so parents
+                  and players can see what is being worked on and why, week by week.
                 </p>
-              </div>
-              <div className="prog-row reveal reveal-delay-2">
-                <span className="prog-tag">Programme</span>
-                <h3>Development programmes</h3>
+              </article>
+              <article className="feature-card reveal reveal-delay-2">
+                <span className="feature-icon"><ClipboardCheck size={22} aria-hidden="true" /></span>
+                <h3>Performance evaluations</h3>
                 <p>
-                  Structured blocks of sessions with clear objectives, so parents and players
-                  can see what is being worked on and why, week by week.
+                  Coaches rate every goalkeeper across ten categories after each evaluation,
+                  with notes and development priorities recorded for each player.
                 </p>
-              </div>
-              <div className="prog-row reveal reveal-delay-3">
-                <span className="prog-tag">Match prep</span>
-                <h3>Performance development</h3>
+              </article>
+              <article className="feature-card reveal reveal-delay-3">
+                <span className="feature-icon"><CalendarCheck size={22} aria-hidden="true" /></span>
+                <h3>Simple online booking</h3>
                 <p>
-                  Longer-term progression for committed goalkeepers, connecting evaluations,
-                  development priorities and training focus into one pathway.
+                  Buy credits, book sessions and manage more than one player from a single
+                  account &mdash; no phone calls or spreadsheets required.
                 </p>
-              </div>
+              </article>
             </div>
           </div>
         </section>
 
-        {/* ── PERFORMANCE ─────────────────────────────────────────────────── */}
-        <section id="performance" aria-labelledby="perf-title">
+        {/* ── PLAYER DEVELOPMENT ─────────────────────────────────────────── */}
+        <section id="development" aria-labelledby="dev-title">
           <div className="wrap perf-grid">
             <div className="perf-copy reveal">
-              <span className="eyebrow">Performance tracking</span>
-              <h2 id="perf-title">See the progress, not just the sessions</h2>
+              <span className="eyebrow">Player development</span>
+              <h2 id="dev-title">See the progress, not just the sessions</h2>
               <p className="lede">
-                After evaluations, coaches rate each goalkeeper across ten categories and
-                record strengths, priorities and notes. Parents see it all in one place.
+                After evaluations, coaches rate each goalkeeper across ten categories and record
+                strengths, priorities and notes. Parents see it all in one place.
               </p>
+              <ul className="dev-tags" aria-label="Areas covered in coaching and evaluations">
+                <li>Technical development</li>
+                <li>Positioning &amp; decision-making</li>
+                <li>Distribution</li>
+                <li>Handling &amp; shot-stopping</li>
+                <li>Communication &amp; confidence</li>
+                <li>Coach evaluations &amp; progress tracking</li>
+              </ul>
               <ul className="perf-points">
                 <li>Ratings across shot stopping, handling, distribution, positioning and more</li>
                 <li>Trend indicators showing what has improved since the last evaluation</li>
@@ -214,61 +340,116 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── CREDITS / HOW IT WORKS ──────────────────────────────────────── */}
-        <section id="credits" className="rule-top" aria-labelledby="credit-title">
+        {/* ── HOW IT WORKS ───────────────────────────────────────────────── */}
+        <section id="how-it-works" className="rule-top" aria-labelledby="how-title">
           <div className="wrap">
             <div className="section-head reveal">
               <span className="eyebrow">How it works</span>
-              <h2 id="credit-title">Credits in. Sessions booked. Sorted.</h2>
+              <h2 id="how-title">From sign-up to first save</h2>
               <p className="lede">
-                Parents manage everything from one account: buy a session or a package of
-                credits, book the sessions that suit you, and amend when plans change.
+                Getting a goalkeeper started with PPGK takes three steps, all managed from one
+                account.
               </p>
             </div>
             <div className="credit-grid">
               <article className="credit-card reveal">
                 <span className="k">Step 1</span>
-                <h3>Buy credits</h3>
+                <h3>Create your account and player profile</h3>
                 <p>
-                  Purchase a single session or a package. Your credit balance and expiry dates
-                  are always visible in your account, so there are no surprises.
+                  Register as a parent or player and add a profile for each goalkeeper you want
+                  to book sessions for.
                 </p>
               </article>
               <article className="credit-card reveal reveal-delay-1">
                 <span className="k">Step 2</span>
-                <h3>Book sessions</h3>
+                <h3>Choose a session or training package</h3>
                 <p>
-                  See available sessions and book directly. Managing more than one goalkeeper?
-                  Book different players onto different sessions from the same account.
+                  Buy a single session or a credit package, then book the sessions that suit your
+                  schedule directly from your account.
                 </p>
               </article>
               <article className="credit-card reveal reveal-delay-2">
                 <span className="k">Step 3</span>
-                <h3>Stay in the loop</h3>
+                <h3>Train, receive feedback and track development</h3>
                 <p>
-                  Confirmations, reminders and evaluation updates arrive automatically. If
-                  plans change, eligible bookings can be amended within the permitted window.
+                  Confirmations, reminders and evaluation updates arrive automatically, so
+                  progress is always visible between sessions.
                 </p>
               </article>
             </div>
           </div>
         </section>
 
+        {/* ── SESSIONS / PACKAGES ────────────────────────────────────────── */}
+        <section id="packages" aria-labelledby="packages-title">
+          <div className="wrap">
+            <div className="section-head reveal">
+              <span className="eyebrow">Sessions &amp; packages</span>
+              <h2 id="packages-title">Find the right way to train</h2>
+              <p className="lede">
+                Browse current session availability and credit packages from your account.
+                Pricing and schedules are kept up to date inside the platform.
+              </p>
+            </div>
+            <div className="package-grid">
+              <article className="package-card reveal">
+                <span className="feature-icon"><Users size={22} aria-hidden="true" /></span>
+                <h3>Group goalkeeper sessions</h3>
+                <p>
+                  Small-group training that adds match realism &mdash; crosses, one-on-ones and
+                  communication under pressure.
+                </p>
+                <Link className="package-link" to="/sessions">
+                  View upcoming sessions
+                  <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </article>
+              <article className="package-card reveal reveal-delay-1">
+                <span className="feature-icon"><UserCheck size={22} aria-hidden="true" /></span>
+                <h3>Individual coaching</h3>
+                <p>
+                  Focused 1-to-1 technical work on the areas a goalkeeper needs most, set at
+                  their own pace.
+                </p>
+                <Link className="package-link" to="/sessions">
+                  View upcoming sessions
+                  <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </article>
+              <article className="package-card reveal reveal-delay-2">
+                <span className="feature-icon"><Wallet size={22} aria-hidden="true" /></span>
+                <h3>Training credit packages</h3>
+                <p>
+                  Buy credits in advance for better value across multiple sessions, with balance
+                  and expiry always visible in your account.
+                </p>
+                <Link className="package-link" to="/packages">
+                  See packages
+                  <ArrowRight size={15} aria-hidden="true" />
+                </Link>
+              </article>
+            </div>
+          </div>
+        </section>
+
         {/* ── COACH / CREDIBILITY ─────────────────────────────────────────── */}
-        <section className="coach" aria-labelledby="coach-title">
+        <section id="coach" className="coach" aria-labelledby="coach-title">
           <div className="wrap coach-grid">
             <div className="reveal">
-              <span className="eyebrow">The coaching</span>
-              <h2 id="coach-title" style={{ margin: '1.1rem 0 1.6rem' }}>
+              <div className="coach-id">
+                <span className="coach-avatar" role="img" aria-label="Coach initials placeholder">MT</span>
+                <span className="coach-id-text">
+                  <strong>Matthew Towns</strong>
+                  <span>Head Coach, Premier Performance Goalkeeping</span>
+                </span>
+              </div>
+              <h2 id="coach-title" style={{ margin: '1.4rem 0 1.6rem' }}>
                 Goalkeeping is its own game
               </h2>
               <p className="coach-quote">
                 "Goalkeepers are made in the details:{' '}
                 <span className="accent">set position, first touch, one more save</span>{' '}
                 than the striker expects."
-              </p>
-              <p className="coach-name">
-                <strong>Matthew Towns</strong>, Head Coach, Premier Performance Goalkeeping
               </p>
             </div>
             <div className="coach-facts reveal reveal-delay-1">
@@ -298,6 +479,7 @@ export default function LandingPage() {
 
         {/* ── FINAL CTA ───────────────────────────────────────────────────── */}
         <section id="book" className="cta" aria-labelledby="cta-title">
+          <div className="hero-glow" aria-hidden="true" />
           <div className="wrap inner reveal">
             <span className="eyebrow" style={{ justifyContent: 'center' }}>Get started</span>
             <h2 id="cta-title">Give your goalkeeper a coach of their own</h2>
@@ -305,19 +487,55 @@ export default function LandingPage() {
               Create an account, add your player's profile and book their first session in
               minutes.
             </p>
-            <div className="hero-actions" style={{ justifyContent: 'center' }}>
-              <Link className="btn btn-solid" to="/register">Create an account</Link>
-              <a className="btn btn-ghost" href="#programmes">Explore programmes first</a>
+            <div className="cta-actions">
+              <Link className="btn btn-solid" to="/sessions">
+                <CalendarCheck size={16} aria-hidden="true" />
+                View upcoming sessions
+              </Link>
+              <Link className="btn btn-ghost" to="/register">
+                <UserPlus size={16} aria-hidden="true" />
+                Create an account
+              </Link>
+              <a className="btn btn-ghost" href="mailto:info@ppgk.app">
+                <Mail size={16} aria-hidden="true" />
+                Contact Matthew
+              </a>
             </div>
           </div>
         </section>
 
       </main>
 
-      <footer>
-        <div className="wrap foot">
-          <span className="mono">PPGK &middot; Premier Performance Goalkeeping</span>
-          <span>Specialist goalkeeper coaching, Malta</span>
+      <footer id="contact">
+        <div className="wrap foot-grid">
+          <div className="foot-brand">
+            <a className="logo" href="#top">PP<span>GK</span></a>
+            <p>Specialist goalkeeper coaching, Malta.</p>
+          </div>
+
+          <div className="foot-col">
+            <span className="foot-heading">Platform</span>
+            <a href="#coaching">Coaching</a>
+            <Link to="/sessions">Sessions</Link>
+            <a href="#development">Player development</a>
+            <Link to="/packages">Packages</Link>
+          </div>
+
+          <div className="foot-col">
+            <span className="foot-heading">Account</span>
+            <Link to="/signin">Sign in</Link>
+            <Link to="/register">Create an account</Link>
+          </div>
+
+          <div className="foot-col">
+            <span className="foot-heading">Contact &amp; legal</span>
+            <a href="mailto:info@ppgk.app">info@ppgk.app</a>
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms and Conditions</Link>
+          </div>
+        </div>
+        <div className="wrap foot-bottom">
+          <span className="mono">&copy; {new Date().getFullYear()} PPGK &middot; Premier Performance Goalkeeping</span>
           <span className="mono">ppgk.app</span>
         </div>
       </footer>

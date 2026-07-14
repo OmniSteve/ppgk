@@ -64,12 +64,12 @@ export default function SessionDetails() {
 
       <div className="bg-card rounded-2xl border border-border overflow-hidden">
         <div className="bg-sidebar p-6 border-b border-border">
-          <div className="flex items-start justify-between">
-            <div>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-primary text-xs font-semibold uppercase tracking-wide mb-1">{session.sessionType}</p>
-              <h1 className="text-foreground font-black text-2xl">{session.name}</h1>
+              <h1 className="text-foreground font-black text-2xl break-words">{session.name}</h1>
             </div>
-            <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+            <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
               session.spotsRemaining === 0 ? 'bg-destructive/20 text-destructive' :
               session.spotsRemaining <= 3 ? 'bg-warning/20 text-warning' :
               'bg-success/20 text-success'
@@ -82,7 +82,7 @@ export default function SessionDetails() {
         <div className="p-6 space-y-5">
           {session.description && <p className="text-muted-foreground leading-relaxed">{session.description}</p>}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             {[
               { icon: Calendar, label: 'Date', value: session.date ? new Date(session.date).toLocaleDateString('en-MT', { weekday: 'short', day: 'numeric', month: 'long' }) : '—' },
               { icon: Clock, label: 'Time', value: `${session.startTime} – ${session.endTime}` },
@@ -95,9 +95,9 @@ export default function SessionDetails() {
                 <div className="w-9 h-9 rounded-lg bg-accent border border-border flex items-center justify-center flex-shrink-0">
                   <item.icon size={16} className="text-muted-foreground" />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <p className="text-muted-foreground text-xs">{item.label}</p>
-                  <p className="font-semibold text-foreground text-sm">{item.value}</p>
+                  <p className="font-semibold text-foreground text-sm break-words">{item.value}</p>
                 </div>
               </div>
             ))}

@@ -22,7 +22,24 @@
       "Bash(npm init *)",
       "Bash(npm install *)",
       "Bash(node check.js)",
-      "Bash(npx --no-install uipro --version)"
+      "Bash(npx --no-install uipro --version)",
+      "Bash(python3 \"C:/Test/Projects/ppgk/ppgk/.claude/skills/ui-ux-pro-max/scripts/search.py\" --help)",
+      "Bash(py \"C:/Test/Projects/ppgk/ppgk/.claude/skills/ui-ux-pro-max/scripts/search.py\" --help)",
+      "Bash(python3 .claude/skills/ui-ux-pro-max/scripts/search.py \"goalkeeper coaching youth sports academy premium performance\" --design-system -p \"PPGK\" -f markdown)",
+      "Bash(where python *)",
+      "Bash(C:/Users/marls001/AppData/Local/Microsoft/WindowsApps/python.exe --version)",
+      "Bash(py --version)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"goalkeeper coaching youth sports academy premium performance booking membership\" --design-system -p \"PPGK\" -f markdown)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"hero social-proof pricing testimonial booking\" --domain landing -n 10)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"animation accessibility dark mode mobile nav\" --domain ux -n 10)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"dark premium sports performance minimal editorial\" --domain style -n 8)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"hero navbar mobile menu card responsive\" --stack html-tailwind -n 8)",
+      "Bash(git stash *)",
+      "Bash(curl -s -o /dev/null -w \"HTTP %{http_code}\\\\n\" http://localhost:5174/)",
+      "Bash(curl -s http://localhost:5174/src/pages/public/LandingPage.jsx -o /tmp/landing-transformed.js -w \"module HTTP %{http_code}\\\\n\")",
+      "Bash(pkill -f \"vite\")",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"responsive admin dashboard mobile app shell sidebar drawer navigation\" --domain ux -n 12)",
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"responsive data table mobile dense data small screen\" --domain ux -n 10)"
     ]
   }
 }

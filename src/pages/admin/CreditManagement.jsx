@@ -91,8 +91,8 @@ export default function CreditManagement() {
         </div>
       )}
 
-      <div className="flex gap-3">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1 min-w-[200px] relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by client name…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
         </div>
@@ -109,10 +109,10 @@ export default function CreditManagement() {
           {ledger.length === 0 ? (
             <div className="p-16 text-center"><p className="text-muted-foreground">No credit ledger entries found</p></div>
           ) : ledger.map((e) => (
-            <div key={e.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground text-sm">{e.clientName}</p>
-                <p className="text-muted-foreground text-xs mt-0.5">{e.description} · {new Date(e.createdAt).toLocaleString('en-MT')}</p>
+            <div key={e.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
+              <div className="flex-1 min-w-[9rem]">
+                <p className="font-bold text-foreground text-sm truncate">{e.clientName}</p>
+                <p className="text-muted-foreground text-xs mt-0.5 truncate">{e.description} · {new Date(e.createdAt).toLocaleString('en-MT')}</p>
                 {e.expiresAt && <p className="text-muted-foreground text-xs">Expires: {new Date(e.expiresAt).toLocaleDateString('en-MT')}</p>}
               </div>
               <span className={`font-black text-base flex-shrink-0 text-label-mono ${e.amount > 0 ? 'text-success' : 'text-destructive'}`}>

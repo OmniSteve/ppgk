@@ -55,9 +55,9 @@ export default function UpcomingBookings() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-black text-foreground">My Bookings</h1>
-        <Link to="/sessions" className="bg-primary hover:bg-primary-hover text-foreground text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
+        <Link to="/sessions" className="bg-primary hover:bg-primary-hover text-foreground text-sm font-bold px-4 py-2.5 rounded-xl transition-colors self-start">
           Book Session
         </Link>
       </div>

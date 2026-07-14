@@ -64,16 +64,16 @@ export default function CoachManagement() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-foreground">Coaches</h1>
           <p className="text-muted-foreground text-sm">{coaches.length} coaches registered</p>
         </div>
-        <div className="flex gap-2">
-          <button onClick={handleSync} disabled={syncing} className="border border-border hover:bg-accent text-foreground font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors disabled:opacity-50">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={handleSync} disabled={syncing} className="border border-border hover:bg-accent text-foreground font-semibold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
             <RefreshCw size={15} className={syncing ? 'animate-spin' : ''} />Sync from Roles
           </button>
-          <button onClick={openNew} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors">
+          <button onClick={openNew} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors">
             <Plus size={15} />New Coach
           </button>
         </div>
@@ -88,7 +88,7 @@ export default function CoachManagement() {
             <button onClick={() => setEditing(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className="block text-muted-foreground text-xs mb-1">First Name</label><input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className={inp} /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">Last Name</label><input value={form.lastName} onChange={(e) => setForm({ ...form, lastName: e.target.value })} className={inp} /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">Email</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className={inp} /></div>

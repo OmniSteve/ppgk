@@ -71,8 +71,8 @@ export default function SessionTypeManagement() {
             <button onClick={() => setEditing(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2"><label className="block text-muted-foreground text-xs mb-1">Type Name</label><input value={form.name} onChange={set('name')} className={inp} placeholder="e.g. Individual Training" /></div>
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
+            <div className="col-span-1 xs:col-span-2"><label className="block text-muted-foreground text-xs mb-1">Type Name</label><input value={form.name} onChange={set('name')} className={inp} placeholder="e.g. Individual Training" /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">Duration (minutes)</label><input type="number" value={form.durationMinutes} onChange={set('durationMinutes')} className={inp} /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">Default Capacity</label><input type="number" value={form.defaultCapacity} onChange={set('defaultCapacity')} className={inp} /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">Credit Cost</label><input type="number" value={form.creditCost} onChange={set('creditCost')} className={inp} /></div>
@@ -100,16 +100,16 @@ export default function SessionTypeManagement() {
           {types.length === 0 ? (
             <div className="p-16 text-center"><Tag size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No session types yet</p></div>
           ) : types.map((t) => (
-            <div key={t.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
+            <div key={t.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
               <div className="w-3 h-10 rounded-full flex-shrink-0" style={{ backgroundColor: t.colour || '#2563EB' }} />
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground text-sm">{t.name}</p>
-                <p className="text-muted-foreground text-xs text-label-mono">{t.durationMinutes}min · capacity {t.defaultCapacity} · {t.creditCost} credit{t.creditCost !== 1 ? 's' : ''}{t.price ? ` · €${t.price} drop-in` : ''}</p>
+              <div className="flex-1 min-w-[9rem]">
+                <p className="font-bold text-foreground text-sm truncate">{t.name}</p>
+                <p className="text-muted-foreground text-xs text-label-mono truncate">{t.durationMinutes}min · capacity {t.defaultCapacity} · {t.creditCost} credit{t.creditCost !== 1 ? 's' : ''}{t.price ? ` · €${t.price} drop-in` : ''}</p>
               </div>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${t.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {t.active ? 'Active' : 'Inactive'}
               </span>
-              <button onClick={() => { setForm({ ...t }); setEditing(t.id); setError(''); }} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
+              <button onClick={() => { setForm({ ...t }); setEditing(t.id); setError(''); }} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0 ml-auto">
                 <Edit2 size={14} />
               </button>
             </div>

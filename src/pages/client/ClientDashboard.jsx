@@ -76,12 +76,12 @@ export default function ClientDashboard() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-black text-foreground">Welcome back, {user?.firstName}!</h1>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-black text-foreground break-words">Welcome back, {user?.firstName}!</h1>
           <p className="text-muted-foreground text-sm mt-1">Here's your training overview</p>
         </div>
-        <Link to="/sessions" className="bg-primary hover:bg-primary-hover text-foreground text-sm font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center gap-2">
+        <Link to="/sessions" className="bg-primary hover:bg-primary-hover text-foreground text-sm font-bold px-4 py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2 self-start">
           <Plus size={16} />
           Book Session
         </Link>

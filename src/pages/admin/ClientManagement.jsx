@@ -81,7 +81,7 @@ export default function ClientManagement() {
             <button onClick={() => setEditing(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div>
               <label className="block text-muted-foreground text-xs mb-1">First Name</label>
               <input value={form.firstName} onChange={(e) => setForm({ ...form, firstName: e.target.value })} className={inp} />
@@ -129,13 +129,13 @@ export default function ClientManagement() {
           {users.length === 0 ? (
             <div className="p-16 text-center"><Users size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No users found</p></div>
           ) : users.map((u) => (
-            <div key={u.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
+            <div key={u.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
                 <span className="text-primary font-bold text-sm">{u.firstName?.[0]}{u.lastName?.[0]}</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground text-sm">{u.firstName} {u.lastName}</p>
-                <p className="text-muted-foreground text-xs">{u.email}</p>
+              <div className="flex-1 min-w-[9rem]">
+                <p className="font-bold text-foreground text-sm truncate">{u.firstName} {u.lastName}</p>
+                <p className="text-muted-foreground text-xs truncate">{u.email}</p>
               </div>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${roleColors[u.role] || 'bg-accent text-muted-foreground'}`}>
                 {u.role}
@@ -143,7 +143,7 @@ export default function ClientManagement() {
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${u.active !== false ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {u.active !== false ? 'Active' : 'Inactive'}
               </span>
-              <button onClick={() => openEdit(u)} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
+              <button onClick={() => openEdit(u)} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0 ml-auto">
                 <Edit2 size={14} />
               </button>
             </div>

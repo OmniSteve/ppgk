@@ -61,13 +61,13 @@ export default function NotificationManagement() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-foreground">Notifications</h1>
           <p className="text-muted-foreground text-sm">Log and email templates</p>
         </div>
         {tab === 'templates' && (
-          <button onClick={() => { setForm(defaultTemplate); setEditingTemplate('new'); setError(''); }} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm flex items-center gap-2 transition-colors">
+          <button onClick={() => { setForm(defaultTemplate); setEditingTemplate('new'); setError(''); }} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 transition-colors self-start">
             <Plus size={15} />New Template
           </button>
         )}
@@ -119,7 +119,7 @@ export default function NotificationManagement() {
                 <button onClick={() => setEditingTemplate(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
               </div>
               {error && <p className="text-destructive text-sm">{error}</p>}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
                 <div><label className="block text-muted-foreground text-xs mb-1">Template Name</label><input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className={inp} /></div>
                 <div>
                   <label className="block text-muted-foreground text-xs mb-1">Event Trigger</label>
@@ -147,15 +147,15 @@ export default function NotificationManagement() {
             {templates.length === 0 ? (
               <div className="p-16 text-center"><p className="text-muted-foreground">No templates configured</p></div>
             ) : templates.map((t) => (
-              <div key={t.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-foreground text-sm">{t.name}</p>
-                  <p className="text-muted-foreground text-xs">{t.eventTrigger?.replace(/_/g, ' ')} · {t.subject}</p>
+              <div key={t.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
+                <div className="flex-1 min-w-[9rem]">
+                  <p className="font-bold text-foreground text-sm truncate">{t.name}</p>
+                  <p className="text-muted-foreground text-xs truncate">{t.eventTrigger?.replace(/_/g, ' ')} · {t.subject}</p>
                 </div>
                 <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${t.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                   {t.active ? 'Active' : 'Inactive'}
                 </span>
-                <div className="flex gap-2 flex-shrink-0">
+                <div className="flex gap-2 flex-shrink-0 ml-auto">
                   <button onClick={() => testSend(t.id)} className="w-8 h-8 rounded-lg bg-accent hover:bg-success/20 flex items-center justify-center text-muted-foreground hover:text-success transition-all">
                     <Send size={13} />
                   </button>

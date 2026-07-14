@@ -2,10 +2,11 @@ import React, { useState, Component } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell, MapPin, Tag,
   Package, BookOpen, ClipboardList, CreditCard, Bell, BarChart2,
-  FileText, Settings, LogOut, Menu, X, Shield, Calendar
+  FileText, Settings, LogOut, Menu, Shield, Calendar
 } from 'lucide-react';
 
 const navGroups = [
@@ -162,20 +163,17 @@ export default function AdminLayout({ children = <Outlet /> }) {
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 flex">
-          <div className="fixed inset-0 bg-black/70" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative z-50 flex flex-col w-64 bg-sidebar">
-            <button onClick={() => setSidebarOpen(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-foreground z-10">
-              <X size={20} />
-            </button>
-            <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
-          </aside>
-        </div>
-      )}
+      {/* Mobile sidebar drawer */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent
+          side="left"
+          className="lg:hidden w-64 max-w-[85vw] bg-sidebar border-sidebar-border p-0 flex flex-col gap-0"
+        >
+          <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
+        </SheetContent>
+      </Sheet>
 
-      <div className="flex-1 lg:ml-56 print:ml-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 lg:ml-56 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile header */}
         <header className="lg:hidden print:hidden bg-sidebar px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-border">
           <div className="flex items-center gap-2">

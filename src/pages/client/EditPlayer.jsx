@@ -90,12 +90,12 @@ export default function EditPlayer() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Personal Details</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <Field label="First name" required><Input required value={form.firstName} onChange={set('firstName')} /></Field>
             <Field label="Last name" required><Input required value={form.lastName} onChange={set('lastName')} /></Field>
           </div>
           <Field label="Date of birth"><Input type="date" value={form.dateOfBirth} onChange={set('dateOfBirth')} /></Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <Field label="Age group">
               <Select value={form.ageGroup} onChange={set('ageGroup')}>
                 <option value="">Select</option>
@@ -127,7 +127,7 @@ export default function EditPlayer() {
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Emergency Contact</h2>
           <Field label="Name"><Input value={form.emergencyContactName} onChange={set('emergencyContactName')} /></Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <Field label="Phone"><Input type="tel" value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} /></Field>
             <Field label="Relationship"><Input value={form.emergencyContactRelationship} onChange={set('emergencyContactRelationship')} /></Field>
           </div>

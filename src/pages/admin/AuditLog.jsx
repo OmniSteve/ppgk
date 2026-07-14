@@ -36,8 +36,8 @@ export default function AuditLog() {
         <p className="text-muted-foreground text-sm">{total} audit records</p>
       </div>
 
-      <div className="flex gap-3">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1 min-w-[200px] relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search audit log…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
         </div>
@@ -59,25 +59,25 @@ export default function AuditLog() {
         <div className="bg-card rounded-2xl border border-border divide-y divide-border overflow-hidden">
           {logs.map((log) => (
             <div key={log.id} className="px-5 py-4 hover:bg-accent transition-colors">
-              <div className="flex items-start justify-between gap-4 mb-1">
+              <div className="flex flex-wrap items-start justify-between gap-x-4 gap-y-1 mb-1">
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${actionColors[log.action?.split('_')[0]] || 'bg-accent text-muted-foreground'}`}>
                     {log.action?.replace(/_/g, ' ')}
                   </span>
                   <span className="bg-accent text-foreground text-xs font-medium px-2 py-0.5 rounded-full capitalize">{log.recordType}</span>
-                  <span className="text-foreground font-bold text-sm">{log.description}</span>
+                  <span className="text-foreground font-bold text-sm break-words">{log.description}</span>
                 </div>
                 <p className="text-muted-foreground text-xs whitespace-nowrap flex-shrink-0">{new Date(log.createdAt).toLocaleString('en-MT')}</p>
               </div>
-              <div className="flex items-center gap-3 text-muted-foreground text-xs">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs">
                 <span>by {log.actorName || 'System'}</span>
-                {log.recordId && <span>· ID: <span className="text-label-mono">{log.recordId}</span></span>}
-                {log.reason && <span>· Reason: {log.reason}</span>}
+                {log.recordId && <span className="min-w-0">· ID: <span className="text-label-mono break-all">{log.recordId}</span></span>}
+                {log.reason && <span className="break-words">· Reason: {log.reason}</span>}
               </div>
               {(log.previousValue || log.newValue) && (
-                <div className="mt-2 grid grid-cols-2 gap-2">
-                  {log.previousValue && <div className="bg-destructive/10 rounded-lg px-3 py-2 text-xs text-destructive"><span className="font-semibold block">Before</span>{log.previousValue}</div>}
-                  {log.newValue && <div className="bg-success/10 rounded-lg px-3 py-2 text-xs text-success"><span className="font-semibold block">After</span>{log.newValue}</div>}
+                <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {log.previousValue && <div className="bg-destructive/10 rounded-lg px-3 py-2 text-xs text-destructive break-words"><span className="font-semibold block">Before</span>{log.previousValue}</div>}
+                  {log.newValue && <div className="bg-success/10 rounded-lg px-3 py-2 text-xs text-success break-words"><span className="font-semibold block">After</span>{log.newValue}</div>}
                 </div>
               )}
             </div>

@@ -65,13 +65,13 @@ export default function Reports() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-foreground">Reports</h1>
           <p className="text-muted-foreground text-sm">Generate and export operational reports</p>
         </div>
         {results && !results.error && (
-          <button onClick={exportCsv} disabled={exporting} className="flex items-center gap-2 border border-border text-foreground font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-accent transition-all">
+          <button onClick={exportCsv} disabled={exporting} className="flex items-center justify-center gap-2 border border-border text-foreground font-semibold px-4 py-2.5 rounded-xl text-sm hover:bg-accent transition-all self-start">
             {exporting ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
             Export CSV
           </button>
@@ -93,7 +93,7 @@ export default function Reports() {
         </div>
 
         <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide pt-2">Filters</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-2 md:grid-cols-3 gap-4">
           <div><label className="block text-muted-foreground text-xs mb-1">From date</label><input type="date" value={filters.from} onChange={set('from')} className={inputCls + ' w-full'} /></div>
           <div><label className="block text-muted-foreground text-xs mb-1">To date</label><input type="date" value={filters.to} onChange={set('to')} className={inputCls + ' w-full'} /></div>
           <div><label className="block text-muted-foreground text-xs mb-1">Client ID (optional)</label><input value={filters.clientId} onChange={set('clientId')} className={inputCls + ' w-full'} placeholder="Filter by client" /></div>
@@ -113,7 +113,7 @@ export default function Reports() {
             <p className="text-destructive text-sm">{results.error}</p>
           ) : (
             <>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h2 className="font-bold text-foreground">{REPORT_TYPES.find((r) => r.key === reportType)?.label}</h2>
                 <p className="text-muted-foreground text-sm">{results.totalRows ?? results.rows?.length ?? 0} rows</p>
               </div>

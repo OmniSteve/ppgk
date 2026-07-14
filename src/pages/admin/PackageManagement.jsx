@@ -45,12 +45,12 @@ export default function PackageManagement() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-foreground">Packages</h1>
           <p className="text-muted-foreground text-sm">Session credit packages</p>
         </div>
-        <button onClick={() => { setForm(defaultPkg); setEditing('new'); setError(''); }} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center gap-2">
+        <button onClick={() => { setForm(defaultPkg); setEditing('new'); setError(''); }} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-4 py-2.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 self-start">
           <Plus size={16} />New Package
         </button>
       </div>
@@ -62,7 +62,7 @@ export default function PackageManagement() {
             <button onClick={() => setEditing(null)} className="text-muted-foreground hover:text-foreground"><X size={18} /></button>
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className="block text-foreground text-xs font-medium mb-1">Package Name</label><input value={form.name} onChange={set('name')} className={inp} placeholder="e.g. Monthly Bundle" /></div>
             <div><label className="block text-foreground text-xs font-medium mb-1">Credits</label><input type="number" value={form.credits} onChange={set('credits')} className={inp} placeholder="e.g. 8" /></div>
             <div><label className="block text-foreground text-xs font-medium mb-1">Price (EUR)</label><input type="number" step="0.01" value={form.price} onChange={set('price')} className={inp} placeholder="0.00" /></div>
@@ -91,22 +91,22 @@ export default function PackageManagement() {
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border">
           {packages.map((pkg) => (
-            <div key={pkg.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
+            <div key={pkg.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
               <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
                 <Package size={18} className="text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground text-sm">{pkg.name}</p>
-                <p className="text-muted-foreground text-xs text-label-mono">{pkg.credits} credits · €{pkg.price} · {pkg.validityMonths} months</p>
+              <div className="flex-1 min-w-[9rem]">
+                <p className="font-bold text-foreground text-sm truncate">{pkg.name}</p>
+                <p className="text-muted-foreground text-xs text-label-mono truncate">{pkg.credits} credits · €{pkg.price} · {pkg.validityMonths} months</p>
               </div>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${pkg.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${pkg.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {pkg.active ? 'Active' : 'Inactive'}
               </span>
-              <div className="flex items-center gap-2">
-                <button onClick={() => toggleActive(pkg)} className="w-8 h-8 rounded-lg bg-accent hover:bg-accent/70 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                <button onClick={() => toggleActive(pkg)} className="w-9 h-9 rounded-lg bg-accent hover:bg-accent/70 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                   {pkg.active ? <ToggleRight size={16} /> : <ToggleLeft size={16} />}
                 </button>
-                <button onClick={() => { setForm({ ...pkg }); setEditing(pkg.id); setError(''); }} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                <button onClick={() => { setForm({ ...pkg }); setEditing(pkg.id); setError(''); }} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                   <Edit2 size={14} />
                 </button>
               </div>

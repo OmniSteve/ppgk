@@ -92,7 +92,7 @@ export default function PlayerPerformanceForm({ playerId, clientId, playerName, 
 
           <div>
             <p className={labelCls}>Ratings</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 bg-accent border border-border rounded-xl p-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-4 bg-accent border border-border rounded-xl p-4">
               {RATING_FIELDS.map(([key, label]) => (
                 <RatingInput key={key} label={label} value={form[key]} onChange={setRating(key)} />
               ))}

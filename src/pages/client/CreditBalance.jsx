@@ -23,12 +23,12 @@ export default function CreditBalance() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-black text-foreground">Credit Balance</h1>
           <p className="text-muted-foreground text-sm mt-0.5">Your session credits and transaction history</p>
         </div>
-        <Link to="/packages" className="bg-primary hover:bg-primary-hover text-foreground text-sm font-bold px-4 py-2.5 rounded-xl transition-colors">
+        <Link to="/packages" className="bg-primary hover:bg-primary-hover text-foreground text-sm font-bold px-4 py-2.5 rounded-xl transition-colors self-start">
           Buy Credits
         </Link>
       </div>
@@ -49,12 +49,12 @@ export default function CreditBalance() {
               const daysLeft = expiryDate ? Math.ceil((expiryDate - new Date()) / 86400000) : null;
               const expiringSoon = daysLeft !== null && daysLeft <= 14;
               return (
-                <div key={pkg.id} className="flex items-center justify-between p-3 rounded-xl bg-accent border border-border">
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{pkg.packageName || 'Credit Package'}</p>
+                <div key={pkg.id} className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 p-3 rounded-xl bg-accent border border-border">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-foreground text-sm truncate">{pkg.packageName || 'Credit Package'}</p>
                     <p className="text-muted-foreground text-xs">Purchased {purchaseDate ? purchaseDate.toLocaleDateString('en-GB') : '—'}</p>
                   </div>
-                  <div className="text-right">
+                  <div className="text-right flex-shrink-0">
                     <p className="font-black text-foreground text-lg">{pkg.creditsRemaining ?? pkg.creditsGranted ?? '?'} <span className="text-muted-foreground font-normal text-xs">credits</span></p>
                     <p className={`text-xs font-semibold ${expiringSoon ? 'text-destructive' : 'text-muted-foreground'}`}>
                       {expiryDate ? `Expires ${expiryDate.toLocaleDateString('en-GB')}${expiringSoon ? ` (${daysLeft} days)` : ''}` : 'No expiry'}

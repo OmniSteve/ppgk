@@ -39,18 +39,18 @@ const SessionCard = ({ session, onSelect, selected }) => (
     onClick={() => onSelect(session)}
   >
     <div className="p-5">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
+        <div className="flex items-center gap-2 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-primary/20 flex flex-col items-center justify-center flex-shrink-0">
             <span className="text-foreground text-xs font-bold leading-none text-label-mono">{new Date(session.date).getDate()}</span>
             <span className="text-primary text-[9px] font-semibold uppercase">{new Date(session.date).toLocaleString('en', { month: 'short' })}</span>
           </div>
-          <div>
-            <h3 className="font-bold text-foreground text-sm leading-tight">{session.name}</h3>
+          <div className="min-w-0">
+            <h3 className="font-bold text-foreground text-sm leading-tight truncate">{session.name}</h3>
             <p className="text-muted-foreground text-xs">{session.sessionType}</p>
           </div>
         </div>
-        <StatusBadge spots={session.spotsRemaining} />
+        <span className="flex-shrink-0"><StatusBadge spots={session.spotsRemaining} /></span>
       </div>
 
       <div className="space-y-1.5 mb-4">
@@ -123,7 +123,7 @@ export default function SessionCatalogue() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-5">
+    <div className={`max-w-4xl mx-auto space-y-5 ${selected.length > 0 ? 'pb-28' : ''}`}>
       <div>
         <h1 className="text-2xl font-black text-foreground">Available Sessions</h1>
         <p className="text-muted-foreground text-sm mt-0.5">Select one or more sessions to book</p>
@@ -188,16 +188,16 @@ export default function SessionCatalogue() {
       )}
 
       {selected.length > 0 && (
-        <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-sidebar border-t border-border px-4 py-4 flex items-center justify-between z-20">
-          <div>
-            <p className="text-foreground font-bold">{selected.length} session{selected.length > 1 ? 's' : ''} selected</p>
+        <div className="fixed bottom-0 left-0 right-0 lg:left-64 bg-sidebar border-t border-border px-4 py-3 flex flex-wrap items-center justify-between gap-3 z-20">
+          <div className="min-w-0">
+            <p className="text-foreground font-bold truncate">{selected.length} session{selected.length > 1 ? 's' : ''} selected</p>
             <p className="text-muted-foreground text-xs text-label-mono">
               {selected.reduce((sum, s) => sum + (s.credits || 0), 0)} credits or €{selected.reduce((sum, s) => sum + (s.price || 0), 0).toFixed(2)}
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <button onClick={() => setSelected([])} className="text-muted-foreground hover:text-foreground transition-colors"><X size={18} /></button>
-            <button onClick={proceedToCheckout} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-6 py-2.5 rounded-xl text-sm transition-colors">
+          <div className="flex items-center gap-3 flex-shrink-0">
+            <button onClick={() => setSelected([])} aria-label="Clear selected sessions" className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"><X size={18} /></button>
+            <button onClick={proceedToCheckout} className="bg-primary hover:bg-primary-hover text-foreground font-bold px-5 py-2.5 rounded-xl text-sm transition-colors whitespace-nowrap">
               Continue to Checkout →
             </button>
           </div>

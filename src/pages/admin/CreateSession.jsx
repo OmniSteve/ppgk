@@ -84,7 +84,7 @@ export default function CreateSession() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <Section title="Session Details">
           <div><Label required>Session Name</Label><Input required value={form.name} onChange={set('name')} placeholder="e.g. Saturday Morning GK Session" /></div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Session Type</Label>
               <Select value={form.sessionTypeId} onChange={set('sessionTypeId')}>
                 <option value="">Select type</option>
@@ -102,12 +102,12 @@ export default function CreateSession() {
         </Section>
 
         <Section title="Schedule & Location">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4">
             <div><Label required>Date</Label><Input type="date" required value={form.date} onChange={set('date')} /></div>
             <div><Label required>Start Time</Label><Input type="time" required value={form.startTime} onChange={set('startTime')} /></div>
             <div><Label required>End Time</Label><Input type="time" required value={form.endTime} onChange={set('endTime')} /></div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Location</Label>
               <Select value={form.locationId} onChange={set('locationId')}>
                 <option value="">Select location</option>
@@ -124,7 +124,7 @@ export default function CreateSession() {
         </Section>
 
         <Section title="Eligibility & Capacity">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4">
             <div><Label>Age Group</Label>
               <Select value={form.ageGroup} onChange={set('ageGroup')}>
                 <option value="">All ages</option>
@@ -142,14 +142,14 @@ export default function CreateSession() {
         </Section>
 
         <Section title="Pricing">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Price (EUR)</Label><Input type="number" step="0.01" min="0" value={form.price} onChange={set('price')} placeholder="0.00" /></div>
             <div><Label>Credits Required</Label><Input type="number" min="0" value={form.credits} onChange={set('credits')} placeholder="e.g. 1" /></div>
           </div>
         </Section>
 
         <Section title="Booking Rules">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Booking Opens</Label><Input type="datetime-local" value={form.bookingOpenDate} onChange={set('bookingOpenDate')} /></div>
             <div><Label>Booking Closes</Label><Input type="datetime-local" value={form.bookingCloseDate} onChange={set('bookingCloseDate')} /></div>
             <div><Label>Cancellation Deadline (hours)</Label><Input type="number" value={form.cancellationDeadlineHours} onChange={set('cancellationDeadlineHours')} /></div>

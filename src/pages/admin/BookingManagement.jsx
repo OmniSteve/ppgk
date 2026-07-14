@@ -39,8 +39,8 @@ export default function BookingManagement() {
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1 min-w-[200px] relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by client, player or session…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
         </div>
@@ -62,15 +62,15 @@ export default function BookingManagement() {
               <p className="text-muted-foreground">No bookings found</p>
             </div>
           ) : bookings.map((b) => (
-            <div key={b.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
+            <div key={b.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex flex-col items-center justify-center flex-shrink-0">
                 <span className="text-foreground text-xs font-bold leading-none text-label-mono">{new Date(b.sessionDate).getDate()}</span>
                 <span className="text-primary text-[9px] font-bold uppercase">{new Date(b.sessionDate).toLocaleString('en', { month: 'short' })}</span>
               </div>
-              <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-[9rem]">
                 <p className="font-bold text-foreground text-sm truncate">{b.sessionName}</p>
-                <div className="flex items-center gap-3 text-muted-foreground text-xs mt-0.5">
-                  <span className="flex items-center gap-1"><User size={11} />{b.clientName} → {b.playerName}</span>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-0.5 text-muted-foreground text-xs mt-0.5">
+                  <span className="flex items-center gap-1 min-w-0 truncate"><User size={11} className="flex-shrink-0" />{b.clientName} → {b.playerName}</span>
                   <span>{b.startTime}</span>
                 </div>
               </div>

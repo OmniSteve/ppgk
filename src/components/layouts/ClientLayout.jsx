@@ -3,9 +3,10 @@ import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ClientErrorBoundary from '@/components/ClientErrorBoundary';
 import { useAuth } from '@/contexts/AuthContext';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 import {
   LayoutDashboard, Calendar, Users, CreditCard, ShoppingBag,
-  Bell, User, LogOut, Menu, X, Shield, Briefcase
+  Bell, User, LogOut, Menu, Shield, Briefcase
 } from 'lucide-react';
 
 const navItems = [
@@ -114,24 +115,18 @@ export default function ClientLayout({ children }) {
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>
 
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div className="lg:hidden fixed inset-0 z-40 flex">
-          <div className="fixed inset-0 bg-black/60" onClick={() => setSidebarOpen(false)} />
-          <aside className="relative z-50 flex flex-col w-72 bg-sidebar">
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-            >
-              <X size={20} />
-            </button>
-            <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
-          </aside>
-        </div>
-      )}
+      {/* Mobile Sidebar Drawer */}
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent
+          side="left"
+          className="lg:hidden w-72 max-w-[85vw] bg-sidebar border-sidebar-border p-0 flex flex-col gap-0"
+        >
+          <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
+        </SheetContent>
+      </Sheet>
 
       {/* Main Content */}
-      <div className="flex-1 lg:ml-64 print:ml-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 lg:ml-64 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile Header */}
         <header className="lg:hidden print:hidden bg-sidebar px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-border">
           <div className="flex items-center gap-3">

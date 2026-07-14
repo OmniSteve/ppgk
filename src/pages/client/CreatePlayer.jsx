@@ -66,12 +66,12 @@ export default function CreatePlayer() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Personal Details</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <Field label="First name" required><Input required value={form.firstName} onChange={set('firstName')} placeholder="First name" /></Field>
             <Field label="Last name" required><Input required value={form.lastName} onChange={set('lastName')} placeholder="Last name" /></Field>
           </div>
           <Field label="Date of birth" required><Input type="date" required value={form.dateOfBirth} onChange={set('dateOfBirth')} /></Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <Field label="Age group" required>
               <Select required value={form.ageGroup} onChange={set('ageGroup')}>
                 <option value="">Select age group</option>
@@ -103,7 +103,7 @@ export default function CreatePlayer() {
         <div className={sectionCls}>
           <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Emergency Contact</h2>
           <Field label="Contact name"><Input value={form.emergencyContactName} onChange={set('emergencyContactName')} placeholder="Full name" /></Field>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <Field label="Phone"><Input type="tel" value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} placeholder="+356 …" /></Field>
             <Field label="Relationship"><Input value={form.emergencyContactRelationship} onChange={set('emergencyContactRelationship')} placeholder="e.g. Parent" /></Field>
           </div>

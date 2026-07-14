@@ -60,8 +60,8 @@ export default function SessionManagement() {
         </Link>
       </div>
 
-      <div className="flex gap-3">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1 min-w-[200px] relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search sessions…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
         </div>
@@ -81,12 +81,12 @@ export default function SessionManagement() {
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border">
           {sessions.map((s) => (
-            <div key={s.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
+            <div key={s.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
             <div className="w-10 h-10 rounded-xl bg-primary/20 flex flex-col items-center justify-center flex-shrink-0">
               <span className="text-foreground text-xs font-bold leading-none text-label-mono">{new Date(s.sessionDate).getDate()}</span>
               <span className="text-primary text-[9px] font-bold uppercase">{new Date(s.sessionDate).toLocaleString('en', { month: 'short' })}</span>
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-[9rem]">
               <p className="font-bold text-foreground text-sm truncate">{s.title}</p>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-muted-foreground text-xs mt-0.5 min-w-0">
                 <span className="flex items-center gap-1"><Clock size={11} />{s.startTime}</span>
@@ -97,11 +97,11 @@ export default function SessionManagement() {
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[s.status] || 'bg-accent text-muted-foreground'}`}>
                 {s.status?.replace(/_/g, ' ')}
               </span>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <Link to={`/admin/sessions/${s.id}/edit`} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                <Link to={`/admin/sessions/${s.id}/edit`} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                   <Edit2 size={14} />
                 </Link>
-                <button onClick={() => handleDelete(s)} disabled={deleting === s.id} className="w-8 h-8 rounded-lg bg-accent hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
+                <button onClick={() => handleDelete(s)} disabled={deleting === s.id} className="w-9 h-9 rounded-lg bg-accent hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-foreground transition-all disabled:opacity-50">
                   <Trash2 size={14} />
                 </button>
               </div>

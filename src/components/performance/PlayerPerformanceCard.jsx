@@ -75,7 +75,7 @@ export default function PlayerPerformanceCard({ record, previous, canManage, onE
         </div>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-2.5 pt-3 border-t border-border">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-2.5 pt-3 border-t border-border">
         {CATEGORY_FIELDS.map(([field, label]) => (
           <RatingDisplay key={field} value={record[field]} label={label} size="sm" />
         ))}

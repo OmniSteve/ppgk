@@ -37,17 +37,17 @@ export default function PurchaseHistory() {
       ) : (
         <div className="bg-card rounded-2xl border border-border divide-y divide-border">
           {entries.map((e) => (
-            <div key={e.id} className="flex items-center justify-between p-5">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-accent border border-border flex items-center justify-center">
+            <div key={e.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 p-5">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="w-10 h-10 rounded-xl bg-accent border border-border flex items-center justify-center flex-shrink-0">
                   {e.type === 'purchase' ? <CreditCard size={18} className="text-primary" /> : <ShoppingBag size={18} className="text-muted-foreground" />}
                 </div>
-                <div>
-                  <p className="font-bold text-foreground text-sm">{e.description}</p>
+                <div className="min-w-0">
+                  <p className="font-bold text-foreground text-sm truncate">{e.description}</p>
                   <p className="text-muted-foreground text-xs mt-0.5">{e.createdAt ? new Date(e.createdAt).toLocaleDateString('en-MT', { day: 'numeric', month: 'long', year: 'numeric' }) : '—'}</p>
                 </div>
               </div>
-              <div className="text-right">
+              <div className="text-right flex-shrink-0">
                 <p className={`font-black text-base ${e.amount > 0 ? 'text-success' : 'text-destructive'}`}>
                   {e.amount > 0 ? '+' : ''}{e.amount}
                 </p>

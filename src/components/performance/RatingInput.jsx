@@ -5,7 +5,7 @@ export default function RatingInput({ label, value, onChange }) {
   return (
     <div>
       <label className="block text-xs font-semibold text-muted-foreground mb-1">{label}</label>
-      <div className="flex items-center gap-1">
+      <div className="flex flex-wrap items-center gap-1">
         {[1, 2, 3, 4, 5].map((n) => (
           <button
             key={n}

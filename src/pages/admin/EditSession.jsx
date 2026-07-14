@@ -112,10 +112,10 @@ export default function EditSession() {
         <ChevronLeft size={16} />
         Back to Sessions
       </Link>
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 xs:flex-row xs:items-center xs:justify-between">
         <h1 className="text-2xl font-black text-foreground">Edit Session</h1>
         {form.status !== 'cancelled' && (
-          <button onClick={handleCancelSession} disabled={cancelling} className="flex items-center gap-2 text-destructive hover:text-destructive/80 text-sm font-semibold border border-destructive/30 hover:border-destructive/60 px-4 py-2 rounded-xl transition-all">
+          <button onClick={handleCancelSession} disabled={cancelling} className="flex items-center justify-center gap-2 text-destructive hover:text-destructive/80 text-sm font-semibold border border-destructive/30 hover:border-destructive/60 px-4 py-2 rounded-xl transition-all">
             <AlertTriangle size={14} />
             {cancelling ? 'Cancelling…' : 'Cancel Session'}
           </button>
@@ -127,7 +127,7 @@ export default function EditSession() {
       <form onSubmit={handleSave} className="space-y-5">
         <Section title="Session Details">
           <div><Label>Session Name</Label><Input value={form.name || ''} onChange={set('name')} /></div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Session Type</Label>
               <Select value={form.sessionTypeId || ''} onChange={set('sessionTypeId')}>
                 <option value="">Select type</option>
@@ -144,12 +144,12 @@ export default function EditSession() {
         </Section>
 
         <Section title="Schedule & Location">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4">
             <div><Label>Date</Label><Input type="date" value={form.date || ''} onChange={set('date')} /></div>
             <div><Label>Start Time</Label><Input type="time" value={form.startTime || ''} onChange={set('startTime')} /></div>
             <div><Label>End Time</Label><Input type="time" value={form.endTime || ''} onChange={set('endTime')} /></div>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Location</Label>
               <Select value={form.locationId || ''} onChange={set('locationId')}>
                 <option value="">Select location</option>
@@ -166,7 +166,7 @@ export default function EditSession() {
         </Section>
 
         <Section title="Eligibility & Capacity">
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4">
             <div><Label>Age Group</Label>
               <Select value={form.ageGroup || ''} onChange={set('ageGroup')}>
                 <option value="">All</option>
@@ -184,7 +184,7 @@ export default function EditSession() {
         </Section>
 
         <Section title="Pricing">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><Label>Price (EUR)</Label><Input type="number" step="0.01" value={form.price || ''} onChange={set('price')} /></div>
             <div><Label>Credits Required</Label><Input type="number" value={form.credits || ''} onChange={set('credits')} /></div>
           </div>

@@ -114,7 +114,7 @@ export default function PaymentManagement() {
       </div>
 
       {Object.keys(totals).length > 0 && (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 xs:grid-cols-3 gap-4">
           {totals.totalPaid !== undefined && (
             <div className="bg-card rounded-2xl border border-border p-4">
               <p className="text-display text-3xl font-black text-foreground">€{Number(totals.totalPaid || 0).toFixed(2)}</p>
@@ -136,8 +136,8 @@ export default function PaymentManagement() {
         </div>
       )}
 
-      <div className="flex gap-3">
-        <div className="flex-1 relative">
+      <div className="flex flex-wrap gap-3">
+        <div className="flex-1 min-w-[200px] relative">
           <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by client, reference…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
         </div>
@@ -154,19 +154,19 @@ export default function PaymentManagement() {
           {payments.length === 0 ? (
             <div className="p-16 text-center"><CreditCard size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No payments found</p></div>
           ) : payments.map((p) => (
-            <div key={p.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <p className="font-bold text-foreground text-sm">{p.clientName}</p>
-                  <span className="text-muted-foreground text-xs font-mono text-label-mono">{p.reference}</span>
+            <div key={p.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
+              <div className="flex-1 min-w-[10rem]">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                  <p className="font-bold text-foreground text-sm truncate">{p.clientName}</p>
+                  <span className="text-muted-foreground text-xs font-mono text-label-mono break-all">{p.reference}</span>
                 </div>
-                <p className="text-muted-foreground text-xs mt-0.5">{p.description} · {new Date(p.createdAt).toLocaleString('en-MT')}</p>
+                <p className="text-muted-foreground text-xs mt-0.5 truncate">{p.description} · {new Date(p.createdAt).toLocaleString('en-MT')}</p>
               </div>
               <p className="text-foreground font-bold text-sm flex-shrink-0 text-label-mono">€{Number(p.amount || 0).toFixed(2)}</p>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColor[p.status] || 'bg-accent text-muted-foreground'}`}>
                 {p.status?.replace(/_/g, ' ')}
               </span>
-              <div className="flex gap-1 flex-shrink-0">
+              <div className="flex gap-1 flex-shrink-0 ml-auto">
                 {p.stripePaymentIntent && (
                   <a href={`https://dashboard.stripe.com/payments/${p.stripePaymentIntent}`} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-lg bg-accent hover:bg-accent/70 flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                     <ExternalLink size={13} />
@@ -193,13 +193,13 @@ export default function PaymentManagement() {
 
       {refundTarget && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={closeRefund}>
-          <div className="w-full max-w-lg bg-sidebar border border-border rounded-2xl p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between">
-              <div>
+          <div className="w-full max-w-lg max-h-[85vh] overflow-y-auto bg-sidebar border border-border rounded-2xl p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
                 <h2 className="text-lg font-black text-foreground">Refund payment</h2>
-                <p className="text-muted-foreground text-xs mt-0.5">{refundTarget.clientName} · <span className="text-label-mono">{refundTarget.reference} · €{Number(refundTarget.amount || 0).toFixed(2)}</span></p>
+                <p className="text-muted-foreground text-xs mt-0.5 break-words">{refundTarget.clientName} · <span className="text-label-mono break-all">{refundTarget.reference} · €{Number(refundTarget.amount || 0).toFixed(2)}</span></p>
               </div>
-              <button onClick={closeRefund} className="text-muted-foreground hover:text-foreground transition-colors"><X size={18} /></button>
+              <button onClick={closeRefund} className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0"><X size={18} /></button>
             </div>
 
             <div>

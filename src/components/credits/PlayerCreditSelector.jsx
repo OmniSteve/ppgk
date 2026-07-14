@@ -82,7 +82,7 @@ export default function PlayerCreditSelector({ selected, onSelect }) {
         </div>
         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground pl-11">
           {selected.clientEmail && (
-            <span className="flex items-center gap-1"><Mail size={11} />{selected.clientEmail}</span>
+            <span className="flex items-center gap-1 min-w-0 max-w-full"><Mail size={11} className="flex-shrink-0" /><span className="truncate">{selected.clientEmail}</span></span>
           )}
           {selected.clientPhone && (
             <span className="flex items-center gap-1"><Phone size={11} />{selected.clientPhone}</span>

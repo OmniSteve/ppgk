@@ -123,8 +123,8 @@ export default function AppSettings() {
         <div key={group.label} className="bg-card rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-bold text-foreground">{group.label}</h2>
           {group.settings.map((s) => (
-            <div key={s.key} className="flex items-start justify-between gap-4">
-              <div className="flex-1">
+            <div key={s.key} className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+              <div className="flex-1 min-w-0">
                 <label className="block text-foreground text-sm font-medium mb-0.5">{s.label}</label>
                 {s.hint && <p className="text-muted-foreground text-xs">{s.hint}</p>}
               </div>
@@ -143,7 +143,7 @@ export default function AppSettings() {
                     type={s.type || 'text'}
                     value={settings[s.key] ?? ''}
                     onChange={(e) => set(s.key, e.target.value)}
-                    className="w-48 bg-card border border-border rounded-xl px-3 py-2 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors text-right"
+                    className="w-full sm:w-48 bg-card border border-border rounded-xl px-3 py-2 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors sm:text-right"
                   />
                 )}
               </div>

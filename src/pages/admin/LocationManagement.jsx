@@ -60,7 +60,7 @@ export default function LocationManagement() {
           </div>
           {error && <p className="text-destructive text-sm">{error}</p>}
           <div><label className="block text-muted-foreground text-xs mb-1">Venue Name</label><input value={form.name} onChange={set('name')} className={inp} placeholder="e.g. Marsa Sports Complex" /></div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className="block text-muted-foreground text-xs mb-1">Address Line 1</label><input value={form.addressLine1} onChange={set('addressLine1')} className={inp} /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">Address Line 2</label><input value={form.addressLine2} onChange={set('addressLine2')} className={inp} /></div>
             <div><label className="block text-muted-foreground text-xs mb-1">City / Area</label><input value={form.city} onChange={set('city')} className={inp} /></div>
@@ -88,18 +88,18 @@ export default function LocationManagement() {
           {locations.length === 0 ? (
             <div className="p-16 text-center"><MapPin size={36} className="text-muted-foreground mx-auto mb-2" /><p className="text-muted-foreground">No locations yet</p></div>
           ) : locations.map((loc) => (
-            <div key={loc.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
+            <div key={loc.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-4 hover:bg-accent transition-colors">
               <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center flex-shrink-0">
                 <MapPin size={18} className="text-primary" />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground text-sm">{loc.name}</p>
-                <p className="text-muted-foreground text-xs">{[loc.addressLine1, loc.city, loc.postCode].filter(Boolean).join(', ')}</p>
+              <div className="flex-1 min-w-[9rem]">
+                <p className="font-bold text-foreground text-sm truncate">{loc.name}</p>
+                <p className="text-muted-foreground text-xs truncate">{[loc.addressLine1, loc.city, loc.postCode].filter(Boolean).join(', ')}</p>
               </div>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${loc.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {loc.active ? 'Active' : 'Inactive'}
               </span>
-              <button onClick={() => { setForm({ ...loc }); setEditing(loc.id); setError(''); }} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
+              <button onClick={() => { setForm({ ...loc }); setEditing(loc.id); setError(''); }} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0 ml-auto">
                 <Edit2 size={14} />
               </button>
             </div>

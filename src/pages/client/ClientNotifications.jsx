@@ -44,7 +44,7 @@ export default function ClientNotifications() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between gap-2 mb-1">
-                    <p className={`font-semibold text-sm ${n.read ? 'text-muted-foreground' : 'text-foreground'}`}>{n.subject}</p>
+                    <p className={`font-semibold text-sm truncate ${n.read ? 'text-muted-foreground' : 'text-foreground'}`}>{n.subject}</p>
                     <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${typeColor[n.type] || 'bg-accent text-muted-foreground'}`}>
                       {n.type?.replace(/_/g, ' ')}
                     </span>

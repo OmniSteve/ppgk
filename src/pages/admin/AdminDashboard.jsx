@@ -54,12 +54,12 @@ export default function AdminDashboard() {
           <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide mb-3">Upcoming Sessions</p>
           <div className="bg-card rounded-2xl border border-border divide-y divide-border">
             {data.upcomingSessions.map((s) => (
-              <div key={s.id} className="flex items-center justify-between px-5 py-3">
-                <div>
-                  <p className="text-foreground text-sm font-semibold">{s.title}</p>
-                  <p className="text-muted-foreground text-xs">{s.sessionDate} · {s.startTime} · {s.locationName || 'No location'}</p>
+              <div key={s.id} className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-5 py-3">
+                <div className="min-w-[9rem]">
+                  <p className="text-foreground text-sm font-semibold truncate">{s.title}</p>
+                  <p className="text-muted-foreground text-xs truncate">{s.sessionDate} · {s.startTime} · {s.locationName || 'No location'}</p>
                 </div>
-                <p className="text-muted-foreground text-xs text-label-mono">{s.bookedCount ?? 0}/{s.capacity ?? '–'} booked</p>
+                <p className="text-muted-foreground text-xs text-label-mono flex-shrink-0">{s.bookedCount ?? 0}/{s.capacity ?? '–'} booked</p>
               </div>
             ))}
           </div>

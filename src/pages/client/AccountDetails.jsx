@@ -64,7 +64,7 @@ export default function AccountDetails() {
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Personal Information</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className={labelCls}>First name</label><input value={form.firstName} onChange={set('firstName')} className={inputCls} /></div>
             <div><label className={labelCls}>Last name</label><input value={form.lastName} onChange={set('lastName')} className={inputCls} /></div>
           </div>
@@ -74,10 +74,10 @@ export default function AccountDetails() {
 
         <div className="bg-card rounded-2xl border border-border p-6 space-y-4">
           <h2 className="font-bold text-xs uppercase tracking-wide text-muted-foreground">Emergency Contact</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className={labelCls}>Name</label><input value={form.emergencyContactName} onChange={set('emergencyContactName')} className={inputCls} /></div>
             <div><label className={labelCls}>Phone</label><input type="tel" value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} className={inputCls} /></div>
-            <div className="col-span-2"><label className={labelCls}>Relationship</label><input value={form.emergencyContactRelation} onChange={set('emergencyContactRelation')} placeholder="e.g. Parent, Spouse, Guardian" className={inputCls} /></div>
+            <div className="col-span-1 xs:col-span-2"><label className={labelCls}>Relationship</label><input value={form.emergencyContactRelation} onChange={set('emergencyContactRelation')} placeholder="e.g. Parent, Spouse, Guardian" className={inputCls} /></div>
           </div>
         </div>
 

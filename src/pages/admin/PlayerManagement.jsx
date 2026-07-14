@@ -55,12 +55,12 @@ function EditModal({ player, onClose, onSaved }) {
         <div className="p-5 space-y-5">
           {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-3 text-destructive text-sm">{error}</div>}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className={labelCls}>First Name</label><input className={inputCls} value={form.firstName} onChange={set('firstName')} /></div>
             <div><label className={labelCls}>Last Name</label><input className={inputCls} value={form.lastName} onChange={set('lastName')} /></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className={labelCls}>Date of Birth</label><input type="date" className={inputCls} value={form.dateOfBirth} onChange={set('dateOfBirth')} /></div>
             <div>
               <label className={labelCls}>Age Group</label>
@@ -71,7 +71,7 @@ function EditModal({ player, onClose, onSaved }) {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div>
               <label className={labelCls}>Experience Level</label>
               <select className={inputCls} value={form.experienceLevel} onChange={set('experienceLevel')}>
@@ -82,7 +82,7 @@ function EditModal({ player, onClose, onSaved }) {
             <div><label className={labelCls}>Current Club</label><input className={inputCls} value={form.currentClub} onChange={set('currentClub')} /></div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
             <div><label className={labelCls}>School</label><input className={inputCls} value={form.school} onChange={set('school')} /></div>
             <div>
               <label className={labelCls}>Status</label>
@@ -96,7 +96,7 @@ function EditModal({ player, onClose, onSaved }) {
 
           <div className="border-t border-border pt-4">
             <p className="text-xs font-semibold text-warning mb-3 flex items-center gap-1.5"><AlertTriangle size={13} />Medical Information</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <div><label className={labelCls}>Medical Info</label><textarea className={inputCls} rows={3} value={form.medicalInfo} onChange={set('medicalInfo')} /></div>
               <div><label className={labelCls}>Allergies</label><textarea className={inputCls} rows={3} value={form.allergies} onChange={set('allergies')} /></div>
             </div>
@@ -104,10 +104,10 @@ function EditModal({ player, onClose, onSaved }) {
 
           <div className="border-t border-border pt-4">
             <p className="text-xs font-semibold text-muted-foreground mb-3">Emergency Contact</p>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <div><label className={labelCls}>Name</label><input className={inputCls} value={form.emergencyContactName} onChange={set('emergencyContactName')} /></div>
               <div><label className={labelCls}>Phone</label><input className={inputCls} value={form.emergencyContactPhone} onChange={set('emergencyContactPhone')} /></div>
-              <div className="col-span-2"><label className={labelCls}>Relationship</label><input className={inputCls} value={form.emergencyContactRelationship} onChange={set('emergencyContactRelationship')} placeholder="e.g. Parent" /></div>
+              <div className="col-span-1 xs:col-span-2"><label className={labelCls}>Relationship</label><input className={inputCls} value={form.emergencyContactRelationship} onChange={set('emergencyContactRelationship')} placeholder="e.g. Parent" /></div>
             </div>
           </div>
 
