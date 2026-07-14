@@ -3,15 +3,18 @@
  * Body: { email, password, firstName, lastName, phone? }
  *
  * - PBKDF2 password hashing (100,000 iterations, SHA-256)
+ * - Creates the user, client_profile, and one active "account holder" player
+ *   in a single D1 batch (all-or-nothing) so a client never ends up with an
+ *   account but no player profile.
  * - Sends email verification via Resend
  * - Does NOT log the user in (must verify email first)
  *
  * Source file: worker/src/routes/auth/register.js
- * Email send: line ~67 via sendTemplatedEmail (worker/src/lib/email.js)
+ * Email send: line ~80 via sendTemplatedEmail (worker/src/lib/email.js)
  * Sender address: 'Premier Performance GK <no-reply@premierperformancegk.com>'
  *   ↑ Must match a verified domain in your Resend account.
  */
-import { queryOne, execute, audit } from '../../lib/db.js';
+import { queryOne, batch, audit }   from '../../lib/db.js';
 import { sendTemplatedEmail }       from '../../lib/email.js';
 import { err, ok, requireFields }   from '../../lib/validate.js';
 import { hashPassword }             from '../../lib/password.js';
@@ -38,15 +41,40 @@ export async function handleRegister(request, env) {
   const verifyToken   = crypto.randomUUID();
   const userId        = crypto.randomUUID();
 
-  await execute(env,
-    `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, email_verify_token, active)
-     VALUES (?, ?, ?, ?, ?, ?, 'client', ?, 1)`,
-    [userId, email.toLowerCase(), passwordHash, firstName, lastName, phone ?? null, verifyToken]
-  );
-  await execute(env,
-    `INSERT INTO client_profiles (id, user_id) VALUES (?, ?)`,
-    [crypto.randomUUID(), userId]
-  );
+  // User + client_profile + the client's own "account holder" player are
+  // created as one D1 batch (all-or-nothing) — if any insert fails, none of
+  // them are committed, so we never end up with a user and no player (or a
+  // player without a user). The account-holder player is marked active and
+  // is_account_holder=1; a partial unique index (migration 0005) guarantees
+  // at most one such player per client even if this ever runs twice for the
+  // same userId.
+  try {
+    await batch(env, [
+      {
+        sql: `INSERT INTO users (id, email, password_hash, first_name, last_name, phone, role, email_verify_token, active)
+              VALUES (?, ?, ?, ?, ?, ?, 'client', ?, 1)`,
+        params: [userId, email.toLowerCase(), passwordHash, firstName, lastName, phone ?? null, verifyToken],
+      },
+      {
+        sql: `INSERT INTO client_profiles (id, user_id) VALUES (?, ?)`,
+        params: [crypto.randomUUID(), userId],
+      },
+      {
+        sql: `INSERT INTO players (id, client_id, first_name, last_name, status, is_account_holder)
+              VALUES (?, ?, ?, ?, 'active', 1)`,
+        params: [crypto.randomUUID(), userId, firstName, lastName],
+      },
+    ]);
+  } catch (e) {
+    // Most likely a concurrent registration for the same email racing past
+    // the existence check above (UNIQUE constraint on users.email). Respond
+    // the same anti-enumeration way rather than leaking which case it was.
+    if (String(e?.message || '').toUpperCase().includes('UNIQUE')) {
+      return ok({ message: 'If that email is new, a verification link has been sent.' }, 201);
+    }
+    console.error('[register] Account creation failed:', e);
+    return err('Registration failed. Please try again.', 500);
+  }
 
   await audit(env, {
     actorId:     userId,

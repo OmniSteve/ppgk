@@ -14,6 +14,7 @@ function normalisePlayer(p) {
     currentClub: p.currentClub ?? '',
     dateOfBirth: p.dateOfBirth ?? '',
     status: p.status ?? 'active',
+    isAccountHolder: !!p.isAccountHolder,
   };
 }
 
@@ -61,7 +62,10 @@ export default function PlayerList() {
                     <span className="text-foreground font-black text-base">{p.firstName?.[0]}{p.lastName?.[0]}</span>
                   </div>
                   <div className="min-w-0">
-                    <p className="font-bold text-foreground truncate">{p.firstName} {p.lastName}</p>
+                    <p className="font-bold text-foreground truncate">
+                      {p.firstName} {p.lastName}
+                      {p.isAccountHolder && <span className="text-muted-foreground text-xs font-medium ml-1.5">(Account Holder)</span>}
+                    </p>
                     <p className="text-muted-foreground text-xs truncate">{p.ageGroup}{p.experienceLevel ? ` · ${p.experienceLevel}` : ''}</p>
                   </div>
                 </div>

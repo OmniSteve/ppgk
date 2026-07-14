@@ -28,6 +28,7 @@ function normalisePlayer(p) {
     lastName: p.lastName ?? '',
     ageGroup: p.ageGroup ?? '',
     experienceLevel: p.experienceLevel ?? '',
+    isAccountHolder: !!p.isAccountHolder,
   };
 }
 
@@ -168,7 +169,10 @@ export default function Checkout() {
                 <label key={p.id} className={radioItem(selectedPlayer === p.id)}>
                   <input type="radio" name="player" value={p.id} checked={selectedPlayer === p.id} onChange={() => setSelectedPlayer(p.id)} className="accent-primary" />
                   <div>
-                    <p className="font-semibold text-foreground text-sm">{p.firstName} {p.lastName}</p>
+                    <p className="font-semibold text-foreground text-sm flex items-center gap-1.5">
+                      {p.firstName} {p.lastName}
+                      {p.isAccountHolder && <span className="text-muted-foreground text-xs font-medium">(My Player Profile)</span>}
+                    </p>
                     <p className="text-muted-foreground text-xs">{p.ageGroup}{p.experienceLevel ? ` · ${p.experienceLevel}` : ''}</p>
                   </div>
                 </label>
