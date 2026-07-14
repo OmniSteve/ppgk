@@ -39,7 +39,9 @@
       "Bash(curl -s http://localhost:5174/src/pages/public/LandingPage.jsx -o /tmp/landing-transformed.js -w \"module HTTP %{http_code}\\\\n\")",
       "Bash(pkill -f \"vite\")",
       "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"responsive admin dashboard mobile app shell sidebar drawer navigation\" --domain ux -n 12)",
-      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"responsive data table mobile dense data small screen\" --domain ux -n 10)"
+      "Bash(py .claude/skills/ui-ux-pro-max/scripts/search.py \"responsive data table mobile dense data small screen\" --domain ux -n 10)",
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(node -e \"const p=require\\('./package.json'\\); const d={...p.dependencies,...p.devDependencies}; ['typescript','tailwindcss','framer-motion','motion','lucide-react','@radix-ui/react-dialog','shadcn'].forEach\\(k=>console.log\\(k, d[k]||'NOT INSTALLED'\\)\\)\")"
     ]
   }
 }

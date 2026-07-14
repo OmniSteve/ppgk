@@ -87,7 +87,6 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in srgb, hsl(var(--background)) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid hsl(var(--border));
 }
@@ -278,6 +277,24 @@
   font-weight: 500;
 }
 
+/* interactive dot-grid background + fade so it never competes with text */
+.ppgk-landing .hero-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.9;
+}
+.ppgk-landing .hero-canvas-fade {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to bottom, transparent 0%, hsl(var(--background)) 92%),
+    radial-gradient(ellipse at center, transparent 35%, hsl(var(--background)) 96%);
+}
+
 /* ambient background glow behind hero / final CTA */
 .ppgk-landing .hero-glow {
   position: absolute;
@@ -290,6 +307,81 @@
 }
 .ppgk-landing .hero-grid,
 .ppgk-landing .cta .wrap { position: relative; z-index: 1; }
+
+/* "coaching led by" lead pill */
+.ppgk-landing .hero-lead {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.5rem 1.1rem 0.5rem 0.7rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 999px;
+  background: hsl(var(--card) / 0.7);
+  backdrop-filter: blur(6px);
+  font-size: 0.82rem;
+  color: hsl(var(--muted-foreground));
+}
+.ppgk-landing .hero-lead strong { color: hsl(var(--foreground)); font-weight: 600; }
+.ppgk-landing .hero-lead .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(var(--primary));
+  box-shadow: 0 0 0 4px hsl(var(--primary) / 0.18);
+  flex-shrink: 0;
+}
+
+/* clip window for the rotating headline word so it doesn't overflow adjacent lines */
+.ppgk-landing .rotating-clip {
+  display: inline-block;
+  overflow: hidden;
+  height: 1.05em;
+  line-height: 1.05em;
+  vertical-align: top;
+}
+
+/* secondary sign-in prompt beneath the primary CTA row */
+.ppgk-landing .hero-signin {
+  font-size: 0.88rem;
+  color: hsl(var(--muted-foreground));
+}
+.ppgk-landing .hero-signin a {
+  color: hsl(var(--primary));
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.ppgk-landing .hero-signin a:hover,
+.ppgk-landing .hero-signin a:focus-visible { color: hsl(var(--foreground)); }
+
+/* subtle scroll cue */
+.ppgk-landing .scroll-cue {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(1.25rem, 3vw, 2rem);
+  transform: translateX(-50%);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 50%;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--card) / 0.6);
+  backdrop-filter: blur(6px);
+  animation: lp-bob 2.4s ease-in-out infinite;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
+}
+.ppgk-landing .scroll-cue:hover,
+.ppgk-landing .scroll-cue:focus-visible {
+  color: hsl(var(--primary));
+  border-color: hsl(var(--primary));
+}
+@keyframes lp-bob {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%      { transform: translateX(-50%) translateY(6px); }
+}
 
 /* platform capability chips (booking / progress tracking) */
 .ppgk-landing .hero-platform {
@@ -309,19 +401,6 @@
   color: hsl(var(--muted-foreground));
 }
 .ppgk-landing .hero-platform svg { color: hsl(var(--primary)); flex-shrink: 0; }
-
-/* staggered hero entrance */
-.ppgk-landing .stagger {
-  opacity: 0;
-  transform: translateY(26px);
-  animation: lp-rise 0.6s var(--ease) forwards;
-}
-.ppgk-landing .stagger:nth-child(1) { animation-delay: 0.05s; }
-.ppgk-landing .stagger:nth-child(2) { animation-delay: 0.15s; }
-.ppgk-landing .stagger:nth-child(3) { animation-delay: 0.25s; }
-.ppgk-landing .stagger:nth-child(4) { animation-delay: 0.35s; }
-.ppgk-landing .stagger:nth-child(5) { animation-delay: 0.45s; }
-@keyframes lp-rise { to { opacity: 1; transform: none; } }
 
 /* ── SVG save diagram ───────────────────────────────────────────────────── */
 .ppgk-landing .hero-art          { position: relative; }
@@ -773,8 +852,8 @@
 
 /* ── reduced motion ─────────────────────────────────────────────────────── */
 @media (prefers-reduced-motion: reduce) {
-  .ppgk-landing .stagger                 { animation: none; opacity: 1; transform: none; }
   .ppgk-landing .reveal                  { transition: none; opacity: 1; transform: none; }
+  .ppgk-landing .scroll-cue              { animation: none; }
   .ppgk-landing .anim .shot-path,
   .ppgk-landing .anim .ball,
   .ppgk-landing .anim .glove-mark,

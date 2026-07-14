@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, motion, useReducedMotion, useScroll, useMotionValueEvent } from 'framer-motion';
 import {
   Menu,
   X,
@@ -14,9 +14,14 @@ import {
   UserPlus,
   Mail,
   ArrowRight,
+  ChevronDown,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import DotGridCanvas from '@/components/landing/DotGridCanvas';
+import RotatingWord from '@/components/landing/RotatingWord';
 import './LandingPage.css';
+
+const ROTATING_WORDS = ['Technique', 'Confidence', 'Reactions', 'Positioning', 'Performance'];
 
 // Anchors point to on-page sections; `route` entries are real application routes.
 const NAV_LINKS = [
@@ -34,13 +39,13 @@ const roleHome = (role) => {
   return '/dashboard';
 };
 
-const NavItem = ({ link, onClick }) =>
+const NavItem = ({ link, onClick, innerRef }) =>
   link.route ? (
-    <Link to={link.href} onClick={onClick}>
+    <Link to={link.href} onClick={onClick} ref={innerRef}>
       {link.label}
     </Link>
   ) : (
-    <a href={link.href} onClick={onClick}>
+    <a href={link.href} onClick={onClick} ref={innerRef}>
       {link.label}
     </a>
   );
@@ -48,7 +53,14 @@ const NavItem = ({ link, onClick }) =>
 export default function LandingPage() {
   const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const shouldReduceMotion = useReducedMotion();
+  const menuToggleRef = useRef(null);
+  const firstMobileLinkRef = useRef(null);
+
+  // Sticky header intensifies its background/border once the page scrolls.
+  const { scrollY } = useScroll();
+  useMotionValueEvent(scrollY, 'change', (latest) => setIsScrolled(latest > 10));
 
   // Scroll-reveal: observe .reveal elements and add .in when they enter the viewport.
   // On reduced-motion or no IntersectionObserver support, mark all visible immediately.
@@ -82,13 +94,36 @@ export default function LandingPage() {
     };
   }, [mobileOpen]);
 
+  // Escape closes the menu and returns focus to the toggle button; opening
+  // moves focus into the menu so keyboard users land somewhere useful.
+  useEffect(() => {
+    if (!mobileOpen) return undefined;
+    firstMobileLinkRef.current?.focus();
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setMobileOpen(false);
+        menuToggleRef.current?.focus();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [mobileOpen]);
+
   const closeMobile = () => setMobileOpen(false);
   const dashboardHref = user ? roleHome(user.role) : null;
 
   return (
     <div className="ppgk-landing">
 
-      <header>
+      <motion.header
+        initial={false}
+        animate={isScrolled ? 'scrolled' : 'top'}
+        variants={{
+          top: { backgroundColor: 'hsl(var(--background) / 0.7)', boxShadow: 'none' },
+          scrolled: { backgroundColor: 'hsl(var(--background) / 0.94)', boxShadow: '0 8px 24px -12px rgba(0,0,0,0.5)' },
+        }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}
+      >
         <nav className="nav" aria-label="Main">
           <a className="logo" href="#top">PP<span>GK</span></a>
 
@@ -111,6 +146,7 @@ export default function LandingPage() {
           <div className="nav-mobile-actions">
             <Link className="btn btn-solid btn-sm" to="/sessions">Book a session</Link>
             <button
+              ref={menuToggleRef}
               type="button"
               className="menu-toggle"
               aria-expanded={mobileOpen}
@@ -134,9 +170,9 @@ export default function LandingPage() {
               transition={{ duration: shouldReduceMotion ? 0 : 0.28, ease: [0.16, 1, 0.3, 1] }}
             >
               <ul>
-                {NAV_LINKS.map((link) => (
+                {NAV_LINKS.map((link, i) => (
                   <li key={link.label}>
-                    <NavItem link={link} onClick={closeMobile} />
+                    <NavItem link={link} onClick={closeMobile} innerRef={i === 0 ? firstMobileLinkRef : undefined} />
                   </li>
                 ))}
                 <li>
@@ -150,46 +186,122 @@ export default function LandingPage() {
             </motion.div>
           )}
         </AnimatePresence>
-      </header>
+      </motion.header>
 
       <main id="top">
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
         <section className="hero" aria-label="Introduction">
+          <DotGridCanvas className="hero-canvas" />
+          <div className="hero-canvas-fade" aria-hidden="true" />
           <div className="hero-glow" aria-hidden="true" />
           <div className="wrap hero-grid">
 
-            <div className="hero-copy">
-              <span className="eyebrow stagger">Specialist goalkeeper coaching, Malta</span>
-              <h1 className="stagger">
-                Develop the goalkeeper.<br />
-                <span className="accent">Build the performance.</span>
-              </h1>
-              <p className="lede stagger">
-                Premier Performance Goalkeeping improves technique, confidence, decision-making
-                and match performance through structured individual and group sessions, with
-                every player's progress tracked and shared after each evaluation.
-              </p>
-              <div className="hero-actions stagger">
+            <motion.div
+              className="hero-copy"
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: {},
+                visible: {
+                  transition: {
+                    staggerChildren: shouldReduceMotion ? 0 : 0.12,
+                    delayChildren: shouldReduceMotion ? 0 : 0.05,
+                  },
+                },
+              }}
+            >
+              <motion.span
+                className="hero-lead"
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: -10 },
+                  visible: { opacity: 1, y: 0, transition: { duration: shouldReduceMotion ? 0 : 0.5 } },
+                }}
+              >
+                <span className="dot" aria-hidden="true" />
+                Coaching led by <strong>Matthew Towns</strong>
+              </motion.span>
+
+              <motion.h1
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 18 },
+                  visible: { opacity: 1, y: 0, transition: { duration: shouldReduceMotion ? 0 : 0.6, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Build better<br />
+                <span className="rotating-clip">
+                  <RotatingWord words={ROTATING_WORDS} active={!shouldReduceMotion} className="accent" />
+                </span>
+              </motion.h1>
+
+              <motion.p
+                className="lede"
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 14 },
+                  visible: { opacity: 1, y: 0, transition: { duration: shouldReduceMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
+                Professional goalkeeper coaching designed to develop technique, confidence,
+                decision-making and match performance &mdash; structured individual and group
+                sessions in Malta, with every player's progress tracked and shared after each
+                evaluation.
+              </motion.p>
+
+              <motion.div
+                className="hero-actions"
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0, y: 14 },
+                  visible: { opacity: 1, y: 0, transition: { duration: shouldReduceMotion ? 0 : 0.55, ease: [0.16, 1, 0.3, 1] } },
+                }}
+              >
                 <Link className="btn btn-solid" to="/sessions">
-                  View upcoming sessions
+                  View Sessions
                   <ArrowRight size={16} aria-hidden="true" />
                 </Link>
-                <a className="btn btn-ghost" href="#coach">Learn about PPGK</a>
-              </div>
-              <div className="hero-platform stagger">
+                <Link className="btn btn-ghost" to="/register">Create Account</Link>
+              </motion.div>
+
+              <motion.div
+                className="hero-signin"
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0 },
+                  visible: { opacity: 1, transition: { duration: shouldReduceMotion ? 0 : 0.5 } },
+                }}
+              >
+                Already training with us? <Link to="/signin">Sign in</Link>
+              </motion.div>
+
+              <motion.div
+                className="hero-platform"
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0 },
+                  visible: { opacity: 1, transition: { duration: shouldReduceMotion ? 0 : 0.5 } },
+                }}
+              >
                 <span><CalendarCheck size={15} aria-hidden="true" /> Book sessions online</span>
                 <span><TrendingUp size={15} aria-hidden="true" /> Track player progress</span>
-              </div>
-              <div className="hero-meta stagger">
+              </motion.div>
+
+              <motion.div
+                className="hero-meta"
+                variants={{
+                  hidden: shouldReduceMotion ? { opacity: 1 } : { opacity: 0 },
+                  visible: { opacity: 1, transition: { duration: shouldReduceMotion ? 0 : 0.5 } },
+                }}
+              >
                 <span><strong>1-to-1</strong> and group sessions</span>
                 <span><strong>10</strong> evaluation categories</span>
-                <span>Head Coach <strong>Matthew Towns</strong></span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
             {/* Signature element: the save, drawn as a training diagram */}
-            <div className="hero-art anim" aria-hidden="true">
+            <motion.div
+              className="hero-art anim"
+              aria-hidden="true"
+              initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.94, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              transition={{ duration: shouldReduceMotion ? 0 : 0.7, delay: shouldReduceMotion ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
+            >
               <svg
                 viewBox="0 0 460 340"
                 role="img"
@@ -222,9 +334,20 @@ export default function LandingPage() {
                 </g>
                 <text className="save-label" x="300" y="120">Save. Reset. Again.</text>
               </svg>
-            </div>
+            </motion.div>
 
           </div>
+
+          <motion.a
+            href="#coaching"
+            className="scroll-cue"
+            aria-label="Scroll to coaching benefits"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.6, delay: shouldReduceMotion ? 0 : 1.1 }}
+          >
+            <ChevronDown size={20} aria-hidden="true" />
+          </motion.a>
         </section>
 
         {/* ── COACHING BENEFITS ──────────────────────────────────────────── */}
