@@ -111,14 +111,14 @@
   align-items: center;
   list-style: none;
 }
-.ppgk-landing .nav-links a {
+.ppgk-landing .nav-links a:not(.btn) {
   text-decoration: none;
   font-size: 0.92rem;
   color: hsl(var(--muted-foreground));
   transition: color 0.3s var(--ease);
 }
-.ppgk-landing .nav-links a:hover,
-.ppgk-landing .nav-links a:focus-visible {
+.ppgk-landing .nav-links a:not(.btn):hover,
+.ppgk-landing .nav-links a:not(.btn):focus-visible {
   color: hsl(var(--foreground));
 }
 @media (max-width: 720px) {

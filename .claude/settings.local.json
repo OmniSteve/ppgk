@@ -5,7 +5,23 @@
       "Bash(grep -v \"//.*text-slate\\\\|//.*bg-white\")",
       "Bash(npm run:*)",
       "Bash(grep -n \"#[0-9a-fA-F]\\\\{3,6\\\\}\\\\|Spline\" \"C:/Test/Projects/ppgk/ppgk/src/pages/public/LandingPage.jsx\" \"C:/Test/Projects/ppgk/ppgk/src/pages/public/LandingPage.css\")",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Skill(run)",
+      "Bash(xargs -I{} grep -Hm1 '^description:' {})",
+      "Bash(echo \"exit:$?\")",
+      "Bash(npx --no-install playwright --version)",
+      "Bash(timeout 30 bash -c 'until curl -sf http://localhost:5173 >/dev/null 2>&1 || curl -sf http://localhost:3000 >/dev/null 2>&1; do sleep 1; done')",
+      "Bash(curl -s -o /dev/null -w \"5173:%{http_code}\\\\n\" http://localhost:5173)",
+      "Bash(curl -s -o /dev/null -w \"3000:%{http_code}\\\\n\" http://localhost:3000)",
+      "Bash(mkdir -p /tmp/shots)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --no-sandbox --screenshot=/tmp/shots/landing-midnight.png --window-size=1400,1000 --virtual-time-budget=3000 http://localhost:5173/)",
+      "Bash('/c/Program Files/Google/Chrome/Application/chrome.exe' --headless=new --disable-gpu --no-sandbox --window-size=1400,700 --virtual-time-budget=4000 --screenshot=/tmp/shots/floodlit.png --run-all-compositor-stages-before-draw --js-flags= 'data:text/html,<script>location='\\\\''http://localhost:5173/'\\\\''</script>')",
+      "Bash(npm ls *)",
+      "Bash(node -e \"console.log\\(require.resolve\\('puppeteer-core'\\)\\)\")",
+      "Bash(mkdir -p /c/Users/marls001/AppData/Local/Temp/claude/C--Test-Projects-ppgk-ppgk/e8168bd2-8bb6-41a5-84cd-76d30066d084/scratchpad/verify)",
+      "Bash(npm init *)",
+      "Bash(npm install *)",
+      "Bash(node check.js)"
     ]
   }
 }
