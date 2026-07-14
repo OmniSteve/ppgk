@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
     const data = await response.json().catch(() => ({}));
     // 201 with accountCreated=true but emailSent=false is still a partial success
     if (!response.ok && !data.accountCreated) {
-      throw new Error(data.message || 'Registration failed');
+      throw new Error(data.error || data.message || 'Registration failed');
     }
     return data;
   };
