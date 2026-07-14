@@ -29,7 +29,6 @@ const NAV_LINKS = [
   { label: 'Coaching', href: '#coaching' },
   { label: 'Sessions', href: '/sessions', route: true },
   { label: 'Player Development', href: '#development' },
-  { label: 'Packages', href: '#packages' },
   { label: 'Contact', href: '#contact' },
 ];
 
