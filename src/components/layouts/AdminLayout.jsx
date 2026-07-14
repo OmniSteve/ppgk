@@ -1,20 +1,29 @@
-import React, { useState, Component } from 'react';
+import React, { useState, useEffect, useMemo, Component } from 'react';
 import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import CollapsibleNavGroup from './CollapsibleNavGroup';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell, MapPin, Tag,
   Package, BookOpen, ClipboardList, CreditCard, Bell, BarChart2,
   FileText, Settings, LogOut, Menu, Shield, Calendar
 } from 'lucide-react';
 
+// Persists which sidebar categories are expanded, per browser tab. Reset
+// naturally when the session ends because sessionStorage (not localStorage)
+// is per-tab and clears on tab/browser close.
+const SIDEBAR_GROUPS_KEY = 'ppgk-admin-sidebar-groups';
+
 const navGroups = [
   {
+    id: 'overview',
     label: 'Overview',
     items: [{ label: 'Dashboard', icon: LayoutDashboard, href: '/admin' }],
   },
   {
+    id: 'people',
     label: 'People',
     items: [
       { label: 'Users', icon: Users, href: '/admin/clients' },
@@ -23,6 +32,7 @@ const navGroups = [
     ],
   },
   {
+    id: 'sessions',
     label: 'Sessions',
     items: [
       { label: 'Sessions', icon: Calendar, href: '/admin/sessions' },
@@ -31,6 +41,7 @@ const navGroups = [
     ],
   },
   {
+    id: 'bookings-finance',
     label: 'Bookings & Finance',
     items: [
       { label: 'Bookings', icon: BookOpen, href: '/admin/bookings' },
@@ -40,6 +51,7 @@ const navGroups = [
     ],
   },
   {
+    id: 'operations',
     label: 'Operations',
     items: [
       { label: 'Attendance', icon: ClipboardList, href: '/admin/attendance' },
@@ -47,6 +59,7 @@ const navGroups = [
     ],
   },
   {
+    id: 'insights',
     label: 'Insights',
     items: [
       { label: 'Reports', icon: BarChart2, href: '/admin/reports' },
@@ -54,14 +67,34 @@ const navGroups = [
     ],
   },
   {
+    id: 'system',
     label: 'System',
     items: [{ label: 'Settings', icon: Settings, href: '/admin/settings' }],
   },
 ];
 
-function SidebarNav({ user, location, onLinkClick, onSignOut }) {
-  const isActive = (href) =>
-    location.pathname === href || (href !== '/admin' && location.pathname.startsWith(href + '/'));
+function isNavItemActive(pathname, href) {
+  return pathname === href || (href !== '/admin' && pathname.startsWith(href + '/'));
+}
+
+/** Which group (if any) owns the currently active route. */
+function findActiveGroupId(pathname) {
+  const group = navGroups.find((g) => g.items.some((item) => isNavItemActive(pathname, item.href)));
+  return group?.id ?? null;
+}
+
+function loadStoredGroups() {
+  try {
+    const raw = sessionStorage.getItem(SIDEBAR_GROUPS_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function SidebarNav({ user, location, openGroups, onOpenGroupsChange, onLinkClick, onSignOut }) {
+  const isActive = (href) => isNavItemActive(location.pathname, href);
 
   return (
     <div className="flex flex-col h-full">
@@ -72,33 +105,22 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
           </div>
           <div>
             <p className="text-foreground font-bold text-sm leading-tight">Admin Panel</p>
-            <p className="text-primary text-xs">Premier Performance GK</p>
+            <p className="text-primary text-xs">PPGK</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 p-3 overflow-y-auto space-y-4">
-        {navGroups.map((group) => (
-          <div key={group.label}>
-            <p className="text-muted-foreground text-[10px] font-semibold uppercase tracking-wider px-3 mb-1">{group.label}</p>
-            {group.items.map((item) => {
-              const active = isActive(item.href);
-              return (
-                <Link
-                  key={item.href}
-                  to={item.href}
-                  onClick={onLinkClick}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all mb-0.5 ${
-                    active ? 'bg-primary text-foreground' : 'text-muted-foreground hover:bg-accent hover:text-foreground'
-                  }`}
-                >
-                  <item.icon size={16} />
-                  {item.label}
-                </Link>
-              );
-            })}
-          </div>
-        ))}
+      <nav className="flex-1 overflow-y-auto">
+        <AccordionPrimitive.Root
+          type="multiple"
+          value={openGroups}
+          onValueChange={onOpenGroupsChange}
+          className="p-3 space-y-1"
+        >
+          {navGroups.map((group) => (
+            <CollapsibleNavGroup key={group.id} group={group} isActive={isActive} onLinkClick={onLinkClick} />
+          ))}
+        </AccordionPrimitive.Root>
       </nav>
 
       <div className="p-4 border-t border-sidebar-border space-y-2">
@@ -151,6 +173,29 @@ export default function AdminLayout({ children = <Outlet /> }) {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  // Shared between the desktop <aside> and the mobile <Sheet> — both render
+  // a SidebarNav, and lifting the state here keeps them in sync instead of
+  // each holding its own copy.
+  const [openGroups, setOpenGroups] = useState(loadStoredGroups);
+  const activeGroupId = useMemo(() => findActiveGroupId(location.pathname), [location.pathname]);
+
+  // Auto-expand the group containing the active route. Keyed on the active
+  // GROUP (not the raw pathname), so navigating between sibling routes in
+  // an already-open group doesn't re-run this — a manual collapse sticks
+  // until the route actually moves to a different group.
+  useEffect(() => {
+    if (!activeGroupId) return;
+    setOpenGroups((prev) => (prev.includes(activeGroupId) ? prev : [...prev, activeGroupId]));
+  }, [activeGroupId]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(SIDEBAR_GROUPS_KEY, JSON.stringify(openGroups));
+    } catch {
+      // sessionStorage unavailable (e.g. private browsing) — state stays in-memory only
+    }
+  }, [openGroups]);
+
   const handleSignOut = () => {
     signOut();
     navigate('/signin');
@@ -160,7 +205,14 @@ export default function AdminLayout({ children = <Outlet /> }) {
     <div className="min-h-screen bg-background flex">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-56 bg-sidebar fixed inset-y-0 left-0 z-30 border-r border-sidebar-border print:hidden">
-        <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
+        <SidebarNav
+          user={user}
+          location={location}
+          openGroups={openGroups}
+          onOpenGroupsChange={setOpenGroups}
+          onLinkClick={() => {}}
+          onSignOut={handleSignOut}
+        />
       </aside>
 
       {/* Mobile sidebar drawer */}
@@ -169,7 +221,14 @@ export default function AdminLayout({ children = <Outlet /> }) {
           side="left"
           className="lg:hidden w-64 max-w-[85vw] bg-sidebar border-sidebar-border p-0 flex flex-col gap-0"
         >
-          <SidebarNav user={user} location={location} onLinkClick={() => setSidebarOpen(false)} onSignOut={handleSignOut} />
+          <SidebarNav
+            user={user}
+            location={location}
+            openGroups={openGroups}
+            onOpenGroupsChange={setOpenGroups}
+            onLinkClick={() => setSidebarOpen(false)}
+            onSignOut={handleSignOut}
+          />
         </SheetContent>
       </Sheet>
 
