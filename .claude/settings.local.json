@@ -48,7 +48,14 @@
       "Bash(node worker/tests/password.test.js)",
       "Bash(node worker/tests/refund-credits.test.js)",
       "Bash(node worker/tests/response-shape.test.js)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(npx --no-install chromium-cli --help)",
+      "Bash(where chromium-cli *)",
+      "Read(//c/Users/marls001/.claude/skills/**)",
+      "Read(//c/Users/marls001/.claude/**)",
+      "Read(//c//**)",
+      "Bash(node -e \"console.log\\(require.resolve\\('playwright'\\)\\)\")",
+      "Bash(curl -s http://localhost:5177/)"
     ]
   }
 }

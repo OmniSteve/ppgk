@@ -56,6 +56,7 @@ export default function LandingPage() {
   const shouldReduceMotion = useReducedMotion();
   const menuToggleRef = useRef(null);
   const firstMobileLinkRef = useRef(null);
+  const heroArtRef = useRef(null);
 
   // Sticky header intensifies its background/border once the page scrolls.
   const { scrollY } = useScroll();
@@ -107,6 +108,48 @@ export default function LandingPage() {
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [mobileOpen]);
+
+  // Subtle desktop-only pointer parallax on the goal graphic. Fine-pointer
+  // devices only, disabled under reduced-motion; shifts the whole SVG a few
+  // px via a CSS custom property so it never touches the ball's own
+  // offset-path trajectory. Rect is measured once (+ on resize) rather than
+  // per pointer move.
+  useEffect(() => {
+    if (shouldReduceMotion) return undefined;
+    if (!window.matchMedia('(pointer: fine)').matches) return undefined;
+    const el = heroArtRef.current;
+    if (!el) return undefined;
+
+    let rect = el.getBoundingClientRect();
+    const onResize = () => { rect = el.getBoundingClientRect(); };
+    window.addEventListener('resize', onResize);
+
+    let frame = null;
+    const onMove = (event) => {
+      if (event.pointerType && event.pointerType !== 'mouse') return;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = null;
+        const px = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+        const py = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+        el.style.setProperty('--parallax-x', px.toFixed(3));
+        el.style.setProperty('--parallax-y', py.toFixed(3));
+      });
+    };
+    const onLeave = () => {
+      el.style.setProperty('--parallax-x', '0');
+      el.style.setProperty('--parallax-y', '0');
+    };
+
+    el.addEventListener('pointermove', onMove);
+    el.addEventListener('pointerleave', onLeave);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.removeEventListener('resize', onResize);
+      el.removeEventListener('pointermove', onMove);
+      el.removeEventListener('pointerleave', onLeave);
+    };
+  }, [shouldReduceMotion]);
 
   const closeMobile = () => setMobileOpen(false);
   const dashboardHref = user ? roleHome(user.role) : null;
@@ -302,35 +345,68 @@ export default function LandingPage() {
               transition={{ duration: shouldReduceMotion ? 0 : 0.7, delay: shouldReduceMotion ? 0 : 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               <svg
+                ref={heroArtRef}
                 viewBox="0 0 460 340"
                 role="img"
                 aria-label="Diagram of a shot arcing towards the top corner and being saved"
               >
-                {/* net */}
+                {/* net: the two verticals and top rail nearest the save point are split
+                    into their own group (.net-ripple) so impact can shake just that
+                    corner instead of the whole net */}
                 <g className="net-line">
                   <line x1="60"  y1="40" x2="60"  y2="300" />
                   <line x1="110" y1="40" x2="110" y2="300" />
                   <line x1="160" y1="40" x2="160" y2="300" />
                   <line x1="210" y1="40" x2="210" y2="300" />
                   <line x1="260" y1="40" x2="260" y2="300" />
-                  <line x1="310" y1="40" x2="310" y2="300" />
-                  <line x1="360" y1="40" x2="360" y2="300" />
-                  <line x1="20"  y1="90"  x2="400" y2="90"  />
                   <line x1="20"  y1="140" x2="400" y2="140" />
                   <line x1="20"  y1="190" x2="400" y2="190" />
                   <line x1="20"  y1="245" x2="400" y2="245" />
                 </g>
+                <g className="net-ripple">
+                  <line x1="310" y1="40" x2="310" y2="300" />
+                  <line x1="360" y1="40" x2="360" y2="300" />
+                  <line x1="20"  y1="90"  x2="400" y2="90"  />
+                </g>
                 {/* goal frame */}
                 <path className="frame-line" d="M20 300 L20 40 L400 40 L400 300" fill="none" />
+
                 {/* shot trajectory to top corner */}
                 <path className="shot-path" d="M20 300 C 140 240, 240 130, 318 74" />
-                {/* ball travelling the path */}
+
+                {/* faint trailing ghosts, drawn behind the ball via positive animation-delay
+                    so they always lag the same fraction of a loop behind it */}
+                <circle className="ball-trail ball-trail-1" r="6.5" />
+                <circle className="ball-trail ball-trail-2" r="4.5" />
+                {/* soft halo that blooms as the ball approaches the save point */}
+                <circle className="ball-glow" r="15" />
+                {/* ball + seam: both ride the same offset-path in lockstep (kept as
+                    sibling shapes rather than a wrapping <g> — offset-path support
+                    for plain SVG shapes is far more consistent across browsers than
+                    for container elements). The seam gets its own extra rotation. */}
                 <circle className="ball" r="9" />
-                {/* glove intercept: two strokes forming an open catch */}
+                <path className="ball-seam" d="M-6 -3 Q 0 -7 6 -3 M-6 3 Q 0 7 6 3" />
+
+                {/* save impact: flash + expanding ring at the contact point */}
+                <circle className="impact-flash" cx="318" cy="74" r="7" />
+                <circle className="impact-ring"  cx="318" cy="74" r="10" />
+
+                {/* glove intercept: two strokes forming an open catch (the "save arc") */}
                 <g className="glove-mark">
                   <path d="M330 52 q 14 10 10 32" />
                   <path d="M352 62 q 2 20 -16 28" />
                 </g>
+
+                {/* short-lived spark burst at the save point */}
+                <g className="impact-particles">
+                  <circle className="particle" cx="318" cy="74" r="2.2" style={{ '--dx': '-20px', '--dy': '-8px' }} />
+                  <circle className="particle" cx="318" cy="74" r="1.8" style={{ '--dx': '-10px', '--dy': '-22px' }} />
+                  <circle className="particle" cx="318" cy="74" r="2"   style={{ '--dx': '8px',   '--dy': '-24px' }} />
+                  <circle className="particle" cx="318" cy="74" r="1.6" style={{ '--dx': '20px',  '--dy': '-10px' }} />
+                  <circle className="particle" cx="318" cy="74" r="1.8" style={{ '--dx': '16px',  '--dy': '10px'  }} />
+                  <circle className="particle" cx="318" cy="74" r="1.6" style={{ '--dx': '-6px',  '--dy': '16px'  }} />
+                </g>
+
                 <text className="save-label" x="300" y="120">Save. Reset. Again.</text>
               </svg>
             </motion.div>
