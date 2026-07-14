@@ -10,9 +10,12 @@
  * - Does NOT log the user in (must verify email first)
  *
  * Source file: worker/src/routes/auth/register.js
- * Email send: line ~80 via sendTemplatedEmail (worker/src/lib/email.js)
- * Sender address: 'Premier Performance GK <no-reply@premierperformancegk.com>'
- *   ↑ Must match a verified domain in your Resend account.
+ * Email send: via sendTemplatedEmail (worker/src/lib/email.js)
+ * Sender address: 'Premier Performance GK <no-reply@ppgk.app>'
+ *   (set in lib/email.js — must match a verified domain in Resend)
+ *
+ * Duplicate emails return 409. Requires migration 0005 (players.is_account_holder)
+ * to be applied, or the registration batch fails with SQLITE_ERROR.
  */
 import { queryOne, batch, audit }   from '../../lib/db.js';
 import { sendTemplatedEmail }       from '../../lib/email.js';
@@ -26,15 +29,19 @@ export async function handleRegister(request, env) {
   const missing = requireFields(body, ['email', 'password', 'firstName', 'lastName']);
   if (missing) return err(missing);
 
-  const { email, password, firstName, lastName, phone } = body;
+  const { email, password, firstName, lastName } = body;
+  // The registration form sends the phone number as `mobile`; accept both.
+  const phone = body.phone ?? body.mobile ?? null;
 
   if (password.length < 8) return err('Password must be at least 8 characters');
+  if (body.confirmPassword !== undefined && body.confirmPassword !== password) {
+    return err('Passwords do not match');
+  }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return err('Invalid email address');
 
   const existing = await queryOne(env, 'SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
-  // Anti-enumeration: return same message regardless
   if (existing) {
-    return ok({ message: 'If that email is new, a verification link has been sent.' }, 201);
+    return err('An account with this email already exists. Try signing in instead.', 409);
   }
 
   const passwordHash  = await hashPassword(password);
@@ -67,10 +74,9 @@ export async function handleRegister(request, env) {
     ]);
   } catch (e) {
     // Most likely a concurrent registration for the same email racing past
-    // the existence check above (UNIQUE constraint on users.email). Respond
-    // the same anti-enumeration way rather than leaking which case it was.
+    // the existence check above (UNIQUE constraint on users.email).
     if (String(e?.message || '').toUpperCase().includes('UNIQUE')) {
-      return ok({ message: 'If that email is new, a verification link has been sent.' }, 201);
+      return err('An account with this email already exists. Try signing in instead.', 409);
     }
     console.error('[register] Account creation failed:', e);
     return err('Registration failed. Please try again.', 500);
@@ -111,11 +117,12 @@ export async function handleRegister(request, env) {
   }
 
   if (!emailResult.success) {
+    // The provider error is logged above; only a generic message goes to the client.
     return Response.json({
       accountCreated: true,
       emailSent: false,
       message: 'Your account was created, but we could not send the verification email. Please use Resend Verification Email.',
-      error: emailResult.error ?? 'Email delivery failed',
+      error: 'Email delivery failed',
     }, { status: 201 });
   }
 

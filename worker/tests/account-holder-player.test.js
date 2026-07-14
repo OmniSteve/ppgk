@@ -221,16 +221,35 @@ await test('the player uses the registration first/last name', async () => {
 
 console.log('\n── Duplicate / concurrent registration ──────────────────────');
 
-await test('a duplicate registration request (existing email) does not create another player', async () => {
+await test('a duplicate registration request (existing email) returns 409 and does not create another player', async () => {
   const store = makeStore();
   const env = makeEnv(store);
   await handleRegister(registerRequest(NEW_CLIENT), env);
   assertEqual(store.players.length, 1);
 
   const res2 = await handleRegister(registerRequest(NEW_CLIENT), env);
-  assert(res2.status === 201, 'anti-enumeration response still reports 201');
+  assertEqual(res2.status, 409, 'duplicate email must return 409');
   assertEqual(store.users.length, 1, 'no second user should be created');
   assertEqual(store.players.length, 1, 'no second player should be created');
+});
+
+console.log('\n── Validation and field mapping ──────────────────────────────');
+
+await test('mismatched confirmPassword returns 400 and creates nothing', async () => {
+  const store = makeStore();
+  const env = makeEnv(store);
+  const res = await handleRegister(registerRequest({ ...NEW_CLIENT, confirmPassword: 'Different1!' }), env);
+  assertEqual(res.status, 400, 'confirmPassword mismatch must return 400');
+  assertEqual(store.users.length, 0, 'no user should be created');
+});
+
+await test('the form field `mobile` is stored as the user phone', async () => {
+  const store = makeStore();
+  const env = makeEnv(store);
+  const { phone, ...withoutPhone } = NEW_CLIENT;
+  const res = await handleRegister(registerRequest({ ...withoutPhone, mobile: '35679000000' }), env);
+  assertEqual(res.status, 201);
+  assertEqual(store.users[0].phone, '35679000000', 'mobile must map to users.phone');
 });
 
 await test('a concurrent registration race (UNIQUE violation mid-batch) does not leave a stray player', async () => {
