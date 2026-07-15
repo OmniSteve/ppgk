@@ -18,6 +18,7 @@ import { ThemeProvider } from '@/contexts/ThemeContext';
 
 // Real application auth
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { CartProvider } from '@/contexts/CartContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import AppProtectedRoute from '@/components/AppProtectedRoute';
 import EnvironmentBadge from '@/components/EnvironmentBadge';
@@ -31,6 +32,12 @@ import ResetPassword from '@/pages/public/ResetPassword';
 import TermsPage from '@/pages/public/TermsPage';
 import VerifyEmail from '@/pages/public/VerifyEmail';
 import PrivacyPage from '@/pages/public/PrivacyPage';
+import Shop from '@/pages/public/store/Shop';
+import ProductDetail from '@/pages/public/store/ProductDetail';
+import Cart from '@/pages/public/store/Cart';
+import StoreCheckout from '@/pages/public/store/StoreCheckout';
+import OrderSuccess from '@/pages/public/store/OrderSuccess';
+import GuestOrderLookup from '@/pages/public/store/GuestOrderLookup';
 
 // Client pages
 import ClientDashboard from '@/pages/client/ClientDashboard';
@@ -51,6 +58,7 @@ import CreditBalance from '@/pages/client/CreditBalance';
 import PurchaseHistory from '@/pages/client/PurchaseHistory';
 import ClientNotifications from '@/pages/client/ClientNotifications';
 import AccountDetails from '@/pages/client/AccountDetails';
+import OrderHistory from '@/pages/client/OrderHistory';
 
 // Coach pages
 import CoachDashboard from '@/pages/coach/CoachDashboard';
@@ -84,6 +92,10 @@ import NotificationManagement from '@/pages/admin/NotificationManagement';
 import Reports from '@/pages/admin/Reports';
 import AuditLog from '@/pages/admin/AuditLog';
 import AppSettings from '@/pages/admin/AppSettings';
+import ProductManagement from '@/pages/admin/store/ProductManagement';
+import CategoryManagement from '@/pages/admin/store/CategoryManagement';
+import StoreOrderManagement from '@/pages/admin/store/StoreOrderManagement';
+import InventoryManagement from '@/pages/admin/store/InventoryManagement';
 
 const AppRoutes = () => {
   const { user, isLoading } = useAuth();
@@ -107,6 +119,14 @@ const AppRoutes = () => {
       <Route path="/verify-email" element={<VerifyEmail />} />
       <Route path="/privacy" element={<PrivacyPage />} />
 
+      {/* Public store — no authentication required (guest checkout) */}
+      <Route path="/shop" element={<Shop />} />
+      <Route path="/shop/product/:slug" element={<ProductDetail />} />
+      <Route path="/shop/checkout" element={<StoreCheckout />} />
+      <Route path="/shop/order-success" element={<OrderSuccess />} />
+      <Route path="/shop/order/:token" element={<GuestOrderLookup />} />
+      <Route path="/cart" element={<Cart />} />
+
       <Route element={<AppProtectedRoute allowedRoles={['client', 'coach', 'head_coach', 'admin']} />}>
         <Route element={<ClientLayout><Outlet /></ClientLayout>}>
           <Route path="/dashboard" element={<ClientDashboard />} />
@@ -127,6 +147,7 @@ const AppRoutes = () => {
           <Route path="/purchase-history" element={<PurchaseHistory />} />
           <Route path="/notifications" element={<ClientNotifications />} />
           <Route path="/account" element={<AccountDetails />} />
+          <Route path="/account/orders" element={<OrderHistory />} />
         </Route>
       </Route>
 
@@ -161,6 +182,10 @@ const AppRoutes = () => {
           <Route path="/admin/reports" element={<Reports />} />
           <Route path="/admin/audit" element={<AuditLog />} />
           <Route path="/admin/settings" element={<AppSettings />} />
+          <Route path="/admin/store/products" element={<ProductManagement />} />
+          <Route path="/admin/store/categories" element={<CategoryManagement />} />
+          <Route path="/admin/store/orders" element={<StoreOrderManagement />} />
+          <Route path="/admin/store/inventory" element={<InventoryManagement />} />
         </Route>
       </Route>
 
@@ -173,14 +198,16 @@ function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <QueryClientProvider client={queryClientInstance}>
-          <Router>
-            <ScrollToTop />
-            <AppRoutes />
-          </Router>
-          <EnvironmentBadge />
-          <Toaster />
-        </QueryClientProvider>
+        <CartProvider>
+          <QueryClientProvider client={queryClientInstance}>
+            <Router>
+              <ScrollToTop />
+              <AppRoutes />
+            </Router>
+            <EnvironmentBadge />
+            <Toaster />
+          </QueryClientProvider>
+        </CartProvider>
       </AuthProvider>
     </ThemeProvider>
   );

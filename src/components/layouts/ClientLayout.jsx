@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import {
   LayoutDashboard, Calendar, Users, CreditCard, ShoppingBag,
-  Bell, User, LogOut, Menu, Shield, Briefcase
+  Bell, User, LogOut, Menu, Shield, Briefcase, ShoppingCart, Package
 } from 'lucide-react';
 
 const navItems = [
@@ -17,6 +17,8 @@ const navItems = [
   { label: 'Packages', icon: CreditCard, href: '/packages' },
   { label: 'Credits', icon: CreditCard, href: '/credits' },
   { label: 'Purchases', icon: ShoppingBag, href: '/purchase-history' },
+  { label: 'Shop', icon: ShoppingCart, href: '/shop' },
+  { label: 'My Orders', icon: Package, href: '/account/orders' },
   { label: 'Notifications', icon: Bell, href: '/notifications' },
   { label: 'Account', icon: User, href: '/account' },
 ];

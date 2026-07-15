@@ -8,7 +8,8 @@ import CollapsibleNavGroup from './CollapsibleNavGroup';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell, MapPin, Tag,
   Package, BookOpen, ClipboardList, CreditCard, Bell, BarChart2,
-  FileText, Settings, LogOut, Menu, Shield, Calendar
+  FileText, Settings, LogOut, Menu, Shield, Calendar,
+  ShoppingBag, Layers, ClipboardCheck, Boxes
 } from 'lucide-react';
 
 // Persists which sidebar categories are expanded, per browser tab. Reset
@@ -56,6 +57,16 @@ const navGroups = [
     items: [
       { label: 'Attendance', icon: ClipboardList, href: '/admin/attendance' },
       { label: 'Notifications', icon: Bell, href: '/admin/notifications' },
+    ],
+  },
+  {
+    id: 'store',
+    label: 'Store',
+    items: [
+      { label: 'Products', icon: ShoppingBag, href: '/admin/store/products' },
+      { label: 'Categories', icon: Layers, href: '/admin/store/categories' },
+      { label: 'Orders', icon: ClipboardCheck, href: '/admin/store/orders' },
+      { label: 'Inventory', icon: Boxes, href: '/admin/store/inventory' },
     ],
   },
   {

@@ -7,6 +7,8 @@
  */
 import { query, queryOne, execute, audit } from './lib/db.js';
 import { sendTemplatedEmail }             from './lib/email.js';
+import { releaseExpiredReservations, getStoreSettings, getLowStockItems } from './lib/store.js';
+import { sendStoreAdminEmail }            from './lib/storeEmail.js';
 
 /**
  * Expire credits that have passed their expiry date.
@@ -183,6 +185,36 @@ async function sendSessionReminders(env) {
   return bookings.length;
 }
 
+/**
+ * Release any store inventory reservations past their 30-minute expiry
+ * (abandoned checkouts) so the stock becomes available to other shoppers.
+ */
+async function releaseExpiredStoreReservations(env) {
+  return releaseExpiredReservations(env);
+}
+
+/**
+ * Email the store contact address once per day when any active product or
+ * variant is at or below the configured low-stock threshold. One email per
+ * run (not per item) to avoid spamming the inbox; idempotency is keyed by
+ * day so re-running the cron manually the same day won't double-send.
+ */
+async function sendLowStockAlert(env) {
+  const settings = await getStoreSettings(env);
+  const items = await getLowStockItems(env, settings.store_low_stock_threshold ?? 5);
+  if (items.length === 0) return 0;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const summary = items.map((i) => `${i.name}${i.variant_name ? ` (${i.variant_name})` : ''}: ${i.available} left`).join('; ');
+  await sendStoreAdminEmail(env, {
+    eventTrigger: 'store_low_stock_admin',
+    order: null,
+    idempotencyRef: `store_low_stock_admin_${today}`,
+    extraVariables: { product_name: items[0].name, variant_details: items[0].variant_name || '', stock_qty: items[0].available, summary, day: today },
+  });
+  return items.length;
+}
+
 /** Scheduled event handler — export from the worker entry point */
 export async function handleScheduled(event, env, ctx) {
   const cron = event.cron;
@@ -192,6 +224,10 @@ export async function handleScheduled(event, env, ctx) {
     const expired = await processExpiredCredits(env);
     const reminded = await sendCreditExpiryReminders(env);
     console.info(`Expiry job: expired=${expired}, reminders=${reminded}`);
+
+    const releasedReservations = await releaseExpiredStoreReservations(env);
+    const lowStockCount = await sendLowStockAlert(env);
+    console.info(`Store maintenance: releasedReservations=${releasedReservations}, lowStockItems=${lowStockCount}`);
   }
 
   if (cron === '0 7 * * *') {

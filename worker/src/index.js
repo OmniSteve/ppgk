@@ -71,6 +71,20 @@ import { handleCoachRoster }     from './routes/coach/roster.js';
 import { handlePlayerPerformance }       from './routes/player-performance.js';
 import { handleClientPlayerPerformance } from './routes/client/player-performance.js';
 
+// Store — public
+import { handleStoreProducts, handleStoreCategories } from './routes/store/products.js';
+import { handleStoreImage }                            from './routes/store/images.js';
+import { handleStoreCheckout }                         from './routes/store/checkout.js';
+import { handleStoreOrders }                           from './routes/store/orders.js';
+import { handleStorePublicSettings }                   from './routes/store/settings.js';
+
+// Store — admin
+import { handleAdminStoreProducts }   from './routes/admin/store/products.js';
+import { handleAdminStoreCategories } from './routes/admin/store/categories.js';
+import { handleAdminStoreImages }     from './routes/admin/store/images.js';
+import { handleAdminStoreInventory }  from './routes/admin/store/inventory.js';
+import { handleAdminStoreOrders }     from './routes/admin/store/orders.js';
+
 // Stripe webhook
 import { handleStripeWebhook } from './routes/webhooks/stripe.js';
 
@@ -212,6 +226,44 @@ export default {
       router.post  ('/api/player-performance',                   handlePlayerPerformance);
       router.put   ('/api/player-performance/:id',                handlePlayerPerformance);
       router.delete('/api/player-performance/:id',                handlePlayerPerformance);
+
+      // ── Store — public ───────────────────────────────────────────────────
+      router.get  ('/api/store/products',                handleStoreProducts);
+      router.get  ('/api/store/products/:slug',           handleStoreProducts);
+      router.get  ('/api/store/categories',               handleStoreCategories);
+      router.get  ('/api/store/settings',                 handleStorePublicSettings);
+      router.get  ('/api/store/images/:id',               handleStoreImage);
+      router.post ('/api/store/orders',                   handleStoreCheckout);
+      router.post ('/api/store/checkout',                 handleStoreCheckout);
+      router.get  ('/api/store/orders',                   handleStoreOrders);
+      router.get  ('/api/store/orders/guest/:token',      handleStoreOrders);
+
+      // ── Store — admin ────────────────────────────────────────────────────
+      router.get   ('/api/admin/store/products',                          handleAdminStoreProducts);
+      router.post  ('/api/admin/store/products',                          handleAdminStoreProducts);
+      router.get   ('/api/admin/store/products/:id',                      handleAdminStoreProducts);
+      router.patch ('/api/admin/store/products/:id',                      handleAdminStoreProducts);
+      router.delete('/api/admin/store/products/:id',                      handleAdminStoreProducts);
+      router.get   ('/api/admin/store/products/:id/deletion-eligibility', handleAdminStoreProducts);
+      router.post  ('/api/admin/store/products/:id/variants',             handleAdminStoreProducts);
+      router.patch ('/api/admin/store/products/:id/variants/:variantId',  handleAdminStoreProducts);
+      router.delete('/api/admin/store/products/:id/variants/:variantId',  handleAdminStoreProducts);
+      router.get   ('/api/admin/store/products/:id/images',               handleAdminStoreImages);
+      router.post  ('/api/admin/store/products/:id/images',               handleAdminStoreImages);
+      router.patch ('/api/admin/store/products/:id/images/:imageId',      handleAdminStoreImages);
+      router.delete('/api/admin/store/products/:id/images/:imageId',      handleAdminStoreImages);
+      router.get   ('/api/admin/store/categories',                        handleAdminStoreCategories);
+      router.post  ('/api/admin/store/categories',                        handleAdminStoreCategories);
+      router.patch ('/api/admin/store/categories/:id',                    handleAdminStoreCategories);
+      router.get   ('/api/admin/store/categories/:id/deletion-eligibility', handleAdminStoreCategories);
+      router.delete('/api/admin/store/categories/:id',                    handleAdminStoreCategories);
+      router.get   ('/api/admin/store/inventory/low-stock',                handleAdminStoreInventory);
+      router.post  ('/api/admin/store/inventory/adjust',                   handleAdminStoreInventory);
+      router.get   ('/api/admin/store/orders',                             handleAdminStoreOrders);
+      router.get   ('/api/admin/store/orders/:id',                         handleAdminStoreOrders);
+      router.patch ('/api/admin/store/orders/:id',                         handleAdminStoreOrders);
+      router.post  ('/api/admin/store/orders/:id/refund',                  handleAdminStoreOrders);
+      router.post  ('/api/admin/store/orders/:id/notes',                   handleAdminStoreOrders);
 
       return await router.handle();
     } catch (err) {

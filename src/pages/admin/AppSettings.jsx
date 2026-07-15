@@ -37,6 +37,31 @@ const SETTING_GROUPS = [
       { key: 'send_cancellation_emails',       label: 'Send Cancellation Emails',             type: 'boolean' },
     ],
   },
+  {
+    label: 'Store',
+    settings: [
+      { key: 'store_enabled',                  label: 'Store Enabled',                    type: 'boolean' },
+      { key: 'store_currency',                 label: 'Store Currency',                   type: 'text',   hint: 'e.g. EUR' },
+      { key: 'delivery_enabled',               label: 'Delivery Enabled',                 type: 'boolean' },
+      { key: 'collection_enabled',             label: 'Collection Enabled',               type: 'boolean' },
+      { key: 'store_delivery_fee',             label: 'Malta Delivery Fee',               type: 'number' },
+      { key: 'store_free_delivery_threshold',  label: 'Free Delivery Threshold',          type: 'number', hint: 'Order subtotal above which delivery is free — 0 disables the threshold' },
+      { key: 'store_low_stock_threshold',      label: 'Low-Stock Alert Threshold',        type: 'number', hint: 'Admin is emailed when available stock falls to or below this' },
+      { key: 'store_tax_mode',                 label: 'Tax Treatment',                    type: 'select', options: [
+        { value: 'not_applicable', label: 'Not applicable' },
+        { value: 'added',          label: 'Added at checkout (exclusive)' },
+        { value: 'inclusive',      label: 'Included in displayed prices' },
+      ], hint: 'We do not assume a tax treatment — set this explicitly' },
+      { key: 'store_tax_rate',                 label: 'Tax Rate (%)',                     type: 'number', hint: 'Only used when a tax treatment above is selected' },
+      { key: 'store_contact_email',            label: 'Store Contact Email',              type: 'email', hint: 'Also receives new-order and low-stock alerts' },
+      { key: 'store_contact_phone',            label: 'Store Contact Phone',              type: 'text' },
+      { key: 'collection_location_name',       label: 'Collection Location Name',         type: 'text' },
+      { key: 'collection_address',             label: 'Collection Address',               type: 'textarea' },
+      { key: 'collection_map_link',            label: 'Collection Map Link',              type: 'text' },
+      { key: 'collection_instructions',        label: 'Collection Instructions',          type: 'textarea', hint: 'Shown before checkout and in the order confirmation email' },
+      { key: 'collection_hours',               label: 'Collection Opening Hours',         type: 'text' },
+    ],
+  },
 ];
 
 // key → 'number' | 'boolean' | 'text' | ... derived from the groups above,
@@ -128,7 +153,7 @@ export default function AppSettings() {
                 <label className="block text-foreground text-sm font-medium mb-0.5">{s.label}</label>
                 {s.hint && <p className="text-muted-foreground text-xs">{s.hint}</p>}
               </div>
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 w-full sm:w-auto">
                 {s.type === 'boolean' ? (
                   <button
                     role="switch"
@@ -138,6 +163,21 @@ export default function AppSettings() {
                   >
                     <div className={`w-4 h-4 rounded-full bg-white transition-transform ${Boolean(settings[s.key]) ? 'translate-x-6' : 'translate-x-0'}`} />
                   </button>
+                ) : s.type === 'select' ? (
+                  <select
+                    value={settings[s.key] ?? ''}
+                    onChange={(e) => set(s.key, e.target.value)}
+                    className="w-full sm:w-56 bg-card border border-border rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:border-primary transition-colors"
+                  >
+                    {s.options.map((opt) => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+                  </select>
+                ) : s.type === 'textarea' ? (
+                  <textarea
+                    value={settings[s.key] ?? ''}
+                    onChange={(e) => set(s.key, e.target.value)}
+                    rows={2}
+                    className="w-full sm:w-64 bg-card border border-border rounded-xl px-3 py-2 text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors resize-none"
+                  />
                 ) : (
                   <input
                     type={s.type || 'text'}

@@ -6,6 +6,8 @@
  *
  * Events handled:
  *   - checkout.session.completed  → mark order paid, confirm bookings, record payment, issue package credits
+ *                                    (or, for a store order — see metadata.payment_type — mark it paid,
+ *                                    confirm stock, and send store emails; never both)
  *   - payment_intent.payment_failed → mark the order failed
  *   - charge.refunded             → mark the matching payment refunded (covers dashboard-issued refunds)
  *
@@ -13,6 +15,8 @@
  */
 import { queryOne, query, execute } from '../../lib/db.js';
 import { issuePackageCredits }      from '../../lib/credits.js';
+import { confirmStockForOrder, releaseReservationsForOrder } from '../../lib/store.js';
+import { sendStoreCustomerEmail, sendStoreAdminEmail } from '../../lib/storeEmail.js';
 
 // Reject events whose signature timestamp is older/newer than this (replay protection)
 const TIMESTAMP_TOLERANCE_SECONDS = 300;
@@ -89,8 +93,63 @@ async function recordPayment(env, { order, session, now }) {
   return paymentId;
 }
 
+/**
+ * Store order fulfilment — entirely separate from the coaching path above.
+ * Dispatched by session.metadata.payment_type === 'store_order' so a
+ * completed store checkout can never be mistaken for a coaching order (and
+ * vice versa) and never issues coaching credits.
+ */
+async function handleStoreCheckoutCompleted(env, event) {
+  const session = event.data.object;
+  const orderId = session.metadata?.store_order_id;
+  if (!orderId) {
+    console.error('Stripe webhook: no store_order_id in metadata', session.id);
+    return;
+  }
+
+  const order = await queryOne(env, 'SELECT * FROM store_orders WHERE id = ?', [orderId]);
+  if (!order) {
+    console.error('Stripe webhook: store order not found', orderId);
+    return;
+  }
+  if (order.payment_status === 'paid') return; // idempotent — already processed
+
+  const now = new Date().toISOString();
+  await execute(env,
+    `UPDATE store_orders SET payment_status = 'paid', stripe_payment_intent = ?, updated_at = ? WHERE id = ?`,
+    [session.payment_intent ?? null, now, orderId]
+  );
+
+  await confirmStockForOrder(env, orderId);
+
+  const paidOrder = { ...order, payment_status: 'paid' };
+  await sendStoreCustomerEmail(env, { eventTrigger: 'store_order_confirmation', order: paidOrder });
+  await sendStoreAdminEmail(env, { eventTrigger: 'store_new_order_admin', order: paidOrder });
+
+  console.log('Stripe webhook: store order fulfilled', orderId);
+}
+
+async function handleStorePaymentFailed(env, event) {
+  const intent  = event.data.object;
+  const orderId = intent.metadata?.store_order_id;
+  if (!orderId) return;
+
+  const order = await queryOne(env, "SELECT * FROM store_orders WHERE id = ? AND payment_status = 'pending'", [orderId]);
+  if (!order) return;
+
+  const now = new Date().toISOString();
+  await execute(env, `UPDATE store_orders SET payment_status = 'failed', updated_at = ? WHERE id = ?`, [now, orderId]);
+  await releaseReservationsForOrder(env, orderId); // free the stock back up for other shoppers
+  await sendStoreCustomerEmail(env, { eventTrigger: 'store_payment_failed', order });
+  console.log('Stripe webhook: store order marked failed', orderId);
+}
+
 async function handleCheckoutCompleted(env, event) {
   const session = event.data.object;
+  if (session.metadata?.payment_type === 'store_order') {
+    return handleStoreCheckoutCompleted(env, event);
+  }
+
   const orderId = session.metadata?.orderId;
   if (!orderId) {
     console.error('Stripe webhook: no orderId in metadata', session.id);
@@ -164,7 +223,11 @@ async function handleCheckoutCompleted(env, event) {
 }
 
 async function handlePaymentFailed(env, event) {
-  const intent  = event.data.object;
+  const intent = event.data.object;
+  if (intent.metadata?.payment_type === 'store_order') {
+    return handleStorePaymentFailed(env, event);
+  }
+
   const orderId = intent.metadata?.orderId;
   if (!orderId) return;
 
@@ -185,19 +248,29 @@ async function handleChargeRefunded(env, event) {
     'SELECT id, status FROM payments WHERE stripe_payment_intent = ?',
     [paymentIntent]
   );
-  if (!payment || payment.status === 'refunded') return;
+  if (payment) {
+    if (payment.status === 'refunded') return;
+    const now = new Date().toISOString();
+    await execute(env, `UPDATE payments SET status = 'refunded', updated_at = ? WHERE id = ?`, [now, payment.id]);
+    // Mark any pending refund rows for this payment as succeeded
+    await execute(env, `UPDATE refunds SET status = 'succeeded', updated_at = ? WHERE payment_id = ? AND status = 'pending'`, [now, payment.id]);
+    console.log('Stripe webhook: payment marked refunded', payment.id);
+    return;
+  }
 
+  // Not a coaching payment — check for a matching store order (dashboard-issued
+  // refund reconciliation; the admin-initiated store refund flow in
+  // admin/store/orders.js already sets these fields directly and this is a
+  // no-op in that case since refund_status will already be set).
+  const storeOrder = await queryOne(env, "SELECT id, refund_status, total FROM store_orders WHERE stripe_payment_intent = ?", [paymentIntent]);
+  if (!storeOrder || storeOrder.refund_status) return;
   const now = new Date().toISOString();
+  const amount = Number.isFinite(charge.amount_refunded) ? charge.amount_refunded / 100 : storeOrder.total;
   await execute(env,
-    `UPDATE payments SET status = 'refunded', updated_at = ? WHERE id = ?`,
-    [now, payment.id]
+    `UPDATE store_orders SET refund_status = ?, refund_amount = ?, refunded_at = ?, updated_at = ? WHERE id = ?`,
+    [amount >= storeOrder.total ? 'full' : 'partial', amount, now, now, storeOrder.id]
   );
-  // Mark any pending refund rows for this payment as succeeded
-  await execute(env,
-    `UPDATE refunds SET status = 'succeeded', updated_at = ? WHERE payment_id = ? AND status = 'pending'`,
-    [now, payment.id]
-  );
-  console.log('Stripe webhook: payment marked refunded', payment.id);
+  console.log('Stripe webhook: store order marked refunded', storeOrder.id);
 }
 
 export async function handleStripeWebhook(request, env) {

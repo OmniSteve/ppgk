@@ -15,6 +15,7 @@ import {
   Mail,
   ArrowRight,
   ChevronDown,
+  ShoppingBag,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import DotGridCanvas from '@/components/landing/DotGridCanvas';
@@ -28,6 +29,7 @@ const NAV_LINKS = [
   { label: 'Home', href: '#top' },
   { label: 'Coaching', href: '#coaching' },
   { label: 'Sessions', href: '/sessions', route: true },
+  { label: 'Shop', href: '/shop', route: true },
   { label: 'Player Development', href: '#development' },
   { label: 'Contact', href: '#contact' },
 ];
@@ -690,6 +692,10 @@ export default function LandingPage() {
                 <CalendarCheck size={16} aria-hidden="true" />
                 View upcoming sessions
               </Link>
+              <Link className="btn btn-ghost" to="/shop">
+                <ShoppingBag size={16} aria-hidden="true" />
+                Shop Goalkeeping Gear
+              </Link>
               <Link className="btn btn-ghost" to="/register">
                 <UserPlus size={16} aria-hidden="true" />
                 Create an account
@@ -717,6 +723,7 @@ export default function LandingPage() {
             <Link to="/sessions">Sessions</Link>
             <a href="#development">Player development</a>
             <Link to="/packages">Packages</Link>
+            <Link to="/shop">Shop</Link>
           </div>
 
           <div className="foot-col">

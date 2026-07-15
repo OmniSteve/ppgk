@@ -91,3 +91,19 @@ export async function requireRole(request, env, ...roles) {
   if (!roles.includes(payload.role)) throw Object.assign(new Error('Forbidden'), { status: 403 });
   return payload;
 }
+
+/**
+ * Optional-auth variant for endpoints that serve both guests and logged-in
+ * users identically (store checkout/orders). Returns the JWT payload if a
+ * valid, active-account token is present, otherwise null — never throws. A
+ * deactivated user's token also resolves to null here (requireAuth rejects
+ * it), so a disabled account falls back to guest checkout rather than being
+ * blocked outright.
+ */
+export async function tryAuth(request, env) {
+  try {
+    return await requireAuth(request, env);
+  } catch {
+    return null;
+  }
+}
