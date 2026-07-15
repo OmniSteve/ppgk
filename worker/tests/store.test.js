@@ -40,7 +40,7 @@ const MIGRATIONS_DIR = join(__dirname, '..', '..', 'migrations');
 const MIGRATION_FILES = [
   '0001_initial_schema', '0002_additions', '0003_player_emergency_relationship',
   '0004_player_performance', '0005_player_account_holder', '0006_booking_roster',
-  '0007_account_lifecycle', '0008_ecommerce_store',
+  '0007_account_lifecycle', '0008_ecommerce_store', '0009_sku_generation',
 ];
 const MIGRATION_SQL = MIGRATION_FILES.map(f => readFileSync(join(MIGRATIONS_DIR, `${f}.sql`), 'utf8'));
 

@@ -245,6 +245,7 @@ export default {
       router.patch ('/api/admin/store/products/:id',                      handleAdminStoreProducts);
       router.delete('/api/admin/store/products/:id',                      handleAdminStoreProducts);
       router.get   ('/api/admin/store/products/:id/deletion-eligibility', handleAdminStoreProducts);
+      router.post  ('/api/admin/store/repair-skus',                       handleAdminStoreProducts);
       router.post  ('/api/admin/store/products/:id/variants',             handleAdminStoreProducts);
       router.patch ('/api/admin/store/products/:id/variants/:variantId',  handleAdminStoreProducts);
       router.delete('/api/admin/store/products/:id/variants/:variantId',  handleAdminStoreProducts);

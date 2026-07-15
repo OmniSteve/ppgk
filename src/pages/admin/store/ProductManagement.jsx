@@ -29,6 +29,7 @@ function ProductEditor({ productId, categories, onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [currentId, setCurrentId] = useState(isNew ? null : productId);
+  const [justCreatedSku, setJustCreatedSku] = useState(null);
 
   const loadDetail = (id) => {
     setLoading(true);
@@ -69,6 +70,7 @@ function ProductEditor({ productId, categories, onClose, onSaved }) {
       } else {
         const res = await apiClient.post('/admin/store/products', buildPayload());
         setCurrentId(res.id);
+        setJustCreatedSku(res.sku);
         onSaved();
         loadDetail(res.id); // stay open so variants/images can be added
       }
@@ -92,6 +94,11 @@ function ProductEditor({ productId, categories, onClose, onSaved }) {
         ) : (
           <div className="p-5 space-y-5">
             {error && <div className="bg-destructive/20 border border-destructive/30 rounded-xl p-3 text-destructive text-sm">{error}</div>}
+            {justCreatedSku && (
+              <p className="text-success text-xs bg-success/10 border border-success/30 rounded-lg px-3 py-2">
+                Product created with SKU <span className="font-mono">{justCreatedSku}</span>
+              </p>
+            )}
 
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <div><label className={label}>Name</label><input className={inp} value={form.name} onChange={set('name')} /></div>
@@ -109,7 +116,11 @@ function ProductEditor({ productId, categories, onClose, onSaved }) {
 
             <div className="grid grid-cols-1 xs:grid-cols-2 gap-4">
               <div><label className={label}>Brand</label><input className={inp} value={form.brand} onChange={set('brand')} /></div>
-              <div><label className={label}>SKU</label><input className={inp} value={form.sku} onChange={set('sku')} /></div>
+              <div>
+                <label className={label}>SKU</label>
+                <input className={inp} value={form.sku} onChange={set('sku')} placeholder="Auto-generated if left blank" />
+                {!currentId && <p className="text-muted-foreground text-[11px] mt-1">Optional. A unique SKU will be generated automatically if left blank.</p>}
+              </div>
             </div>
 
             <div><label className={label}>Short Description</label><input className={inp} value={form.shortDescription} onChange={set('shortDescription')} /></div>
@@ -171,26 +182,33 @@ function ProductEditor({ productId, categories, onClose, onSaved }) {
   );
 }
 
+const emptyVariantForm = { name: '', size: '', colour: '', sku: '', stockQty: 0 };
+
 function VariantsEditor({ productId, variants, onChange }) {
-  const [form, setForm] = useState({ name: '', size: '', colour: '', sku: '', stockQty: 0 });
+  const [form, setForm] = useState(emptyVariantForm);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [justCreated, setJustCreated] = useState(null); // { name, sku } — brief confirmation banner
 
-  const reset = () => { setForm({ name: '', size: '', colour: '', sku: '', stockQty: 0 }); setEditingId(null); };
-  const startEdit = (v) => { setForm({ name: v.name, size: v.size || '', colour: v.colour || '', sku: v.sku || '', stockQty: v.stockQty ?? 0 }); setEditingId(v.id); };
+  const reset = () => { setForm(emptyVariantForm); setEditingId(null); };
+  const startEdit = (v) => { setForm({ name: v.name, size: v.size || '', colour: v.colour || '', sku: v.sku || '', stockQty: v.stockQty ?? 0 }); setEditingId(v.id); setJustCreated(null); };
 
   const handleSave = async () => {
     if (!form.name) { setError('Variant name is required'); return; }
-    setSaving(true); setError('');
+    setSaving(true); setError(''); setJustCreated(null);
+    // Explicit payload (rather than spreading `form` directly) so it's clear
+    // exactly which fields — including sku — are sent to the backend.
+    const payload = { name: form.name, size: form.size || undefined, colour: form.colour || undefined, sku: form.sku || undefined, stockQty: Number(form.stockQty) || 0 };
     try {
       if (editingId) {
-        await apiClient.patch(`/admin/store/products/${productId}/variants/${editingId}`, form);
+        await apiClient.patch(`/admin/store/products/${productId}/variants/${editingId}`, payload);
       } else {
-        await apiClient.post(`/admin/store/products/${productId}/variants`, form);
+        const created = await apiClient.post(`/admin/store/products/${productId}/variants`, payload);
+        setJustCreated({ name: created.name, sku: created.sku });
       }
       reset();
-      onChange();
+      onChange(); // reloads product (and thus inventory-relevant) data — no page refresh needed
     } catch (err) {
       setError(err.message || 'Save failed');
     } finally {
@@ -211,11 +229,19 @@ function VariantsEditor({ productId, variants, onChange }) {
     <div className="border-t border-border pt-4 space-y-3">
       <h3 className="font-bold text-foreground text-sm">Variants (size / colour)</h3>
       {error && <p className="text-destructive text-xs">{error}</p>}
+      {justCreated && (
+        <p className="text-success text-xs bg-success/10 border border-success/30 rounded-lg px-3 py-2">
+          Variant "{justCreated.name}" created with SKU <span className="font-mono">{justCreated.sku}</span>
+        </p>
+      )}
       {variants.length > 0 && (
         <div className="space-y-2">
           {variants.map((v) => (
             <div key={v.id} className="flex flex-wrap items-center gap-2 bg-card rounded-xl border border-border px-3 py-2">
-              <span className="text-foreground text-sm font-medium flex-1 min-w-[8rem]">{v.name}</span>
+              <div className="flex-1 min-w-[8rem]">
+                <span className="text-foreground text-sm font-medium block">{v.name}</span>
+                <span className="text-muted-foreground text-xs font-mono">{v.sku || 'No SKU'}</span>
+              </div>
               <span className="text-muted-foreground text-xs">Stock: {v.stockQty}</span>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${v.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>{v.active ? 'Active' : 'Inactive'}</span>
               <AdminActionButton icon={Edit2} label="Edit variant" onClick={() => startEdit(v)} className="w-8 h-8" />
@@ -229,6 +255,10 @@ function VariantsEditor({ productId, variants, onChange }) {
         <input placeholder="Size" className={inp} value={form.size} onChange={(e) => setForm({ ...form, size: e.target.value })} />
         <input placeholder="Colour" className={inp} value={form.colour} onChange={(e) => setForm({ ...form, colour: e.target.value })} />
         <input type="number" placeholder="Stock" className={inp} value={form.stockQty} onChange={(e) => setForm({ ...form, stockQty: e.target.value })} />
+      </div>
+      <div>
+        <input placeholder="SKU (optional — auto-generated if left blank)" className={inp} value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+        <p className="text-muted-foreground text-[11px] mt-1">Optional. A unique SKU will be generated automatically if left blank.</p>
       </div>
       <div className="flex gap-2">
         <button onClick={handleSave} disabled={saving} className="px-4 py-2 rounded-xl bg-primary hover:bg-primary-hover text-foreground text-sm font-bold disabled:opacity-50 flex items-center gap-2">
