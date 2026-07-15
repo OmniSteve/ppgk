@@ -2,7 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <!-- Served from R2 via the Worker (worker/src/routes/assets.js) using a
+         relative URL — resolves against whichever domain served the page, so
+         dev.ppgk.app and ppgk.app each get their own environment's R2 bucket
+         automatically, matching the app's existing relative /api/* convention
+         (see src/services/apiClient.js). Bump ?v= to bust the browser cache
+         when the image itself is replaced. -->
+    <link rel="icon" type="image/png" href="/api/assets/favicon.png?v=1" />
+    <link rel="shortcut icon" type="image/png" href="/api/assets/favicon.png?v=1" />
+    <link rel="apple-touch-icon" href="/api/assets/favicon.png?v=1" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="manifest" href="/manifest.json" />
     <meta name="description" content="Premier Performance GK — Elite goalkeeper training in Malta" />

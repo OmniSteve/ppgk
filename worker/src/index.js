@@ -17,6 +17,7 @@
 import { Router }          from './lib/router.js';
 import { corsHeaders }     from './lib/cors.js';
 import { handleScheduled } from './scheduled.js';
+import { handleFaviconAsset } from './routes/assets.js';
 
 // Auth routes
 import { handleRegister }       from './routes/auth/register.js';
@@ -107,6 +108,9 @@ export default {
 
       // ── Webhooks (no auth) ──────────────────────────────────────────────
       router.post('/api/webhooks/stripe', handleStripeWebhook);
+
+      // ── Static assets (no auth) ──────────────────────────────────────────
+      router.get('/api/assets/favicon.png', handleFaviconAsset);
 
       // ── Auth ────────────────────────────────────────────────────────────
       router.post('/api/auth/register',        handleRegister);
@@ -265,6 +269,9 @@ export default {
       router.patch ('/api/admin/store/orders/:id',                         handleAdminStoreOrders);
       router.post  ('/api/admin/store/orders/:id/refund',                  handleAdminStoreOrders);
       router.post  ('/api/admin/store/orders/:id/notes',                   handleAdminStoreOrders);
+      router.post  ('/api/admin/store/orders/:id/archive',                 handleAdminStoreOrders);
+      router.post  ('/api/admin/store/orders/:id/restore',                 handleAdminStoreOrders);
+      router.delete('/api/admin/store/orders/:id',                         handleAdminStoreOrders);
 
       return await router.handle();
     } catch (err) {

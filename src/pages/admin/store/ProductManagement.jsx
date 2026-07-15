@@ -446,18 +446,24 @@ export default function ProductManagement() {
       )}
 
       {deleteTarget && (
-        <DeleteProductModal product={deleteTarget} onClose={() => setDeleteTarget(null)} onDeleted={() => { setDeleteTarget(null); setSuccess('Product deleted.'); load(); }} />
+        <DeleteProductModal
+          product={deleteTarget}
+          onClose={() => setDeleteTarget(null)}
+          onDeleted={() => { setDeleteTarget(null); setSuccess('Product deleted.'); load(); }}
+          onArchived={() => { setDeleteTarget(null); setSuccess('Product archived.'); load(); }}
+        />
       )}
     </div>
   );
 }
 
-function DeleteProductModal({ product, onClose, onDeleted }) {
+function DeleteProductModal({ product, onClose, onDeleted, onArchived }) {
   const [eligibility, setEligibility] = useState(null);
   const [loading, setLoading] = useState(true);
   const [confirmText, setConfirmText] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [archiving, setArchiving] = useState(false);
 
   useEffect(() => {
     apiClient.get(`/admin/store/products/${product.id}/deletion-eligibility`)
@@ -478,6 +484,18 @@ function DeleteProductModal({ product, onClose, onDeleted }) {
     }
   };
 
+  const handleArchive = async () => {
+    setArchiving(true); setError('');
+    try {
+      await apiClient.patch(`/admin/store/products/${product.id}`, { status: 'archived' });
+      onArchived();
+    } catch (err) {
+      setError(err.message || 'Archive failed');
+    } finally {
+      setArchiving(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
       <div className="w-full max-w-md bg-sidebar border border-border rounded-2xl p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
@@ -487,9 +505,10 @@ function DeleteProductModal({ product, onClose, onDeleted }) {
         {loading ? (
           <div className="flex items-center gap-2 text-muted-foreground text-sm"><Loader2 size={14} className="animate-spin" />Checking eligibility…</div>
         ) : eligibility && !eligibility.eligible ? (
-          <div className="bg-warning/20 border border-warning/30 rounded-xl p-3 text-sm text-foreground">
+          <div className="bg-warning/20 border border-warning/30 rounded-xl p-3 text-sm text-foreground space-y-2">
             <p className="font-semibold">Cannot delete:</p>
             <ul className="list-disc list-inside text-muted-foreground">{eligibility.blockingReasons.map((r, i) => <li key={i}>{r}</li>)}</ul>
+            <p className="text-muted-foreground">This product has been used in one or more orders and cannot be permanently deleted. It can be archived and removed from the shop while keeping order history intact.</p>
           </div>
         ) : eligibility?.eligible ? (
           <div>
@@ -499,6 +518,11 @@ function DeleteProductModal({ product, onClose, onDeleted }) {
         ) : null}
         <div className="flex justify-end gap-2">
           <button onClick={onClose} className="px-4 py-2 rounded-xl border border-border text-sm text-foreground">Close</button>
+          {eligibility && !eligibility.eligible && (
+            <button onClick={handleArchive} disabled={archiving} className="px-4 py-2 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold disabled:opacity-50">
+              {archiving ? 'Archiving…' : 'Archive Product Instead'}
+            </button>
+          )}
           {eligibility?.eligible && (
             <button onClick={handleDelete} disabled={submitting || confirmText !== 'DELETE'} className="px-4 py-2 rounded-xl bg-destructive hover:bg-destructive/90 text-destructive-foreground text-sm font-bold disabled:opacity-50">
               {submitting ? 'Deleting…' : 'Permanently Delete'}

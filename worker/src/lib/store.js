@@ -162,6 +162,53 @@ export async function confirmStockForOrder(env, orderId, performedBy = null) {
   return { skipped: false, itemsAdjusted: rows.length };
 }
 
+/**
+ * Restore stock for specific order line items after a refund — the inverse of
+ * confirmStockForOrder. Never automatic; callers decide which lines/quantities
+ * to restore (full refund defaults to "all", partial refund defaults to "none"
+ * unless the admin explicitly selects items, since a partial refund is often a
+ * price adjustment rather than a physical return).
+ * lines: [{ productId, variantId|null, quantity }]
+ */
+export async function restoreStockForItems(env, { orderId, lines, performedBy = null, refundId = null }) {
+  let itemsAdjusted = 0;
+  for (const line of lines) {
+    if (!line.quantity || line.quantity <= 0) continue;
+    const table = line.variantId ? 'store_product_variants' : 'store_products';
+    const rowId = line.variantId ?? line.productId;
+    await execute(env, `UPDATE ${table} SET stock_qty = stock_qty + ? WHERE id = ?`, [line.quantity, rowId]);
+    await execute(env,
+      `INSERT INTO store_inventory_adjustments (id, product_id, variant_id, delta, reason, order_id, performed_by, note)
+       VALUES (?, ?, ?, ?, 'refund_restock', ?, ?, ?)`,
+      [crypto.randomUUID(), line.variantId ? null : line.productId, line.variantId ?? null, line.quantity, orderId, performedBy, refundId ? `Restored from refund ${refundId}` : null]
+    );
+    itemsAdjusted++;
+  }
+  return { itemsAdjusted };
+}
+
+/**
+ * Live refund status for an order, computed from store_refunds (the
+ * authoritative source — never from the legacy store_orders.refund_status
+ * column, and never inferred from a manual note).
+ */
+export async function computeRefundSummary(env, order) {
+  const refunds = await query(env, 'SELECT * FROM store_refunds WHERE order_id = ? ORDER BY created_at', [order.id]);
+  const paidCents = Math.round(Number(order.total) * 100);
+  const succeededCents = refunds.filter((r) => r.status === 'succeeded').reduce((s, r) => s + r.amount_cents, 0);
+  const hasPending = refunds.some((r) => r.status === 'pending');
+  const hasFailed = refunds.some((r) => r.status === 'failed');
+  const remainingCents = Math.max(0, paidCents - succeededCents);
+
+  let status = 'none';
+  if (succeededCents > 0 && remainingCents === 0) status = 'full';
+  else if (succeededCents > 0) status = 'partial';
+  else if (hasPending) status = 'pending';
+  else if (hasFailed) status = 'failed';
+
+  return { paidCents, refundedCents: succeededCents, remainingCents, status, refunds };
+}
+
 /** Products (or variants) at or below the configured low-stock threshold, for the admin alert cron. */
 export async function getLowStockItems(env, threshold) {
   const products = await query(env,

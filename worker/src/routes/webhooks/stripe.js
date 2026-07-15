@@ -9,7 +9,12 @@
  *                                    (or, for a store order — see metadata.payment_type — mark it paid,
  *                                    confirm stock, and send store emails; never both)
  *   - payment_intent.payment_failed → mark the order failed
- *   - charge.refunded             → mark the matching payment refunded (covers dashboard-issued refunds)
+ *   - charge.refunded             → mark the matching coaching payment refunded; reconcile any
+ *                                    attached refund objects into store_refunds for store orders
+ *   - refund.created/updated/failed,
+ *     charge.refund.updated       → reconcile the refund object into store_refunds (idempotent on
+ *                                    stripe_refund_id) — covers refunds issued directly in the
+ *                                    Stripe dashboard, not just the admin refund endpoint
  *
  * Every processed event is recorded in stripe_events (idempotency across retries).
  */
@@ -239,6 +244,49 @@ async function handlePaymentFailed(env, event) {
   console.log('Stripe webhook: order marked failed', orderId);
 }
 
+/**
+ * Reconcile a single Stripe Refund object into store_refunds — the
+ * authoritative refund ledger for store orders. Idempotent on
+ * stripe_refund_id: a webhook re-delivery or a refund moving
+ * pending -> succeeded/failed both resolve to a single up-to-date row.
+ * Covers refunds issued directly in the Stripe dashboard, not just ones
+ * created via the admin refund endpoint.
+ */
+async function reconcileStripeRefund(env, refundObj) {
+  if (!refundObj || refundObj.object !== 'refund') return;
+  const paymentIntentId = typeof refundObj.payment_intent === 'string' ? refundObj.payment_intent : refundObj.payment_intent?.id;
+  if (!paymentIntentId) return;
+
+  const order = await queryOne(env, 'SELECT id, currency FROM store_orders WHERE stripe_payment_intent = ?', [paymentIntentId]);
+  if (!order) return; // not a store order — coaching payments are reconciled separately below
+
+  const status = refundObj.status === 'succeeded' ? 'succeeded' : (refundObj.status === 'failed' ? 'failed' : 'pending');
+  const now = new Date().toISOString();
+
+  const existing = await queryOne(env, 'SELECT id, status FROM store_refunds WHERE stripe_refund_id = ?', [refundObj.id]);
+  if (existing) {
+    if (existing.status === status) return; // already reconciled at this status — no-op
+    await execute(env, 'UPDATE store_refunds SET status = ?, updated_at = ? WHERE id = ?', [status, now, existing.id]);
+  } else {
+    await execute(env,
+      `INSERT INTO store_refunds (id, order_id, stripe_refund_id, stripe_payment_intent_id, amount_cents, currency, status, reason, created_by)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)
+       ON CONFLICT(stripe_refund_id) DO NOTHING`,
+      [crypto.randomUUID(), order.id, refundObj.id, paymentIntentId, refundObj.amount ?? 0,
+       (refundObj.currency || order.currency || 'eur').toUpperCase(), status, refundObj.reason ?? null]
+    );
+  }
+
+  // Recompute the order's authoritative refunded total from succeeded refunds —
+  // safer than incrementing, since a refund can move pending -> succeeded and
+  // this event may be re-delivered.
+  const sumRow = await queryOne(env,
+    "SELECT COALESCE(SUM(amount_cents), 0) as total FROM store_refunds WHERE order_id = ? AND status = 'succeeded'", [order.id]);
+  await execute(env, 'UPDATE store_orders SET amount_refunded_cents = ?, updated_at = ? WHERE id = ?', [sumRow?.total ?? 0, now, order.id]);
+
+  console.log(`Stripe webhook: store refund ${refundObj.id} reconciled (status=${status}) for order ${order.id}`);
+}
+
 async function handleChargeRefunded(env, event) {
   const charge        = event.data.object;
   const paymentIntent = charge.payment_intent;
@@ -258,19 +306,14 @@ async function handleChargeRefunded(env, event) {
     return;
   }
 
-  // Not a coaching payment — check for a matching store order (dashboard-issued
-  // refund reconciliation; the admin-initiated store refund flow in
-  // admin/store/orders.js already sets these fields directly and this is a
-  // no-op in that case since refund_status will already be set).
-  const storeOrder = await queryOne(env, "SELECT id, refund_status, total FROM store_orders WHERE stripe_payment_intent = ?", [paymentIntent]);
-  if (!storeOrder || storeOrder.refund_status) return;
-  const now = new Date().toISOString();
-  const amount = Number.isFinite(charge.amount_refunded) ? charge.amount_refunded / 100 : storeOrder.total;
-  await execute(env,
-    `UPDATE store_orders SET refund_status = ?, refund_amount = ?, refunded_at = ?, updated_at = ? WHERE id = ?`,
-    [amount >= storeOrder.total ? 'full' : 'partial', amount, now, now, storeOrder.id]
-  );
-  console.log('Stripe webhook: store order marked refunded', storeOrder.id);
+  // Not a coaching payment — reconcile every refund object attached to this
+  // charge into store_refunds (covers dashboard-issued refunds; the
+  // admin-initiated flow in admin/store/orders.js already writes its own row
+  // and this is idempotent against that via stripe_refund_id).
+  const refundObjects = charge.refunds?.data ?? [];
+  for (const refundObj of refundObjects) {
+    await reconcileStripeRefund(env, { ...refundObj, payment_intent: refundObj.payment_intent ?? paymentIntent });
+  }
 }
 
 export async function handleStripeWebhook(request, env) {
@@ -306,6 +349,8 @@ export async function handleStripeWebhook(request, env) {
       await handlePaymentFailed(env, event);
     } else if (event.type === 'charge.refunded') {
       await handleChargeRefunded(env, event);
+    } else if (['refund.created', 'refund.updated', 'refund.failed', 'charge.refund.updated'].includes(event.type)) {
+      await reconcileStripeRefund(env, event.data.object);
     }
 
     if (event.id) {
