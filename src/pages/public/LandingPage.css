@@ -239,29 +239,28 @@
   position: relative;
   overflow: hidden;
 }
-.ppgk-landing .hero-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: clamp(2rem, 5vw, 4.5rem);
+/* Single centred column: logo, then headline copy, top to bottom — same
+   content order at every viewport, only sizing/spacing responds. */
+.ppgk-landing .hero-stack {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-}
-@media (max-width: 880px) {
-  .ppgk-landing .hero-grid { grid-template-columns: 1fr; }
-  .ppgk-landing .hero-art  { order: -1; max-width: 420px; }
-  /* smaller viewport: trim the faintest trail ghost and glow blur so the
-     loop stays light on mid-range mobile devices */
-  .ppgk-landing .anim .ball-trail-2 { display: none; }
-  .ppgk-landing .anim .ball-glow    { filter: blur(4px); }
-  .ppgk-landing .anim .particle:nth-child(n + 5) { display: none; }
+  text-align: center;
 }
 .ppgk-landing .hero h1 .accent { color: hsl(var(--primary)); }
 .ppgk-landing .hero-copy {
   display: grid;
+  justify-items: center;
   gap: 1.6rem;
-  justify-items: start;
+  max-width: 760px;
+}
+.ppgk-landing .hero-copy .lede {
+  max-width: 720px;
+  margin-inline: auto;
 }
 .ppgk-landing .hero-actions {
   display: flex;
+  justify-content: center;
   gap: 1rem;
   flex-wrap: wrap;
   margin-top: 0.4rem;
@@ -273,6 +272,7 @@
   text-transform: uppercase;
   color: hsl(var(--muted-foreground));
   display: flex;
+  justify-content: center;
   gap: 1.6rem;
   flex-wrap: wrap;
   margin-top: 1rem;
@@ -280,6 +280,12 @@
 .ppgk-landing .hero-meta strong {
   color: hsl(var(--foreground));
   font-weight: 500;
+}
+
+/* buttons stack full-width once the row can't comfortably fit side by side */
+@media (max-width: 420px) {
+  .ppgk-landing .hero-actions          { flex-direction: column; align-items: stretch; width: 100%; }
+  .ppgk-landing .hero-actions .btn     { justify-content: center; }
 }
 
 /* interactive dot-grid background + fade so it never competes with text */
@@ -310,7 +316,7 @@
   pointer-events: none;
   z-index: 0;
 }
-.ppgk-landing .hero-grid,
+.ppgk-landing .hero-stack,
 .ppgk-landing .cta .wrap { position: relative; z-index: 1; }
 
 /* "coaching led by" lead pill */
@@ -391,6 +397,7 @@
 /* platform capability chips (booking / progress tracking) */
 .ppgk-landing .hero-platform {
   display: flex;
+  justify-content: center;
   gap: 0.7rem;
   flex-wrap: wrap;
 }
@@ -407,229 +414,105 @@
 }
 .ppgk-landing .hero-platform svg { color: hsl(var(--primary)); flex-shrink: 0; }
 
-/* ── SVG save diagram ───────────────────────────────────────────────────── */
-.ppgk-landing .hero-art          { position: relative; }
-.ppgk-landing .hero-art svg {
+/* ── animated PPGK hero crest ──────────────────────────────────────────────
+   Plays once on mount: the crest fades in, then the ball flies in from the
+   top right trailing its glow and the crest's own baked-in trail streaks,
+   landing with a brief flash and a whole-logo impact bump.
+
+   The crest artwork (hero-logo-badge) is split into two clip-path halves —
+   a static bottom half (wordmark/tagline) and a top wedge that carries the
+   pre-rendered trail graphic. The top wedge travels in together with the
+   ball and glow as one "comet" group so the trail reads as drawn by the
+   ball's own motion, without animating the artwork itself. */
+/* Sits above the headline as the brand introduction. Sized as its own
+   fluid range (desktop ~340–440px, mobile ~230–290px, see media query
+   below) rather than filling a grid column, so it reads as an intro mark
+   rather than a competing hero visual. */
+.ppgk-landing .hero-visual {
+  position: relative;
+  width: clamp(340px, 32vw, 440px);
+  margin: 0 auto clamp(1.75rem, 4vw, 2.75rem);
+}
+.ppgk-landing .hero-logo {
+  position: relative;
   width: 100%;
-  height: auto;
-  /* desktop-only pointer parallax (see LandingPage.jsx); the custom
-     properties default to 0 so this is inert until JS sets them */
-  transform: translate3d(calc(var(--parallax-x, 0) * 5px), calc(var(--parallax-y, 0) * 4px), 0);
-  transition: transform 0.5s var(--ease);
-  will-change: transform;
+  aspect-ratio: 1408 / 590;
+  animation: lp-logo-impact 0.28s ease-out 0.95s 1 both;
 }
-.ppgk-landing .net-line          { stroke: hsl(var(--border)); stroke-width: 1; }
-.ppgk-landing .net-ripple        { stroke: hsl(var(--border)); stroke-width: 1; transform-box: fill-box; transform-origin: 50% 100%; }
-.ppgk-landing .frame-line        { stroke: hsl(var(--foreground)); stroke-width: 3; stroke-linecap: square; transform-box: fill-box; }
-.ppgk-landing .shot-path {
-  stroke: hsl(var(--primary));
-  stroke-width: 2.5;
-  fill: none;
-  stroke-dasharray: 6 7;
-  stroke-linecap: round;
+.ppgk-landing .hero-logo-comet {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  animation: lp-logo-comet 0.6s var(--ease) 0.35s 1 both;
 }
-.ppgk-landing .ball              { offset-path: var(--shot-path); fill: hsl(var(--foreground)); }
-.ppgk-landing .ball-seam {
-  offset-path: var(--shot-path);
-  transform-box: fill-box;
-  transform-origin: center;
-  stroke: hsl(var(--background) / 0.55);
-  stroke-width: 1.2;
-  fill: none;
-  stroke-linecap: round;
+.ppgk-landing .hero-logo-glow,
+.ppgk-landing .hero-logo-badge {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
-.ppgk-landing .ball-trail {
-  offset-path: var(--shot-path);
-  fill: hsl(var(--primary) / 0.5);
-  filter: blur(1.5px);
+.ppgk-landing .hero-logo-badge-top {
+  z-index: 0;
+  clip-path: polygon(0 0, 100% 0, 100% 38%, 28% 42%, 8.5% 44.9%, 0 49.2%);
 }
-.ppgk-landing .ball-glow {
-  offset-path: var(--shot-path);
-  fill: hsl(var(--primary) / 0.55);
-  filter: blur(6px);
+.ppgk-landing .hero-logo-badge-bottom {
+  z-index: 1;
+  clip-path: polygon(0 100%, 0 49.2%, 8.5% 44.9%, 28% 42%, 100% 38%, 100% 100%);
+  animation: lp-logo-badge-in 0.5s ease-out both;
 }
-.ppgk-landing .impact-flash       { fill: hsl(var(--background)); transform-box: fill-box; transform-origin: center; }
-.ppgk-landing .impact-ring {
-  fill: none;
-  stroke: hsl(var(--primary));
-  stroke-width: 2.5;
-  transform-box: fill-box;
-  transform-origin: center;
+.ppgk-landing .hero-logo-ball {
+  position: absolute;
+  left: 74.79%;
+  top: 6.1%;
+  width: 18.75%;
+  animation: lp-logo-ball-spin 0.6s var(--ease) 0.35s 1 both;
 }
-.ppgk-landing .glove-mark        { stroke: hsl(var(--primary)); stroke-width: 3.5; fill: none; stroke-linecap: round; }
-.ppgk-landing .particle          { fill: hsl(var(--primary)); transform-box: fill-box; transform-origin: center; }
-.ppgk-landing .save-label {
-  font-family: var(--font-body);
-  font-size: 11px;
-  letter-spacing: 0.2em;
-  fill: hsl(var(--primary));
-  text-transform: uppercase;
+.ppgk-landing .hero-logo-ball img { width: 100%; display: block; }
+.ppgk-landing .hero-logo-flash {
+  position: absolute;
+  left: 74.79%;
+  top: 6.1%;
+  width: 18.75%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(circle, hsl(var(--primary) / 0.55) 0%, hsl(var(--primary) / 0) 70%);
+  animation: lp-logo-flash 0.5s ease-out 0.95s 1 both;
 }
 
-/*
- * ── Loop sequence (3.4s, infinite) ────────────────────────────────────────
- * Every animated layer shares the same duration and the same percentage
- * checkpoints, so nothing drifts out of phase however long the page sits
- * open: 0%=0s, 11.8%=0.4s, 41.2%=1.4s, 52.9%=1.8s, 70.6%=2.4s, 100%=3.4s.
- *   0.0–0.4s  idle
- *   0.4–1.4s  trajectory draws, ball travels
- *   1.4–1.8s  save impact: flash, ring, arc, net ripple, particles
- *   1.8–2.4s  text pulse, effects settle
- *   2.4–3.4s  pause
- * "Action" layers (shot path, ball, trail, glow, impact fx) fade to
- * opacity 0 before their geometry resets, so the 100%→0% loop restart has
- * nothing visible to snap. The net, frame and label stay visible throughout
- * and only get a brief reaction at impact.
- */
-.ppgk-landing .anim {
-  --shot-path: path("M20 300 C 140 240, 240 130, 318 74");
+/* mobile: smaller mark, still full width of its own box and never cropped —
+   stays in normal flow at the top of the stack, same as every other size */
+@media (max-width: 640px) {
+  .ppgk-landing .hero-visual {
+    width: clamp(230px, 75vw, 290px);
+    margin: 0 auto clamp(1.25rem, 6vw, 1.75rem);
+  }
 }
 
-.ppgk-landing .anim .shot-path {
-  stroke-dashoffset: 520;
-  opacity: 0;
-  animation: lp-shot-draw 3.4s linear infinite;
+@keyframes lp-logo-badge-in {
+  0%   { opacity: 0; transform: translateY(14px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes lp-shot-draw {
-  0%     { opacity: 0; stroke-dashoffset: 520; }
-  11.8%  { opacity: 1; stroke-dashoffset: 520; animation-timing-function: cubic-bezier(.32, 0, .15, 1); }
-  41.2%  { opacity: 1; stroke-dashoffset: 0; }
-  70.6%  { opacity: 1; stroke-dashoffset: 0; }
-  85%    { opacity: 0; stroke-dashoffset: 0; }
-  100%   { opacity: 0; stroke-dashoffset: 520; }
+@keyframes lp-logo-comet {
+  0%   { opacity: 0; transform: translate(-34%, 21.5%); }
+  22%  { opacity: 1; }
+  100% { opacity: 1; transform: translate(0, 0); }
 }
-
-.ppgk-landing .anim .ball,
-.ppgk-landing .anim .ball-seam {
-  opacity: 0;
-  offset-distance: 0%;
-  animation: lp-ball-travel 3.4s linear infinite;
+@keyframes lp-logo-ball-spin {
+  0%   { transform: rotate(-360deg); }
+  100% { transform: rotate(0deg); }
 }
-/* the seam rides the same path/opacity timeline as the ball, plus its own
-   independent rotation so the spin reads without needing a wrapping <g> */
-.ppgk-landing .anim .ball-seam {
-  animation: lp-ball-travel 3.4s linear infinite, lp-ball-spin 3.4s linear infinite;
+@keyframes lp-logo-impact {
+  0%, 100% { transform: scale(1); }
+  35%      { transform: scale(1.025) rotate(-0.4deg); }
 }
-@keyframes lp-ball-travel {
-  0%     { opacity: 0; offset-distance: 0%; }
-  11.8%  { opacity: 1; offset-distance: 0%; animation-timing-function: cubic-bezier(.32, 0, .15, 1); }
-  41.2%  { opacity: 1; offset-distance: 100%; }
-  70.6%  { opacity: 1; offset-distance: 100%; }
-  85%    { opacity: 0; offset-distance: 100%; }
-  100%   { opacity: 0; offset-distance: 0%; }
-}
-@keyframes lp-ball-spin {
-  0%, 11.8% { transform: rotate(0deg); }
-  41.2%     { transform: rotate(150deg); }
-  100%      { transform: rotate(150deg); }
-}
-
-.ppgk-landing .anim .ball-trail-1 { animation: lp-ball-trail-1 3.4s linear infinite 0.05s; }
-.ppgk-landing .anim .ball-trail-2 { animation: lp-ball-trail-2 3.4s linear infinite 0.09s; }
-@keyframes lp-ball-trail-1 {
-  0%     { opacity: 0; offset-distance: 0%; }
-  11.8%  { opacity: 0.35; offset-distance: 0%; }
-  41.2%  { opacity: 0.35; offset-distance: 100%; }
-  70.6%  { opacity: 0.35; offset-distance: 100%; }
-  85%    { opacity: 0; offset-distance: 100%; }
-  100%   { opacity: 0; offset-distance: 0%; }
-}
-@keyframes lp-ball-trail-2 {
-  0%     { opacity: 0; offset-distance: 0%; }
-  11.8%  { opacity: 0.18; offset-distance: 0%; }
-  41.2%  { opacity: 0.18; offset-distance: 100%; }
-  70.6%  { opacity: 0.18; offset-distance: 100%; }
-  85%    { opacity: 0; offset-distance: 100%; }
-  100%   { opacity: 0; offset-distance: 0%; }
-}
-
-.ppgk-landing .anim .ball-glow { animation: lp-ball-glow 3.4s linear infinite; }
-@keyframes lp-ball-glow {
-  0%     { opacity: 0; offset-distance: 0%; }
-  11.8%  { opacity: 0.15; offset-distance: 0%; }
-  38%    { opacity: 0.55; }
-  41.2%  { opacity: 0.75; offset-distance: 100%; }
-  52.9%  { opacity: 0.35; offset-distance: 100%; }
-  70.6%  { opacity: 0.12; offset-distance: 100%; }
-  85%    { opacity: 0; offset-distance: 100%; }
-  100%   { opacity: 0; offset-distance: 0%; }
-}
-
-/* save impact: flash + expanding ring, both anchored at the contact point */
-.ppgk-landing .anim .impact-flash { animation: lp-impact-flash 3.4s linear infinite; }
-@keyframes lp-impact-flash {
-  0%, 41.2% { opacity: 0; transform: scale(0.5); }
-  42.5%     { opacity: 0.9; transform: scale(1.3); }
-  47%       { opacity: 0; transform: scale(1.6); }
-  100%      { opacity: 0; transform: scale(1.6); }
-}
-.ppgk-landing .anim .impact-ring { animation: lp-impact-ring 3.4s linear infinite; }
-@keyframes lp-impact-ring {
-  0%, 41.2% { opacity: 0; transform: scale(0.3); }
-  43%       { opacity: 0.8; transform: scale(0.6); animation-timing-function: cubic-bezier(0, 0, .2, 1); }
-  58%       { opacity: 0; transform: scale(2.4); }
-  100%      { opacity: 0; transform: scale(2.4); }
-}
-
-/* save arc: draws in and glows briefly on impact */
-.ppgk-landing .anim .glove-mark {
-  stroke-dasharray: 60;
-  stroke-dashoffset: 60;
-  animation: lp-arc-draw 3.4s linear infinite;
-}
-@keyframes lp-arc-draw {
-  0%, 41.2% { stroke-dashoffset: 60; filter: drop-shadow(0 0 0 transparent); }
-  48%       { stroke-dashoffset: 0; filter: drop-shadow(0 0 5px hsl(var(--primary) / 0.6)); }
-  60%       { filter: drop-shadow(0 0 0 transparent); }
-  85%       { stroke-dashoffset: 0; }
-  100%      { stroke-dashoffset: 60; }
-}
-
-/* particle burst: each dot travels to its own --dx/--dy offset (set inline in JSX) */
-.ppgk-landing .anim .particle { animation: lp-particle 3.4s linear infinite; }
-@keyframes lp-particle {
-  0%, 41.2% { opacity: 0; transform: translate(0, 0) scale(1); }
-  43%       { opacity: 1; transform: translate(calc(var(--dx) * 0.3), calc(var(--dy) * 0.3)) scale(0.9); }
-  56%       { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3); }
-  100%      { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.3); }
-}
-
-/* net ripple: localised shake near the save corner (skew pivots from the
-   group's bottom edge, so displacement is largest at the top, near impact) */
-.ppgk-landing .anim .net-ripple { animation: lp-net-ripple 3.4s linear infinite; }
-@keyframes lp-net-ripple {
-  0%, 41.2%, 60%, 100% { transform: skewX(0deg) translateX(0); }
-  43%   { transform: skewX(-1.6deg) translateX(-3px); }
-  46.5% { transform: skewX(1.1deg) translateX(2px); }
-  50%   { transform: skewX(-0.5deg) translateX(-1px); }
-  54%   { transform: skewX(0.2deg) translateX(0.4px); }
-}
-
-/* goal frame: a fraction-of-a-second vibration, transform only */
-.ppgk-landing .anim .frame-line { animation: lp-frame-hit 3.4s linear infinite; }
-@keyframes lp-frame-hit {
-  0%, 41.2%, 44%, 100% { transform: translate(0, 0); }
-  42.2% { transform: translate(1px, -0.6px); }
-  43.1% { transform: translate(-0.8px, 0.4px); }
-}
-
-/* net: a very faint opacity "breath" for depth — stays secondary to the ball */
-.ppgk-landing .anim .net-line { animation: lp-net-breathe 3.4s linear infinite; }
-@keyframes lp-net-breathe {
-  0%, 11.8%   { opacity: 0.7; }
-  41.2%       { opacity: 0.55; }
-  70.6%, 100% { opacity: 0.7; }
-}
-
-/* text reaction: brief glow + letter-spacing + opacity pulse, settling before the pause */
-.ppgk-landing .anim .save-label {
-  opacity: 0.85;
-  animation: lp-label-pulse 3.4s linear infinite;
-}
-@keyframes lp-label-pulse {
-  0%, 52.9%   { opacity: 0.85; letter-spacing: 0.2em; filter: drop-shadow(0 0 0 transparent); }
-  58%         { opacity: 1; letter-spacing: 0.26em; filter: drop-shadow(0 0 6px hsl(var(--primary) / 0.55)); }
-  70.6%, 100% { opacity: 0.85; letter-spacing: 0.2em; filter: drop-shadow(0 0 0 transparent); }
+@keyframes lp-logo-flash {
+  0%   { opacity: 0; transform: scale(0.4); }
+  30%  { opacity: 0.9; transform: scale(1); }
+  100% { opacity: 0; transform: scale(1.6); }
 }
 
 /* ── scroll reveals ─────────────────────────────────────────────────────── */
@@ -1031,41 +914,18 @@
 @media (prefers-reduced-motion: reduce) {
   .ppgk-landing .reveal                  { transition: none; opacity: 1; transform: none; }
   .ppgk-landing .scroll-cue              { animation: none; }
-  .ppgk-landing .hero-art svg            { transform: none; transition: none; }
 
-  /* Goal graphic: polished static state — ball held at the save point,
-     trajectory fully drawn, arc complete, label readable. All decorative
-     motion (trail, glow, particles, net/frame reaction, text pulse,
-     parallax) is disabled rather than shown mid-cycle. */
-  .ppgk-landing .anim .shot-path,
-  .ppgk-landing .anim .ball,
-  .ppgk-landing .anim .ball-seam,
-  .ppgk-landing .anim .ball-trail-1,
-  .ppgk-landing .anim .ball-trail-2,
-  .ppgk-landing .anim .ball-glow,
-  .ppgk-landing .anim .impact-flash,
-  .ppgk-landing .anim .impact-ring,
-  .ppgk-landing .anim .particle,
-  .ppgk-landing .anim .net-ripple,
-  .ppgk-landing .anim .frame-line,
-  .ppgk-landing .anim .net-line,
-  .ppgk-landing .anim .glove-mark,
-  .ppgk-landing .anim .save-label        { animation: none; }
-  .ppgk-landing .anim .shot-path         { opacity: 1; stroke-dashoffset: 0; }
-  .ppgk-landing .anim .ball,
-  .ppgk-landing .anim .ball-seam         { opacity: 1; offset-distance: 100%; }
-  .ppgk-landing .anim .ball-seam         { transform: none; }
-  .ppgk-landing .anim .ball-trail-1,
-  .ppgk-landing .anim .ball-trail-2,
-  .ppgk-landing .anim .ball-glow,
-  .ppgk-landing .anim .impact-flash,
-  .ppgk-landing .anim .impact-ring,
-  .ppgk-landing .anim .particle          { opacity: 0; }
-  .ppgk-landing .anim .net-ripple,
-  .ppgk-landing .anim .frame-line        { transform: none; }
-  .ppgk-landing .anim .net-line          { opacity: 0.7; }
-  .ppgk-landing .anim .glove-mark        { stroke-dashoffset: 0; filter: none; }
-  .ppgk-landing .anim .save-label        { opacity: 0.85; letter-spacing: 0.2em; filter: none; }
+  /* Hero crest: polished static end state — badge fully assembled, ball in
+     its landed position, no flash or impact bump. */
+  .ppgk-landing .hero-logo,
+  .ppgk-landing .hero-logo-comet,
+  .ppgk-landing .hero-logo-ball,
+  .ppgk-landing .hero-logo-badge-bottom,
+  .ppgk-landing .hero-logo-flash         { animation: none; }
+  .ppgk-landing .hero-logo-comet         { opacity: 1; transform: none; }
+  .ppgk-landing .hero-logo-ball          { transform: none; }
+  .ppgk-landing .hero-logo-badge-bottom  { opacity: 1; transform: none; }
+  .ppgk-landing .hero-logo-flash         { opacity: 0; }
   .ppgk-landing .bar i                   { transition: none; }
   .ppgk-landing .in .bar i               { width: var(--w); }
   .ppgk-landing .btn,

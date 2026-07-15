@@ -55,7 +55,15 @@
       "Read(//c/Users/marls001/.claude/**)",
       "Read(//c//**)",
       "Bash(node -e \"console.log\\(require.resolve\\('playwright'\\)\\)\")",
-      "Bash(curl -s http://localhost:5177/)"
+      "Bash(curl -s http://localhost:5177/)",
+      "Bash(python3 -c ' *)",
+      "Bash(npx --version)",
+      "Bash(timeout 20 npx --yes sharp-cli --version)",
+      "Bash(timeout 25 npx --yes sharp-cli --version)",
+      "Bash(git -C \"/c/Test/Projects/ppgk/ppgk\" mv \"design-reference/ppgk-hero/assets/badge.png\" \"src/assets/hero-logo/badge.png\")",
+      "Bash(git -C \"/c/Test/Projects/ppgk/ppgk\" mv \"design-reference/ppgk-hero/assets/ball.png\" \"src/assets/hero-logo/ball.png\")",
+      "Bash(git -C \"/c/Test/Projects/ppgk/ppgk\" mv \"design-reference/ppgk-hero/assets/glow.png\" \"src/assets/hero-logo/glow.png\")",
+      "Bash(git -C \"/c/Test/Projects/ppgk/ppgk\" status --short)"
     ]
   }
 }

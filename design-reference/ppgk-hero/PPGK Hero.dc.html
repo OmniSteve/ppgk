@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  body { margin: 0; background: #0b0b0d; }
+  a { color: #f5a300; } a:hover { color: #ffc84d; }
+  @keyframes ppgk-badge-in {
+    0% { opacity: 0; transform: translateY(14px) scale(0.97); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes ppgk-comet {
+    0% { transform: translate(-34%, 21.5%); opacity: 0; }
+    22% { opacity: 1; }
+    100% { transform: translate(0, 0); opacity: 1; }
+  }
+  @keyframes ppgk-spin {
+    0% { transform: rotate(-360deg); }
+    100% { transform: rotate(0deg); }
+  }
+  @keyframes ppgk-impact {
+    0%, 100% { transform: scale(1); }
+    35% { transform: scale(1.025) rotate(-0.4deg); }
+  }
+  @keyframes ppgk-flash {
+    0% { opacity: 0; transform: scale(0.4); }
+    30% { opacity: 0.9; }
+    100% { opacity: 0; transform: scale(1.6); }
+  }
+</style>
+</helmet>
+<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: {{ bg }}; cursor: pointer; overflow: hidden;" onClick="{{ replay }}" title="Click to replay">
+  {{ hero }}
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 1200, &quot;height&quot;: 640},
+ &quot;bg&quot;: {&quot;editor&quot;: &quot;color&quot;, &quot;default&quot;: &quot;#0b0b0d&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;#0b0b0d&quot;, &quot;#111827&quot;, &quot;#ffffff&quot;, &quot;#f5f2ec&quot;], &quot;section&quot;: &quot;Hero&quot;},
+ &quot;duration&quot;: {&quot;editor&quot;: &quot;range&quot;, &quot;default&quot;: 0.6, &quot;min&quot;: 0.3, &quot;max&quot;: 2, &quot;step&quot;: 0.1, &quot;unit&quot;: &quot;s&quot;, &quot;tsType&quot;: &quot;number&quot;, &quot;section&quot;: &quot;Animation&quot;},
+ &quot;loop&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: false, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Animation&quot;}}">
+class Component extends DCLogic {
+  state = { run: 0 };
+  componentDidMount() { this.setupLoop(); }
+  componentDidUpdate() { this.setupLoop(); }
+  setupLoop() {
+    clearInterval(this._t);
+    if (this.props.loop ?? false) {
+      const dur = this.props.duration ?? 1.1;
+      this._t = setInterval(() => this.setState(s => ({ run: s.run + 1 })), (dur + 2.6) * 1000);
+    }
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const e = React.createElement;
+    const dur = this.props.duration ?? 0.6;   // ball flight seconds
+    const delay = 0.35;                        // after badge appears
+    const land = delay + dur;
+    // logo image is 1408x590; ball crop is 264px, final at (1053,36)
+    const hero = e('div', {
+      key: this.state.run,
+      style: { position: 'relative', width: 'min(92vw, 980px)', aspectRatio: '1408 / 590',
+               animation: `ppgk-impact 0.28s ease-out ${land}s 1 both` }
+    },
+      e('div', { style: { position: 'absolute', inset: 0, zIndex: 0,
+                 animation: `ppgk-comet ${dur}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s 1 both` } },
+        e('img', { src: 'assets/glow.png', alt: '',
+          style: { position: 'absolute', inset: 0, width: '100%' } }),
+        e('div', { style: { position: 'absolute', left: '74.79%', top: '6.1%', width: '18.75%',
+                   animation: `ppgk-spin ${dur}s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s 1 both` } },
+          e('img', { src: 'assets/ball.png', alt: '', style: { width: '100%', display: 'block' } })),
+        e('img', { src: 'assets/badge.png', alt: '',
+          style: { position: 'absolute', inset: 0, width: '100%',
+                   clipPath: 'polygon(0 0, 100% 0, 100% 38%, 28% 42%, 8.5% 44.9%, 0 49.2%)' } })),
+      e('img', { src: 'assets/badge.png', alt: 'PPGK — Premier Performance Goalkeeping',
+        style: { position: 'absolute', inset: 0, width: '100%', zIndex: 1,
+                 clipPath: 'polygon(0 100%, 0 49.2%, 8.5% 44.9%, 28% 42%, 100% 38%, 100% 100%)',
+                 animation: 'ppgk-badge-in 0.5s ease-out both' } }),
+      e('div', { style: { position: 'absolute', left: '74.79%', top: '6.1%', width: '18.75%', aspectRatio: '1',
+                 borderRadius: '50%', zIndex: 2, pointerEvents: 'none',
+                 background: 'radial-gradient(circle, rgba(255,190,40,0.55) 0%, rgba(255,190,40,0) 70%)',
+                 animation: `ppgk-flash 0.5s ease-out ${land}s 1 both` } })
+    );
+    return { hero, bg: this.props.bg ?? '#0b0b0d',
+      replay: () => this.setState(s => ({ run: s.run + 1 })) };
+  }
+}
+</script>
+</body>
+</html>
