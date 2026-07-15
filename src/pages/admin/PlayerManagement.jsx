@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { Search, User, AlertTriangle, RefreshCw, X, Save, TrendingUp, CheckCircle, ShieldOff, ShieldCheck, Trash2, ChevronDown } from 'lucide-react';
+import { Search, User, AlertTriangle, RefreshCw, X, Save, TrendingUp, CheckCircle, ShieldOff, ShieldCheck, Trash2, ChevronDown, Edit2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 import { DeactivateModal, ReactivateModal, PermanentDeleteModal } from '@/components/admin/LifecycleModals';
+import { AdminActionButton } from '@/components/admin/AdminActionButton';
 
 const EXPERIENCE_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Elite'];
 const AGE_GROUPS = ['U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14', 'U15', 'U16', 'U17', 'U18', 'Senior'];
@@ -205,55 +205,74 @@ export default function PlayerManagement() {
               <User size={36} className="text-muted-foreground mx-auto mb-2" />
               <p className="text-muted-foreground">No players found</p>
             </div>
-          ) : players.map((p) => (
-            <div key={p.id} className="w-full flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
-              <button
-                onClick={() => setEditing(p)}
-                className="flex items-center gap-4 flex-1 min-w-0 text-left"
-              >
-                <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                  <span className="text-primary font-bold text-sm">{p.firstName?.[0]}{p.lastName?.[0]}</span>
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-bold text-foreground text-sm">{p.firstName} {p.lastName}</p>
-                    {(p.medicalInfo || p.allergies) && (
-                      <AlertTriangle size={13} className="text-warning flex-shrink-0" title="Medical info / allergies on file" />
-                    )}
+          ) : players.map((p) => {
+            const statusBadge = (
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${p.status === 'active' ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
+                {p.status || 'unknown'}
+              </span>
+            );
+            const hasWarning = p.medicalInfo || p.allergies;
+            return (
+            <div key={p.id} className="px-5 py-4 hover:bg-accent transition-colors">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                {/* Header: avatar + name (badges inline on mobile only) */}
+                <div className="flex items-center gap-3 sm:flex-1 sm:min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary font-bold text-sm">{p.firstName?.[0]}{p.lastName?.[0]}</span>
                   </div>
-                  <p className="text-muted-foreground text-xs mt-0.5">
-                    {p.dateOfBirth ? `DOB: ${p.dateOfBirth}` : 'No DOB'} · {p.currentClub || 'No club'} · Parent: {p.parentName || '—'}
-                  </p>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="font-bold text-foreground text-sm break-words">{p.firstName} {p.lastName}</p>
+                      {hasWarning && <AlertTriangle size={13} className="text-warning flex-shrink-0" title="Medical info / allergies on file" />}
+                      <span className="sm:hidden">{statusBadge}</span>
+                      {p.experienceLevel && (
+                        <span className="sm:hidden text-xs font-semibold px-2 py-0.5 rounded-full bg-accent text-muted-foreground flex-shrink-0">{p.experienceLevel}</span>
+                      )}
+                    </div>
+                    {/* Desktop-only compact detail line */}
+                    <p className="hidden sm:block text-muted-foreground text-xs mt-0.5 truncate">
+                      {p.dateOfBirth ? `DOB: ${p.dateOfBirth}` : 'No DOB'} · {p.currentClub || 'No club'} · Parent: {p.parentName || '—'}
+                    </p>
+                  </div>
                 </div>
-              </button>
-              <div className="text-right flex-shrink-0">
-                <p className="text-foreground text-xs font-medium">{p.experienceLevel || '—'}</p>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${p.status === 'active' ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
-                  {p.status || 'unknown'}
-                </span>
+
+                {/* Desktop-only status/level column (original position) */}
+                <div className="hidden sm:flex sm:flex-col sm:items-end text-right flex-shrink-0">
+                  <p className="text-foreground text-xs font-medium">{p.experienceLevel || '—'}</p>
+                  {statusBadge}
+                </div>
+
+                {/* Mobile-only details */}
+                <div className="sm:hidden grid grid-cols-[auto,1fr] gap-x-3 gap-y-1.5 text-xs">
+                  <span className="text-muted-foreground">Date of birth</span>
+                  <span className="text-foreground">{p.dateOfBirth || '—'}</span>
+                  <span className="text-muted-foreground">Club</span>
+                  <span className="text-foreground break-words">{p.currentClub || '—'}</span>
+                  <span className="text-muted-foreground">Parent</span>
+                  <span className="text-foreground break-words">{p.parentName || '—'}</span>
+                  {hasWarning && (
+                    <>
+                      <span className="text-warning flex items-center gap-1"><AlertTriangle size={12} />Alert</span>
+                      <span className="text-warning">Medical info / allergies on file</span>
+                    </>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="grid grid-cols-4 gap-2 pt-3 border-t border-border/60 sm:flex sm:items-center sm:gap-2 sm:pt-0 sm:border-t-0 sm:flex-shrink-0">
+                  <AdminActionButton icon={Edit2} label="Edit player" onClick={() => setEditing(p)} className="w-full h-11 sm:w-9 sm:h-9" />
+                  <AdminActionButton icon={TrendingUp} label="Performance evaluations" to={{ pathname: `/admin/players/${p.id}/performance`, state: { player: p } }} className="w-full h-11 sm:w-9 sm:h-9" />
+                  {p.status === 'active' ? (
+                    <AdminActionButton icon={ShieldOff} label="Deactivate player" variant="warning" onClick={() => openLifecycle('deactivate', p)} className="w-full h-11 sm:w-9 sm:h-9" />
+                  ) : (
+                    <AdminActionButton icon={ShieldCheck} label="Reactivate player" variant="success" onClick={() => openLifecycle('reactivate', p)} className="w-full h-11 sm:w-9 sm:h-9" />
+                  )}
+                  <AdminActionButton icon={Trash2} label="Permanently delete player" variant="destructive" onClick={() => openLifecycle('delete', p)} className="w-full h-11 sm:w-9 sm:h-9" />
+                </div>
               </div>
-              <Link
-                to={`/admin/players/${p.id}/performance`}
-                state={{ player: p }}
-                title="Performance evaluations"
-                className="w-9 h-9 rounded-lg bg-card border border-border flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-muted-foreground/40 transition-all flex-shrink-0"
-              >
-                <TrendingUp size={15} />
-              </Link>
-              {p.status === 'active' ? (
-                <button onClick={() => openLifecycle('deactivate', p)} title="Deactivate" className="w-9 h-9 rounded-lg bg-card border border-border hover:bg-warning flex items-center justify-center text-muted-foreground hover:text-warning-foreground hover:border-warning transition-all flex-shrink-0">
-                  <ShieldOff size={14} />
-                </button>
-              ) : (
-                <button onClick={() => openLifecycle('reactivate', p)} title="Reactivate" className="w-9 h-9 rounded-lg bg-card border border-border hover:bg-success flex items-center justify-center text-muted-foreground hover:text-success-foreground hover:border-success transition-all flex-shrink-0">
-                  <ShieldCheck size={14} />
-                </button>
-              )}
-              <button onClick={() => openLifecycle('delete', p)} title="Permanently delete" className="w-9 h-9 rounded-lg bg-card border border-border hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-destructive-foreground hover:border-destructive transition-all flex-shrink-0">
-                <Trash2 size={14} />
-              </button>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

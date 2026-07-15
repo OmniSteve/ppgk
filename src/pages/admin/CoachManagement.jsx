@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Loader2, X, CheckCircle, RefreshCw, ShieldOff, ShieldCheck, Trash2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 import { DeactivateModal, ReactivateModal, PermanentDeleteModal } from '@/components/admin/LifecycleModals';
+import { AdminActionButton } from '@/components/admin/AdminActionButton';
 
 const defaultForm = { firstName: '', lastName: '', email: '', phone: '', bio: '', specialisations: '', active: true };
 
@@ -140,37 +141,59 @@ export default function CoachManagement() {
         <div className="bg-card rounded-2xl border border-border divide-y divide-border">
           {coaches.length === 0 ? (
             <div className="p-16 text-center"><p className="text-muted-foreground">No coaches found</p></div>
-          ) : coaches.map((c) => (
-            <div key={c.id} className="flex items-center gap-4 px-5 py-4 hover:bg-accent transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-primary font-bold text-sm">{c.firstName?.[0]}{c.lastName?.[0]}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-bold text-foreground text-sm">{c.firstName} {c.lastName}</p>
-                <p className="text-muted-foreground text-xs">{c.email} · {c.specialisations || 'No specialisations listed'}</p>
-              </div>
+          ) : coaches.map((c) => {
+            const statusBadge = (
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${c.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {c.active ? 'Active' : 'Inactive'}
               </span>
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button onClick={() => openEdit(c)} title="Edit" className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
-                  <Edit2 size={14} />
-                </button>
-                {c.active ? (
-                  <button onClick={() => openLifecycle('deactivate', c)} title="Deactivate" className="w-8 h-8 rounded-lg bg-accent hover:bg-warning flex items-center justify-center text-muted-foreground hover:text-warning-foreground transition-all">
-                    <ShieldOff size={14} />
-                  </button>
-                ) : (
-                  <button onClick={() => openLifecycle('reactivate', c)} title="Reactivate" className="w-8 h-8 rounded-lg bg-accent hover:bg-success flex items-center justify-center text-muted-foreground hover:text-success-foreground transition-all">
-                    <ShieldCheck size={14} />
-                  </button>
-                )}
-                <button onClick={() => openLifecycle('delete', c)} title="Permanently delete" className="w-8 h-8 rounded-lg bg-accent hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-destructive-foreground transition-all">
-                  <Trash2 size={14} />
-                </button>
+            );
+            return (
+            <div key={c.id} className="px-5 py-4 hover:bg-accent transition-colors">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
+                {/* Header: avatar + name (status badge inline on mobile only) */}
+                <div className="flex items-center gap-3 sm:flex-1 sm:min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-primary font-bold text-sm">{c.firstName?.[0]}{c.lastName?.[0]}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                      <p className="font-bold text-foreground text-sm break-words">{c.firstName} {c.lastName}</p>
+                      <span className="sm:hidden">{statusBadge}</span>
+                    </div>
+                    {/* Desktop-only compact detail line */}
+                    <p className="hidden sm:block text-muted-foreground text-xs truncate" title={`${c.email || ''} · ${c.specialisations || 'No specialisations listed'}`}>
+                      {c.email} · {c.specialisations || 'No specialisations listed'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Desktop-only status badge (original position) */}
+                <span className="hidden sm:inline-flex">{statusBadge}</span>
+
+                {/* Mobile-only details */}
+                <div className="sm:hidden grid grid-cols-[auto,1fr] gap-x-3 gap-y-1.5 text-xs">
+                  <span className="text-muted-foreground">Email</span>
+                  <span className="text-foreground break-words">{c.email || '—'}</span>
+                  <span className="text-muted-foreground">Specialisations</span>
+                  <span className="text-foreground break-words">{c.specialisations || '—'}</span>
+                  <span className="text-muted-foreground">Linked user</span>
+                  <span className="text-foreground">{c.userId ? 'Yes' : 'No — standalone profile'}</span>
+                </div>
+
+                {/* Actions */}
+                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/60 sm:flex sm:items-center sm:gap-2 sm:pt-0 sm:border-t-0 sm:flex-shrink-0">
+                  <AdminActionButton icon={Edit2} label="Edit coach" onClick={() => openEdit(c)} className="w-full h-11 sm:w-8 sm:h-8" />
+                  {c.active ? (
+                    <AdminActionButton icon={ShieldOff} label="Deactivate coach" variant="warning" onClick={() => openLifecycle('deactivate', c)} className="w-full h-11 sm:w-8 sm:h-8" />
+                  ) : (
+                    <AdminActionButton icon={ShieldCheck} label="Reactivate coach" variant="success" onClick={() => openLifecycle('reactivate', c)} className="w-full h-11 sm:w-8 sm:h-8" />
+                  )}
+                  <AdminActionButton icon={Trash2} label="Permanently delete coach" variant="destructive" onClick={() => openLifecycle('delete', c)} className="w-full h-11 sm:w-8 sm:h-8" />
+                </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 

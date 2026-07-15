@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Users, Edit2, X, Loader2, CheckCircle, Shield, ChevronDown, ShieldOff, ShieldCheck, Trash2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 import { DeactivateModal, ReactivateModal, PermanentDeleteModal } from '@/components/admin/LifecycleModals';
+import { AdminActionButton } from '@/components/admin/AdminActionButton';
 
 const ROLES = ['client', 'coach', 'head_coach', 'admin'];
 // Role-identity badge colours — intentionally preserved, not mapped to semantic tokens
@@ -164,21 +165,13 @@ export default function ClientManagement() {
                 {u.active !== false ? 'Active' : 'Inactive'}
               </span>
               <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
-                <button onClick={() => openEdit(u)} title="Edit" className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
-                  <Edit2 size={14} />
-                </button>
+                <AdminActionButton icon={Edit2} label="Edit user" onClick={() => openEdit(u)} className="w-9 h-9" />
                 {u.active !== false ? (
-                  <button onClick={() => openLifecycle('deactivate', u)} title="Deactivate" className="w-9 h-9 rounded-lg bg-accent hover:bg-warning flex items-center justify-center text-muted-foreground hover:text-warning-foreground transition-all">
-                    <ShieldOff size={14} />
-                  </button>
+                  <AdminActionButton icon={ShieldOff} label="Deactivate user" variant="warning" onClick={() => openLifecycle('deactivate', u)} className="w-9 h-9" />
                 ) : (
-                  <button onClick={() => openLifecycle('reactivate', u)} title="Reactivate" className="w-9 h-9 rounded-lg bg-accent hover:bg-success flex items-center justify-center text-muted-foreground hover:text-success-foreground transition-all">
-                    <ShieldCheck size={14} />
-                  </button>
+                  <AdminActionButton icon={ShieldCheck} label="Reactivate user" variant="success" onClick={() => openLifecycle('reactivate', u)} className="w-9 h-9" />
                 )}
-                <button onClick={() => openLifecycle('delete', u)} title="Permanently delete" className="w-9 h-9 rounded-lg bg-accent hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-destructive-foreground transition-all">
-                  <Trash2 size={14} />
-                </button>
+                <AdminActionButton icon={Trash2} label="Permanently delete user" variant="destructive" onClick={() => openLifecycle('delete', u)} className="w-9 h-9" />
               </div>
             </div>
           ))}
