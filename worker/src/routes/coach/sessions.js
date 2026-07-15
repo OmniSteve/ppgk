@@ -8,7 +8,7 @@ export async function handleCoachSessions(request, env, ctx, params) {
   const url     = new URL(request.url);
   const today   = new Date().toISOString().slice(0, 10);
 
-  const coach = await queryOne(env, 'SELECT id FROM coach_profiles WHERE user_id = ?', [payload.sub]);
+  const coach = await queryOne(env, 'SELECT id FROM coach_profiles WHERE user_id = ? AND active = 1', [payload.sub]);
   const coachId = coach?.id;
   const isAdmin = payload.role === 'admin';
 

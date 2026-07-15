@@ -65,6 +65,7 @@ import { handleCheckout }            from './routes/client/checkout.js';
 import { handleCoachDashboard }  from './routes/coach/dashboard.js';
 import { handleCoachSessions }   from './routes/coach/sessions.js';
 import { handleCoachAttendance } from './routes/coach/attendance.js';
+import { handleCoachRoster }     from './routes/coach/roster.js';
 
 // Player performance routes
 import { handlePlayerPerformance }       from './routes/player-performance.js';
@@ -110,12 +111,28 @@ export default {
       router.get  ('/api/admin/clients/:id',                          handleAdminClients);
       router.put  ('/api/admin/clients/:id',                          handleAdminClients);
       router.patch('/api/admin/clients/:id',                          handleAdminClients);
+      router.delete('/api/admin/clients/:id',                         handleAdminClients);
+      router.get  ('/api/admin/clients/:id/deactivation-impact',      handleAdminClients);
+      router.get  ('/api/admin/clients/:id/deletion-eligibility',     handleAdminClients);
+      router.post ('/api/admin/clients/:id/deactivate',               handleAdminClients);
+      router.post ('/api/admin/clients/:id/reactivate',               handleAdminClients);
       router.get  ('/api/admin/players',                              handleAdminPlayers);
+      router.get  ('/api/admin/players/:id',                          handleAdminPlayers);
       router.patch('/api/admin/players/:id',                          handleAdminPlayers);
+      router.delete('/api/admin/players/:id',                         handleAdminPlayers);
+      router.get  ('/api/admin/players/:id/deactivation-impact',      handleAdminPlayers);
+      router.get  ('/api/admin/players/:id/deletion-eligibility',     handleAdminPlayers);
+      router.post ('/api/admin/players/:id/deactivate',               handleAdminPlayers);
+      router.post ('/api/admin/players/:id/reactivate',               handleAdminPlayers);
       router.get  ('/api/admin/coaches',                              handleAdminCoaches);
       router.post ('/api/admin/coaches/sync',                         handleAdminCoaches);
       router.post ('/api/admin/coaches',                              handleAdminCoaches);
       router.put  ('/api/admin/coaches/:id',                          handleAdminCoaches);
+      router.delete('/api/admin/coaches/:id',                         handleAdminCoaches);
+      router.get  ('/api/admin/coaches/:id/deactivation-impact',      handleAdminCoaches);
+      router.get  ('/api/admin/coaches/:id/deletion-eligibility',     handleAdminCoaches);
+      router.post ('/api/admin/coaches/:id/deactivate',               handleAdminCoaches);
+      router.post ('/api/admin/coaches/:id/reactivate',               handleAdminCoaches);
       router.get  ('/api/admin/locations',                            handleAdminLocations);
       router.post ('/api/admin/locations',                            handleAdminLocations);
       router.put  ('/api/admin/locations/:id',                        handleAdminLocations);
@@ -186,6 +203,8 @@ export default {
       router.get ('/api/coach/sessions/:id/attendees',  handleCoachSessions);
       router.post('/api/coach/attendance',              handleCoachAttendance);
       router.patch('/api/coach/attendance/:id',         handleCoachAttendance);
+      router.get  ('/api/coach/sessions/:id/roster',              handleCoachRoster);
+      router.patch('/api/coach/sessions/:id/roster/:bookingId',   handleCoachRoster);
 
       // ── Player Performance (admin/head_coach/coach) ─────────────────────────
       router.get   ('/api/player-performance/player/:playerId', handlePlayerPerformance);
@@ -203,6 +222,9 @@ export default {
         ? err.status
         : 500;
       if (status === 500) console.error('Unhandled worker error:', err);
+      if (err && err.code === 'ACCOUNT_INACTIVE') {
+        return Response.json({ error: 'ACCOUNT_INACTIVE', message: err.message }, { status });
+      }
       return Response.json(
         { error: status === 500 ? 'Internal server error' : (err.message || 'Error') },
         { status }

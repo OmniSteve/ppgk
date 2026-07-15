@@ -19,12 +19,12 @@ export async function handleResetPassword(request, env) {
   }
 
   const user = await queryOne(env,
-    `SELECT id, first_name, last_name, email, reset_token_expires
+    `SELECT id, first_name, last_name, email, reset_token_expires, active
      FROM users WHERE reset_token = ?`,
     [token]
   );
 
-  if (!user) {
+  if (!user || !user.active) {
     return Response.json({ message: 'Invalid or expired reset token' }, { status: 400 });
   }
 

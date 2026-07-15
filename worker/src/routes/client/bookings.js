@@ -14,6 +14,7 @@ import { err, ok }        from '../../lib/validate.js';
 import { deductCredits, refundCredits, getBalance } from '../../lib/credits.js';
 import { sendTemplatedEmail } from '../../lib/email.js';
 import { buildIcsEvent, icsResponse } from '../../lib/calendar.js';
+import { ACTIVE_BLOCKING_STATUSES, countByStatus, notifyBookingStatus } from '../../lib/roster.js';
 
 async function checkEligibility(env, { player, session, clientId }) {
   if (!player || player.client_id !== clientId) return 'Player not found or not owned by this account';
@@ -190,7 +191,7 @@ export async function handleClientBookings(request, env, ctx, params) {
       const errors   = [];
       for (const sessionId of sessionIds) {
         const session = await queryOne(env,
-          `SELECT id, title, session_date, start_time, end_time, capacity, credit_cost, price, status,
+          `SELECT id, title, session_date, start_time, end_time, capacity, credit_cost, price, status, booking_mode,
                   booking_open_at, booking_close_at, location_id, coach_id
            FROM sessions WHERE id = ?`,
           [sessionId]
@@ -199,17 +200,29 @@ export async function handleClientBookings(request, env, ctx, params) {
         const eligErr = await checkEligibility(env, { player, session, clientId: payload.sub });
         if (eligErr) { errors.push({ sessionId, reason: eligErr }); continue; }
 
-        step = 'check session capacity';
-        const confirmed = await liveConfirmedCount(env, sessionId);
-        if (confirmed >= session.capacity) { errors.push({ sessionId, reason: 'Session is full' }); continue; }
+        const isRequestMode = session.booking_mode === 'request';
+
+        if (isRequestMode && paymentMethod === 'card') {
+          errors.push({ sessionId, reason: 'This session requires coach approval and can only be booked with credits' });
+          continue;
+        }
+
+        // Request-mode sessions accept requests past capacity by design (they
+        // feed the backup pool) — capacity is only enforced when the coach
+        // confirms a player, not at request time.
+        if (!isRequestMode) {
+          step = 'check session capacity';
+          const confirmed = await liveConfirmedCount(env, sessionId);
+          if (confirmed >= session.capacity) { errors.push({ sessionId, reason: 'Session is full' }); continue; }
+        }
 
         step = 'check duplicate booking';
         const dup = await queryOne(env,
           `SELECT id FROM bookings WHERE player_id = ? AND session_id = ?
-           AND status NOT IN ('cancelled_by_client','cancelled_by_admin','payment_failed','pending_payment','rescheduled')`,
-          [playerId, sessionId]
+           AND status IN (${ACTIVE_BLOCKING_STATUSES.map(() => '?').join(',')})`,
+          [playerId, sessionId, ...ACTIVE_BLOCKING_STATUSES]
         );
-        if (dup) { errors.push({ sessionId, reason: 'Player already has an active booking for this session' }); continue; }
+        if (dup) { errors.push({ sessionId, reason: 'Player already has an active booking or request for this session' }); continue; }
         sessions.push(session);
       }
       if (errors.length > 0) return err('One or more sessions cannot be booked', 422, { errors });
@@ -243,15 +256,21 @@ export async function handleClientBookings(request, env, ctx, params) {
           [playerId, session.id]
         );
 
+        const isRequestMode = session.booking_mode === 'request';
+        const initialStatus = isRequestMode ? 'pending' : 'pending_payment';
+
         let bookingId;
         if (existingFailed) {
-          // Reuse the existing row — update it to a fresh pending_payment state
+          // Reuse the existing row — update it to a fresh pending_payment state.
+          // (existingFailed can only match payment_failed/pending_payment rows,
+          // which request-mode bookings never pass through, so this path is
+          // instant-mode only.)
           bookingId = existingFailed.id;
           await execute(env,
-            `UPDATE bookings SET order_id=?, status='pending_payment', payment_method=?,
+            `UPDATE bookings SET order_id=?, status=?, payment_method=?,
              credits_used=?, confirmed_at=NULL, updated_at=?
              WHERE id=?`,
-            [orderId, paymentMethod,
+            [orderId, initialStatus, paymentMethod,
              paymentMethod === 'credits' ? (session.credit_cost ?? 1) : 0,
              new Date().toISOString(), bookingId]
           );
@@ -260,17 +279,23 @@ export async function handleClientBookings(request, env, ctx, params) {
           bookingId = crypto.randomUUID();
           await execute(env,
             `INSERT INTO bookings (id, order_id, client_id, player_id, session_id, status, payment_method, credits_used)
-             VALUES (?, ?, ?, ?, ?, 'pending_payment', ?, ?)`,
-            [bookingId, orderId, payload.sub, playerId, session.id, paymentMethod,
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            [bookingId, orderId, payload.sub, playerId, session.id, initialStatus, paymentMethod,
              paymentMethod === 'credits' ? (session.credit_cost ?? 1) : 0]
           );
-          await execute(env, 'UPDATE sessions SET booked_count = booked_count + 1 WHERE id = ?', [session.id]);
+          // Pending requests don't count toward capacity yet — only bump the
+          // cached booked_count for instant-mode sessions (unchanged behaviour).
+          if (!isRequestMode) {
+            await execute(env, 'UPDATE sessions SET booked_count = booked_count + 1 WHERE id = ?', [session.id]);
+          }
         }
-        bookingIds.push({ bookingId, sessionId: session.id, isNew: !existingFailed });
+        bookingIds.push({ bookingId, sessionId: session.id, isNew: !existingFailed, isRequestMode });
       }
 
       if (paymentMethod === 'credits') {
-        for (const { bookingId, sessionId } of bookingIds) {
+        let anyPending = false;
+
+        for (const { bookingId, sessionId, isRequestMode } of bookingIds) {
           const session = sessions.find(s => s.id === sessionId);
 
           step = 'deduct credits';
@@ -278,19 +303,37 @@ export async function handleClientBookings(request, env, ctx, params) {
             clientId: payload.sub,
             bookingId,
             amount:   session.credit_cost ?? 1,
-            description: `Credit booking: ${session.title} on ${session.session_date}`,
+            description: isRequestMode
+              ? `Credit reserved for booking request: ${session.title} on ${session.session_date}`
+              : `Credit booking: ${session.title} on ${session.session_date}`,
           });
 
           if (!deduction.success) {
-            for (const { bookingId: bid, sessionId: sid, isNew } of bookingIds) {
+            for (const { bookingId: bid, sessionId: sid, isNew, isRequestMode: bidIsRequest } of bookingIds) {
               await execute(env, "UPDATE bookings SET status='payment_failed' WHERE id=?", [bid]);
-              // Only decrement booked_count for newly inserted bookings, not reused ones
-              if (isNew) {
+              // Only decrement booked_count for newly inserted, capacity-counted bookings
+              if (isNew && !bidIsRequest) {
                 await execute(env, 'UPDATE sessions SET booked_count = booked_count - 1 WHERE id = ? AND booked_count > 0', [sid]);
               }
             }
             await execute(env, "UPDATE orders SET status='failed' WHERE id=?", [orderId]);
             return err(deduction.error, 402);
+          }
+
+          if (isRequestMode) {
+            // Already inserted as 'pending' — the credit is reserved, and the
+            // booking now awaits the coach's roster decision.
+            anyPending = true;
+            step = 'send pending-request notification email';
+            await notifyBookingStatus(env, {
+              eventTrigger: 'booking_pending', bookingId, playerId, sessionId,
+              to: payload.email, firstName: payload.firstName,
+              variables: {
+                session_title: session.title ?? '', session_date: session.session_date ?? '',
+                session_time: session.start_time ?? '',
+              },
+            });
+            continue;
           }
 
           step = 'confirm booking';
@@ -324,7 +367,7 @@ export async function handleClientBookings(request, env, ctx, params) {
         await execute(env, "UPDATE orders SET status='paid' WHERE id=?", [orderId]);
 
         step = 'return success';
-        return ok({ orderId, bookingIds: bookingIds.map(b => b.bookingId), status: 'confirmed' }, 201);
+        return ok({ orderId, bookingIds: bookingIds.map(b => b.bookingId), status: anyPending ? 'pending' : 'confirmed' }, 201);
       }
 
       // Card payment
@@ -354,22 +397,32 @@ export async function handleClientBookings(request, env, ctx, params) {
       [params.id, payload.sub]
     );
     if (!booking) return err('Booking not found', 404);
-    if (!['confirmed', 'pending_payment'].includes(booking.status)) {
+    if (!['confirmed', 'pending_payment', 'pending', 'backup'].includes(booking.status)) {
       return err('Booking cannot be cancelled in its current status');
     }
+
+    // Pending/backup requests never held a confirmed slot, so the
+    // cancellation-deadline policy (which protects slot availability close
+    // to the session) doesn't apply — cancelling one always refunds in full.
+    const wasAwaitingDecision = ['pending', 'backup'].includes(booking.status);
 
     const deadlineHours = await queryOne(env, "SELECT value FROM app_settings WHERE key = 'cancellation_deadline_hours'");
     const hoursLimit = parseInt(deadlineHours?.value ?? '24');
     const sessionDt  = new Date(`${booking.session_date}T${booking.start_time}`);
     const hoursUntil = (sessionDt - new Date()) / 3600000;
-    const eligibleForRefund = hoursUntil >= hoursLimit;
+    const eligibleForRefund = wasAwaitingDecision || hoursUntil >= hoursLimit;
 
     const now = new Date().toISOString();
     await execute(env,
       `UPDATE bookings SET status='cancelled_by_client', cancelled_at=?, cancellation_reason=?, updated_at=? WHERE id=?`,
       [now, body.reason ?? null, now, params.id]
     );
-    await execute(env, 'UPDATE sessions SET booked_count = booked_count - 1 WHERE id = ? AND booked_count > 0', [booking.session_id]);
+    // Only bookings that were actually counted toward capacity
+    // (confirmed / pending_payment) need the cached counter decremented —
+    // pending/backup requests were never added to it.
+    if (!wasAwaitingDecision) {
+      await execute(env, 'UPDATE sessions SET booked_count = booked_count - 1 WHERE id = ? AND booked_count > 0', [booking.session_id]);
+    }
 
     let refundResult = { skipped: true };
     if (eligibleForRefund && booking.payment_method === 'credits') {

@@ -74,6 +74,11 @@ function makeStatement(sql, params) {
           .reduce((s, e) => s + e.amount, 0);
         return { consumed };
       }
+      if (sql.includes('SELECT active FROM users WHERE id')) {
+        // requireAuth()'s active-status re-check — this file doesn't model a
+        // users table or test deactivation, so every actor is active.
+        return { active: 1 };
+      }
       throw new Error(`mock first(): unhandled SQL: ${sql}`);
     },
     async all() {

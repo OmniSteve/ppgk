@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CheckCircle, XCircle, Calendar, ArrowRight } from 'lucide-react';
+import { CheckCircle, XCircle, Calendar, ArrowRight, Clock } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 import { buildGoogleCalendarUrl, buildOutlookCalendarUrl, downloadIcs } from '@/utils/calendarUtils';
 
@@ -8,7 +8,8 @@ export default function PaymentResult() {
   const params = new URLSearchParams(window.location.search);
   const status = params.get('status');
   const bookingIds = params.get('bookingIds')?.split(',').filter(Boolean) || [];
-  const success = status === 'success';
+  const pending = status === 'pending';
+  const success = status === 'success' || pending;
 
   const [bookings, setBookings] = useState([]);
 
@@ -16,7 +17,6 @@ export default function PaymentResult() {
     if (!success || bookingIds.length === 0) return;
     Promise.all(bookingIds.map((id) => apiClient.get(`/bookings/${id}`).catch(() => null)))
       .then((results) => setBookings(results.filter(Boolean)));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleAddToCalendar = (type) => {
@@ -35,22 +35,24 @@ export default function PaymentResult() {
 
   return (
     <div className="max-w-md mx-auto py-12 text-center space-y-6">
-      <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${success ? 'bg-success/20' : 'bg-destructive/20'}`}>
-        {success ? <CheckCircle size={40} className="text-success" /> : <XCircle size={40} className="text-destructive" />}
+      <div className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto ${pending ? 'bg-warning/20' : success ? 'bg-success/20' : 'bg-destructive/20'}`}>
+        {pending ? <Clock size={40} className="text-warning" /> : success ? <CheckCircle size={40} className="text-success" /> : <XCircle size={40} className="text-destructive" />}
       </div>
 
       <div>
         <h1 className="text-3xl font-black text-foreground mb-2">
-          {success ? 'Booking Confirmed!' : 'Payment Failed'}
+          {pending ? 'Request Submitted' : success ? 'Booking Confirmed!' : 'Payment Failed'}
         </h1>
         <p className="text-muted-foreground">
-          {success
-            ? `Your ${bookingIds.length} session${bookingIds.length > 1 ? 's' : ''} ${bookingIds.length > 1 ? 'are' : 'is'} booked. A confirmation email has been sent.`
-            : 'Your payment was not processed. No credits were deducted. Please try again.'}
+          {pending
+            ? `Your ${bookingIds.length > 1 ? 'requests have' : 'request has'} been received and ${bookingIds.length > 1 ? 'are' : 'is'} awaiting coach confirmation. We'll email you as soon as a decision is made.`
+            : success
+              ? `Your ${bookingIds.length} session${bookingIds.length > 1 ? 's' : ''} ${bookingIds.length > 1 ? 'are' : 'is'} booked. A confirmation email has been sent.`
+              : 'Your payment was not processed. No credits were deducted. Please try again.'}
         </p>
       </div>
 
-      {success && bookingIds.length > 0 && (
+      {success && !pending && bookingIds.length > 0 && (
         <div className="bg-card rounded-2xl border border-border p-5">
           <div className="flex items-center gap-2 mb-4">
             <Calendar size={18} className="text-primary" />

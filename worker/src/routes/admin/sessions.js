@@ -70,16 +70,23 @@ export async function handleAdminSessions(request, env, ctx, params) {
 
   if (method === 'POST') {
     const body = await request.json();
-    const { title, sessionTypeId, locationId, coachId, sessionDate, startTime, endTime, capacity, creditCost, price, description, notes, ageGroup, abilityLevel, status } = body;
+    const { title, sessionTypeId, locationId, coachId, sessionDate, startTime, endTime, capacity, creditCost, price, description, notes, ageGroup, abilityLevel, status, bookingMode } = body;
     if (!title || !sessionDate || !startTime || !endTime) {
       return Response.json({ message: 'title, sessionDate, startTime and endTime are required' }, { status: 400 });
     }
+    if (bookingMode && !['instant', 'request'].includes(bookingMode)) {
+      return Response.json({ message: 'bookingMode must be instant or request' }, { status: 400 });
+    }
+    if (coachId) {
+      const coach = await queryOne(env, 'SELECT active FROM coach_profiles WHERE id = ?', [coachId]);
+      if (!coach || !coach.active) return Response.json({ message: 'Cannot assign an inactive coach to a session' }, { status: 400 });
+    }
     const id = crypto.randomUUID();
     await execute(env,
-      `INSERT INTO sessions (id, title, session_type_id, location_id, coach_id, session_date, start_time, end_time, capacity, credit_cost, price, description, notes, age_group, ability_level, status)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO sessions (id, title, session_type_id, location_id, coach_id, session_date, start_time, end_time, capacity, credit_cost, price, description, notes, age_group, ability_level, status, booking_mode)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, title, sessionTypeId ?? null, locationId ?? null, coachId ?? null, sessionDate, startTime, endTime,
-       capacity ?? 10, creditCost ?? 1, price ?? null, description ?? null, notes ?? null, ageGroup ?? null, abilityLevel ?? null, status ?? 'draft']
+       capacity ?? 10, creditCost ?? 1, price ?? null, description ?? null, notes ?? null, ageGroup ?? null, abilityLevel ?? null, status ?? 'draft', bookingMode ?? 'instant']
     );
     await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'create', recordType: 'session', recordId: id, description: `Session created: ${title} on ${sessionDate}` });
     return Response.json({ id, message: 'Session created' }, { status: 201 });
@@ -88,21 +95,28 @@ export async function handleAdminSessions(request, env, ctx, params) {
   if (method === 'PUT' && params?.id) {
     const body = await request.json();
     const { title, sessionTypeId, locationId, coachId, sessionDate, startTime, endTime,
-            capacity, creditCost, price, description, notes, status, ageGroup, abilityLevel } = body;
+            capacity, creditCost, price, description, notes, status, ageGroup, abilityLevel, bookingMode } = body;
+    if (bookingMode && !['instant', 'request'].includes(bookingMode)) {
+      return Response.json({ message: 'bookingMode must be instant or request' }, { status: 400 });
+    }
+    if (coachId) {
+      const coach = await queryOne(env, 'SELECT active FROM coach_profiles WHERE id = ?', [coachId]);
+      if (!coach || !coach.active) return Response.json({ message: 'Cannot assign an inactive coach to a session' }, { status: 400 });
+    }
     await execute(env,
       `UPDATE sessions SET
        title = ?, session_type_id = ?, location_id = ?, coach_id = ?,
        session_date = ?, start_time = ?, end_time = ?,
        capacity = ?, credit_cost = ?, price = ?,
        description = ?, notes = ?, status = ?,
-       age_group = ?, ability_level = ?,
+       age_group = ?, ability_level = ?, booking_mode = COALESCE(?, booking_mode),
        updated_at = ?
        WHERE id = ?`,
       [title ?? null, sessionTypeId ?? null, locationId ?? null, coachId ?? null,
        sessionDate || null, startTime ?? null, endTime ?? null,
        capacity ?? null, creditCost ?? null, price ?? null,
        description ?? null, notes ?? null, status ?? null,
-       ageGroup ?? null, abilityLevel ?? null,
+       ageGroup ?? null, abilityLevel ?? null, bookingMode ?? null,
        new Date().toISOString(), params.id]
     );
     await audit(env, { actorId: actor.sub, actorName: `${actor.firstName} ${actor.lastName}`, action: 'update', recordType: 'session', recordId: params.id, description: `Session updated: ${params.id}` });

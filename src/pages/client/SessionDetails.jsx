@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Calendar, Clock, MapPin, Users, User, ChevronLeft, CreditCard } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogFooter,
+  AlertDialogTitle, AlertDialogDescription, AlertDialogAction, AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 
 function normaliseSession(s) {
   if (!s) return null;
@@ -22,6 +26,7 @@ function normaliseSession(s) {
     ageGroup: s.ageGroup ?? '',
     abilityLevel: s.abilityLevel ?? '',
     spotsRemaining: s.spotsRemaining ?? (capacity != null && bookedCount != null ? capacity - bookedCount : null),
+    bookingMode: s.bookingMode ?? 'instant',
   };
 }
 
@@ -30,6 +35,7 @@ export default function SessionDetails() {
   const navigate = useNavigate();
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   useEffect(() => {
     apiClient.get(`/sessions/${id}`)
@@ -38,9 +44,16 @@ export default function SessionDetails() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  const handleBookNow = () => {
+  const proceedToCheckout = () => {
     sessionStorage.setItem('ppgk_checkout_sessions', JSON.stringify([session]));
     navigate('/checkout');
+  };
+
+  const isRequestMode = session?.bookingMode === 'request';
+
+  const handleBookNow = () => {
+    if (isRequestMode) { setConfirmOpen(true); return; }
+    proceedToCheckout();
   };
 
   if (loading) return (
@@ -56,6 +69,10 @@ export default function SessionDetails() {
     </div>
   );
 
+  // Request-mode sessions keep accepting requests past capacity (they feed
+  // the backup pool) — only instant-mode sessions can be "fully booked".
+  const fullyBooked = !isRequestMode && session.spotsRemaining === 0 && session.spotsRemaining != null;
+
   return (
     <div className="max-w-2xl mx-auto space-y-5">
       <Link to="/sessions" className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm font-medium transition-colors">
@@ -69,13 +86,18 @@ export default function SessionDetails() {
               <p className="text-primary text-xs font-semibold uppercase tracking-wide mb-1">{session.sessionType}</p>
               <h1 className="text-foreground font-black text-2xl break-words">{session.name}</h1>
             </div>
-            <span className={`text-xs font-bold px-3 py-1 rounded-full flex-shrink-0 ${
-              session.spotsRemaining === 0 ? 'bg-destructive/20 text-destructive' :
-              session.spotsRemaining <= 3 ? 'bg-warning/20 text-warning' :
-              'bg-success/20 text-success'
-            }`}>
-              {session.spotsRemaining === 0 ? 'Fully Booked' : session.spotsRemaining != null ? `${session.spotsRemaining} spots` : 'Available'}
-            </span>
+            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+              <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                fullyBooked ? 'bg-destructive/20 text-destructive' :
+                !isRequestMode && session.spotsRemaining <= 3 ? 'bg-warning/20 text-warning' :
+                'bg-success/20 text-success'
+              }`}>
+                {fullyBooked ? 'Fully Booked' : isRequestMode ? 'Coach selects roster' : session.spotsRemaining != null ? `${session.spotsRemaining} spots` : 'Available'}
+              </span>
+              {isRequestMode && (
+                <span className="text-xs font-semibold px-3 py-1 rounded-full bg-warning/20 text-warning">Request only</span>
+              )}
+            </div>
           </div>
         </div>
 
@@ -110,6 +132,14 @@ export default function SessionDetails() {
             </div>
           )}
 
+          {isRequestMode && (
+            <div className="bg-warning/10 border border-warning/30 rounded-xl p-4">
+              <p className="text-warning text-sm font-medium">
+                This session has limited places. Requesting does not guarantee a place — the coach reviews all requests and confirms the final roster.
+              </p>
+            </div>
+          )}
+
           <div className="pt-2 border-t border-border">
             <div className="flex items-center justify-between mb-4">
               <div>
@@ -121,14 +151,31 @@ export default function SessionDetails() {
             </div>
             <button
               onClick={handleBookNow}
-              disabled={session.spotsRemaining === 0 && session.spotsRemaining != null}
+              disabled={fullyBooked}
               className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-foreground font-bold py-4 rounded-xl text-base transition-colors"
             >
-              {session.spotsRemaining === 0 && session.spotsRemaining != null ? 'Fully Booked' : 'Book This Session'}
+              {fullyBooked ? 'Fully Booked' : isRequestMode ? 'Request Place' : 'Book This Session'}
             </button>
           </div>
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent className="bg-card border-border text-foreground rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-foreground">Request a place?</AlertDialogTitle>
+            <AlertDialogDescription className="text-muted-foreground">
+              Submitting this request does not guarantee a place. The coach will review the player pool and confirm the final session roster. Your credit is reserved now and returned in full if you're not selected.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="bg-transparent border-border text-foreground hover:bg-accent">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={proceedToCheckout} className="bg-primary hover:bg-primary-hover text-foreground">
+              Continue to Request
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

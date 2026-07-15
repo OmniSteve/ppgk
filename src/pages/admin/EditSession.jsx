@@ -50,6 +50,7 @@ export default function EditSession() {
         abilityLevel: s.abilityLevel ?? '',
         status: s.status ?? 'draft',
         internalNotes: s.notes ?? '',
+        bookingMode: s.bookingMode ?? 'instant',
       });
       setCoaches(Array.isArray(c) ? c : (c.coaches || []));
       setLocations(Array.isArray(l) ? l : (l.locations || []));
@@ -81,6 +82,7 @@ export default function EditSession() {
         status: form.status || 'draft',
         ageGroup: form.ageGroup || null,
         abilityLevel: form.abilityLevel || null,
+        bookingMode: form.bookingMode || 'instant',
       });
       navigate('/admin/sessions');
     } catch (err) {
@@ -180,6 +182,13 @@ export default function EditSession() {
               </Select>
             </div>
             <div><Label>Capacity</Label><Input type="number" min="1" value={form.capacity || ''} onChange={set('capacity')} /></div>
+          </div>
+          <div>
+            <Label>Booking Mode</Label>
+            <Select value={form.bookingMode || 'instant'} onChange={set('bookingMode')}>
+              <option value="instant">Instant — booking confirms immediately</option>
+              <option value="request">Request players first — coach selects the roster</option>
+            </Select>
           </div>
         </Section>
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, User, AlertTriangle, RefreshCw, X, Save, TrendingUp } from 'lucide-react';
+import { Search, User, AlertTriangle, RefreshCw, X, Save, TrendingUp, CheckCircle, ShieldOff, ShieldCheck, Trash2, ChevronDown } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import { DeactivateModal, ReactivateModal, PermanentDeleteModal } from '@/components/admin/LifecycleModals';
 
 const EXPERIENCE_LEVELS = ['Beginner', 'Intermediate', 'Advanced', 'Elite'];
 const AGE_GROUPS = ['U8', 'U9', 'U10', 'U11', 'U12', 'U13', 'U14', 'U15', 'U16', 'U17', 'U18', 'Senior'];
@@ -132,20 +133,35 @@ export default function PlayerManagement() {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [editing, setEditing] = useState(null);
+  const [statusFilter, setStatusFilter] = useState('active'); // 'active' | 'inactive' | 'archived' | 'all'
+  const [success, setSuccess] = useState('');
+  const [lifecycleAction, setLifecycleAction] = useState(null); // { type: 'deactivate'|'reactivate'|'delete', entity }
 
   const load = () => {
     setLoading(true);
-    apiClient.get(`/admin/players?search=${encodeURIComponent(search)}&page=${page}&limit=20`)
+    const statusParam = statusFilter === 'all' ? '&includeInactive=true' : statusFilter === 'active' ? '' : `&status=${statusFilter}`;
+    apiClient.get(`/admin/players?search=${encodeURIComponent(search)}&page=${page}&limit=20${statusParam}`)
       .then((d) => { setPlayers(d.players || []); setTotal(d.total || 0); })
       .catch(() => setPlayers([]))
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [search, page]);
+  useEffect(() => { load(); }, [search, page, statusFilter]);
 
   const handleSaved = (updated) => {
     setPlayers((prev) => prev.map((p) => p.id === updated.id ? updated : p));
     setEditing(null);
+  };
+
+  const openLifecycle = (type, p) => {
+    setLifecycleAction({ type, entity: { id: p.id, name: `${p.firstName} ${p.lastName}`, clientId: p.clientId } });
+    setSuccess('');
+  };
+
+  const handleLifecycleSuccess = (message) => {
+    setLifecycleAction(null);
+    setSuccess(message);
+    load();
   };
 
   return (
@@ -160,9 +176,22 @@ export default function PlayerManagement() {
         </button>
       </div>
 
-      <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by name, club or parent…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
+      {success && <div className="bg-success/20 border border-success/30 rounded-xl p-3 flex items-center gap-2 text-success text-sm"><CheckCircle size={15} />{success}</div>}
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by name, club or parent…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
+        </div>
+        <div className="relative flex-shrink-0">
+          <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="bg-card border border-border rounded-xl pl-4 pr-9 py-2.5 text-sm text-foreground appearance-none focus:outline-none focus:border-primary transition-colors">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="archived">Archived</option>
+            <option value="all">All</option>
+          </select>
+          <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+        </div>
       </div>
 
       {loading ? (
@@ -211,6 +240,18 @@ export default function PlayerManagement() {
               >
                 <TrendingUp size={15} />
               </Link>
+              {p.status === 'active' ? (
+                <button onClick={() => openLifecycle('deactivate', p)} title="Deactivate" className="w-9 h-9 rounded-lg bg-card border border-border hover:bg-warning flex items-center justify-center text-muted-foreground hover:text-warning-foreground hover:border-warning transition-all flex-shrink-0">
+                  <ShieldOff size={14} />
+                </button>
+              ) : (
+                <button onClick={() => openLifecycle('reactivate', p)} title="Reactivate" className="w-9 h-9 rounded-lg bg-card border border-border hover:bg-success flex items-center justify-center text-muted-foreground hover:text-success-foreground hover:border-success transition-all flex-shrink-0">
+                  <ShieldCheck size={14} />
+                </button>
+              )}
+              <button onClick={() => openLifecycle('delete', p)} title="Permanently delete" className="w-9 h-9 rounded-lg bg-card border border-border hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-destructive-foreground hover:border-destructive transition-all flex-shrink-0">
+                <Trash2 size={14} />
+              </button>
             </div>
           ))}
         </div>
@@ -227,6 +268,19 @@ export default function PlayerManagement() {
       )}
 
       {editing && <EditModal player={editing} onClose={() => setEditing(null)} onSaved={handleSaved} />}
+
+      {lifecycleAction?.type === 'deactivate' && (
+        <DeactivateModal entityType="player" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('Player deactivated.')} />
+      )}
+      {lifecycleAction?.type === 'reactivate' && (
+        <ReactivateModal entityType="player" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('Player reactivated.')} />
+      )}
+      {lifecycleAction?.type === 'delete' && (
+        <PermanentDeleteModal entityType="player" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('Player permanently deleted.')} />
+      )}
     </div>
   );
 }

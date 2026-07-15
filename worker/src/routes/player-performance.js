@@ -20,7 +20,7 @@ const EFFECTIVE_SESSION_SQL =
   'COALESCE(pp.session_id, (SELECT b.session_id FROM bookings b WHERE b.id = pp.booking_id))';
 
 async function resolveCoachId(env, userId) {
-  const coach = await queryOne(env, 'SELECT id FROM coach_profiles WHERE user_id = ?', [userId]);
+  const coach = await queryOne(env, 'SELECT id FROM coach_profiles WHERE user_id = ? AND active = 1', [userId]);
   return coach?.id ?? null;
 }
 

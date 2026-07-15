@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Loader2, X, CheckCircle, RefreshCw } from 'lucide-react';
+import { Search, Plus, Edit2, Loader2, X, CheckCircle, RefreshCw, ShieldOff, ShieldCheck, Trash2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import { DeactivateModal, ReactivateModal, PermanentDeleteModal } from '@/components/admin/LifecycleModals';
 
 const defaultForm = { firstName: '', lastName: '', email: '', phone: '', bio: '', specialisations: '', active: true };
 
@@ -14,16 +15,29 @@ export default function CoachManagement() {
   const [syncing, setSyncing] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [includeInactive, setIncludeInactive] = useState(false);
+  const [lifecycleAction, setLifecycleAction] = useState(null); // { type: 'deactivate'|'reactivate'|'delete', entity }
 
   const load = () => {
     setLoading(true);
-    apiClient.get(`/admin/coaches?search=${encodeURIComponent(search)}`)
+    apiClient.get(`/admin/coaches?search=${encodeURIComponent(search)}${includeInactive ? '&includeInactive=true' : ''}`)
       .then((d) => setCoaches(d.coaches || []))
       .catch(() => setCoaches([]))
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [search]);
+  useEffect(() => { load(); }, [search, includeInactive]);
+
+  const openLifecycle = (type, c) => {
+    setLifecycleAction({ type, entity: { id: c.id, name: `${c.firstName} ${c.lastName}`, email: c.email } });
+    setError(''); setSuccess('');
+  };
+
+  const handleLifecycleSuccess = (message) => {
+    setLifecycleAction(null);
+    setSuccess(message);
+    load();
+  };
 
   const handleSync = async () => {
     setSyncing(true); setError(''); setSuccess('');
@@ -109,9 +123,15 @@ export default function CoachManagement() {
         </div>
       )}
 
-      <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search coaches…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search coaches…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
+        </div>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer flex-shrink-0">
+          <input type="checkbox" checked={includeInactive} onChange={(e) => setIncludeInactive(e.target.checked)} className="accent-primary" />
+          Show inactive
+        </label>
       </div>
 
       {loading ? (
@@ -132,12 +152,39 @@ export default function CoachManagement() {
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${c.active ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {c.active ? 'Active' : 'Inactive'}
               </span>
-              <button onClick={() => openEdit(c)} className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0">
-                <Edit2 size={14} />
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button onClick={() => openEdit(c)} title="Edit" className="w-8 h-8 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                  <Edit2 size={14} />
+                </button>
+                {c.active ? (
+                  <button onClick={() => openLifecycle('deactivate', c)} title="Deactivate" className="w-8 h-8 rounded-lg bg-accent hover:bg-warning flex items-center justify-center text-muted-foreground hover:text-warning-foreground transition-all">
+                    <ShieldOff size={14} />
+                  </button>
+                ) : (
+                  <button onClick={() => openLifecycle('reactivate', c)} title="Reactivate" className="w-8 h-8 rounded-lg bg-accent hover:bg-success flex items-center justify-center text-muted-foreground hover:text-success-foreground transition-all">
+                    <ShieldCheck size={14} />
+                  </button>
+                )}
+                <button onClick={() => openLifecycle('delete', c)} title="Permanently delete" className="w-8 h-8 rounded-lg bg-accent hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-destructive-foreground transition-all">
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
+      )}
+
+      {lifecycleAction?.type === 'deactivate' && (
+        <DeactivateModal entityType="coach" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('Coach deactivated.')} />
+      )}
+      {lifecycleAction?.type === 'reactivate' && (
+        <ReactivateModal entityType="coach" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('Coach reactivated.')} />
+      )}
+      {lifecycleAction?.type === 'delete' && (
+        <PermanentDeleteModal entityType="coach" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('Coach permanently deleted.')} />
       )}
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Users, Edit2, X, Loader2, CheckCircle, Shield, ChevronDown } from 'lucide-react';
+import { Search, Users, Edit2, X, Loader2, CheckCircle, Shield, ChevronDown, ShieldOff, ShieldCheck, Trash2 } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
+import { DeactivateModal, ReactivateModal, PermanentDeleteModal } from '@/components/admin/LifecycleModals';
 
 const ROLES = ['client', 'coach', 'head_coach', 'admin'];
 // Role-identity badge colours — intentionally preserved, not mapped to semantic tokens
@@ -24,10 +25,12 @@ export default function ClientManagement() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [includeInactive, setIncludeInactive] = useState(false);
+  const [lifecycleAction, setLifecycleAction] = useState(null); // { type: 'deactivate'|'reactivate'|'delete', entity }
 
   const load = () => {
     setLoading(true);
-    apiClient.get(`/admin/clients?search=${encodeURIComponent(search)}&page=${page}&limit=20`)
+    apiClient.get(`/admin/clients?search=${encodeURIComponent(search)}&page=${page}&limit=20${includeInactive ? '&includeInactive=true' : ''}`)
       .then((d) => {
         setUsers(d.clients || []);
         setTotal(d.total || 0);
@@ -36,7 +39,18 @@ export default function ClientManagement() {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { load(); }, [search, page]);
+  useEffect(() => { load(); }, [search, page, includeInactive]);
+
+  const openLifecycle = (type, u) => {
+    setLifecycleAction({ type, entity: { id: u.id, name: `${u.firstName} ${u.lastName}`, email: u.email } });
+    setError(''); setSuccess('');
+  };
+
+  const handleLifecycleSuccess = (message) => {
+    setLifecycleAction(null);
+    setSuccess(message);
+    load();
+  };
 
   const openEdit = (u) => {
     setForm({ firstName: u.firstName, lastName: u.lastName, phone: u.phone || '', role: u.role, active: u.active !== false });
@@ -117,9 +131,15 @@ export default function ClientManagement() {
         </div>
       )}
 
-      <div className="relative">
-        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by name or email…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="relative flex-1">
+          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <input value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} placeholder="Search by name or email…" className="w-full pl-9 pr-4 py-2.5 bg-card border border-border rounded-xl text-sm text-foreground placeholder-slate-500 focus:outline-none focus:border-primary transition-colors" />
+        </div>
+        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer flex-shrink-0">
+          <input type="checkbox" checked={includeInactive} onChange={(e) => { setIncludeInactive(e.target.checked); setPage(1); }} className="accent-primary" />
+          Show inactive
+        </label>
       </div>
 
       {loading ? (
@@ -143,9 +163,23 @@ export default function ClientManagement() {
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${u.active !== false ? 'bg-success/20 text-success' : 'bg-accent text-muted-foreground'}`}>
                 {u.active !== false ? 'Active' : 'Inactive'}
               </span>
-              <button onClick={() => openEdit(u)} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all flex-shrink-0 ml-auto">
-                <Edit2 size={14} />
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                <button onClick={() => openEdit(u)} title="Edit" className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
+                  <Edit2 size={14} />
+                </button>
+                {u.active !== false ? (
+                  <button onClick={() => openLifecycle('deactivate', u)} title="Deactivate" className="w-9 h-9 rounded-lg bg-accent hover:bg-warning flex items-center justify-center text-muted-foreground hover:text-warning-foreground transition-all">
+                    <ShieldOff size={14} />
+                  </button>
+                ) : (
+                  <button onClick={() => openLifecycle('reactivate', u)} title="Reactivate" className="w-9 h-9 rounded-lg bg-accent hover:bg-success flex items-center justify-center text-muted-foreground hover:text-success-foreground transition-all">
+                    <ShieldCheck size={14} />
+                  </button>
+                )}
+                <button onClick={() => openLifecycle('delete', u)} title="Permanently delete" className="w-9 h-9 rounded-lg bg-accent hover:bg-destructive flex items-center justify-center text-muted-foreground hover:text-destructive-foreground transition-all">
+                  <Trash2 size={14} />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -159,6 +193,19 @@ export default function ClientManagement() {
             <button onClick={() => setPage((p) => p + 1)} disabled={page >= Math.ceil(total / 20)} className="px-4 py-2 rounded-xl border border-border text-sm text-muted-foreground hover:border-muted-foreground/40 disabled:opacity-50 transition-colors">Next</button>
           </div>
         </div>
+      )}
+
+      {lifecycleAction?.type === 'deactivate' && (
+        <DeactivateModal entityType="user" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('User deactivated.')} />
+      )}
+      {lifecycleAction?.type === 'reactivate' && (
+        <ReactivateModal entityType="user" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('User reactivated.')} />
+      )}
+      {lifecycleAction?.type === 'delete' && (
+        <PermanentDeleteModal entityType="user" entity={lifecycleAction.entity}
+          onClose={() => setLifecycleAction(null)} onSuccess={() => handleLifecycleSuccess('User permanently deleted.')} />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Search, Trash2, Edit2, Calendar, Clock, MapPin, Users } from 'lucide-react';
+import { Plus, Search, Trash2, Edit2, Calendar, Clock, MapPin, Users, ClipboardList } from 'lucide-react';
 import { apiClient } from '@/services/apiClient';
 
 const statusColors = {
@@ -92,12 +92,20 @@ export default function SessionManagement() {
                 <span className="flex items-center gap-1"><Clock size={11} />{s.startTime}</span>
                 <span className="flex items-center gap-1 min-w-0 truncate"><MapPin size={11} className="flex-shrink-0" />{s.locationName}</span>
                 <span className="flex items-center gap-1 text-label-mono"><Users size={11} />{s.bookedCount}/{s.capacity}</span>
+                {s.bookingMode === 'request' && (
+                  <span className="text-warning font-semibold">Request only</span>
+                )}
               </div>
             </div>
               <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColors[s.status] || 'bg-accent text-muted-foreground'}`}>
                 {s.status?.replace(/_/g, ' ')}
               </span>
               <div className="flex items-center gap-2 flex-shrink-0 ml-auto">
+                {s.bookingMode === 'request' && (
+                  <Link to={`/coach/sessions/${s.id}/attendees`} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all" title="Manage roster">
+                    <ClipboardList size={14} />
+                  </Link>
+                )}
                 <Link to={`/admin/sessions/${s.id}/edit`} className="w-9 h-9 rounded-lg bg-accent hover:bg-primary flex items-center justify-center text-muted-foreground hover:text-foreground transition-all">
                   <Edit2 size={14} />
                 </Link>

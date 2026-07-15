@@ -60,7 +60,13 @@ export default function BookingDetails() {
   );
 
   const canAmend = booking.canAmend && booking.status === 'confirmed';
-  const canCancel = booking.canCancel && ['confirmed', 'pending_payment'].includes(booking.status);
+  const canCancel = booking.canCancel && ['confirmed', 'pending_payment', 'pending', 'backup'].includes(booking.status);
+
+  const STATUS_LABEL = {
+    pending: 'Awaiting coach confirmation',
+    backup: 'Backup',
+    declined: 'Declined',
+  };
 
   return (
     <div className="max-w-2xl mx-auto space-y-5">
@@ -77,9 +83,9 @@ export default function BookingDetails() {
             </div>
             <span className={`text-xs font-bold px-3 py-1.5 rounded-full flex-shrink-0 ${
               booking.status === 'confirmed' ? 'bg-success/20 text-success' :
-              booking.status === 'cancelled_by_client' || booking.status === 'cancelled_by_admin' ? 'bg-destructive/20 text-destructive' :
+              ['cancelled_by_client', 'cancelled_by_admin', 'declined'].includes(booking.status) ? 'bg-destructive/20 text-destructive' :
               'bg-warning/20 text-warning'
-            }`}>{booking.status?.replace(/_/g, ' ')}</span>
+            }`}>{STATUS_LABEL[booking.status] || booking.status?.replace(/_/g, ' ')}</span>
           </div>
         </div>
 

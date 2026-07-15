@@ -26,11 +26,9 @@ export async function handleCoachAttendance(request, env, ctx, params) {
          VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [crypto.randomUUID(), bookingId, sessionId, playerId, status, notes ?? null, payload.sub]
       );
-      // Mirror status to booking
-      await execute(env,
-        "UPDATE bookings SET status = ?, updated_at = ? WHERE id = ?",
-        [status === 'present' ? 'attended' : 'absent', new Date().toISOString(), bookingId]
-      );
+      // attendance_status lives exclusively in the attendance table —
+      // bookings.status (pending/confirmed/backup/...) is never overwritten
+      // by an attendance mark.
     }
 
     await audit(env, { actorId: payload.sub, action: 'update', recordType: 'attendance', recordId: bookingId, description: `Attendance marked ${status} for booking ${bookingId}` });

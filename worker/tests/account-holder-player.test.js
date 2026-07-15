@@ -111,6 +111,15 @@ function runStatement(store, sql, params) {
     return { first: u ? { first_name: u.first_name, last_name: u.last_name, email: u.email } : null };
   }
 
+  if (s.startsWith('SELECT active FROM users WHERE id')) {
+    // requireAuth()'s active-status re-check. Some tests authenticate as an
+    // admin/coach JWT subject that was never inserted into store.users —
+    // treat those as active rather than rejecting every such request.
+    const [userId] = params;
+    const u = store.users.find((x) => x.id === userId);
+    return { first: { active: u ? u.active : 1 } };
+  }
+
   if (s.startsWith('INSERT INTO coach_profiles')) {
     const [id, userId, firstName, lastName, email] = params;
     store.coach_profiles.push({ id, user_id: userId, first_name: firstName, last_name: lastName, email });

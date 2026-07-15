@@ -21,10 +21,15 @@ function normaliseSession(s) {
     spotsRemaining: s.spotsRemaining ?? (capacity != null && bookedCount != null ? capacity - bookedCount : null),
     ageGroup: s.ageGroup ?? '',
     abilityLevel: s.abilityLevel ?? '',
+    bookingMode: s.bookingMode ?? 'instant',
   };
 }
 
-const StatusBadge = ({ spots }) => {
+const StatusBadge = ({ spots, bookingMode }) => {
+  // Request-mode sessions always keep accepting requests (into a backup
+  // pool), so they're never "Full" — badge instead flags that a coach
+  // selects the roster.
+  if (bookingMode === 'request') return <span className="bg-warning/20 text-warning text-xs font-semibold px-2 py-0.5 rounded-full">Request only</span>;
   if (spots == null) return <span className="bg-success/20 text-success text-xs font-semibold px-2 py-0.5 rounded-full">Available</span>;
   if (spots === 0) return <span className="bg-destructive/20 text-destructive text-xs font-semibold px-2 py-0.5 rounded-full">Full</span>;
   if (spots <= 3) return <span className="bg-warning/20 text-warning text-xs font-semibold px-2 py-0.5 rounded-full">{spots} left</span>;
@@ -50,7 +55,7 @@ const SessionCard = ({ session, onSelect, selected }) => (
             <p className="text-muted-foreground text-xs">{session.sessionType}</p>
           </div>
         </div>
-        <span className="flex-shrink-0"><StatusBadge spots={session.spotsRemaining} /></span>
+        <span className="flex-shrink-0"><StatusBadge spots={session.spotsRemaining} bookingMode={session.bookingMode} /></span>
       </div>
 
       <div className="space-y-1.5 mb-4">

@@ -25,7 +25,7 @@ export default function CreateSession() {
     name: '', sessionTypeId: '', description: '', coachId: '', date: '', startTime: '', endTime: '',
     locationId: '', ageGroup: '', abilityLevel: '', capacity: '', price: '', credits: '',
     bookingOpenDate: '', bookingCloseDate: '', cancellationDeadlineHours: '24',
-    rescheduleDeadlineHours: '24', status: 'draft', internalNotes: '',
+    rescheduleDeadlineHours: '24', status: 'draft', internalNotes: '', bookingMode: 'instant',
   });
 
   useEffect(() => {
@@ -62,6 +62,7 @@ export default function CreateSession() {
         ageGroup: form.ageGroup || null,
         abilityLevel: form.abilityLevel || null,
         status: form.status || 'draft',
+        bookingMode: form.bookingMode || 'instant',
       });
       navigate('/admin/sessions');
     } catch (err) {
@@ -138,6 +139,18 @@ export default function CreateSession() {
               </Select>
             </div>
             <div><Label required>Max Capacity</Label><Input type="number" required min="1" value={form.capacity} onChange={set('capacity')} placeholder="e.g. 10" /></div>
+          </div>
+          <div>
+            <Label>Booking Mode</Label>
+            <Select value={form.bookingMode} onChange={set('bookingMode')}>
+              <option value="instant">Instant — booking confirms immediately</option>
+              <option value="request">Request players first — coach selects the roster</option>
+            </Select>
+            {form.bookingMode === 'request' && (
+              <p className="text-muted-foreground text-xs mt-1.5">
+                Players request a place and pay with credits only. You'll confirm up to capacity from the pending pool on the session's roster screen.
+              </p>
+            )}
           </div>
         </Section>
 

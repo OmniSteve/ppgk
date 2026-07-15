@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ShoppingCart, CreditCard, Users, AlertCircle, Loader2 } from 'lucide-react';
+import { ShoppingCart, CreditCard, Users, AlertCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { apiClient, unwrap } from '@/services/apiClient';
 
 const sectionCls = 'bg-card rounded-2xl border border-border p-5';
@@ -16,6 +16,7 @@ function normaliseSession(s) {
     startTime: s.startTime ?? '',
     endTime: s.endTime ?? '',
     credits: s.credits ?? s.creditCost ?? null,
+    bookingMode: s.bookingMode ?? 'instant',
   };
 }
 
@@ -48,7 +49,12 @@ export default function Checkout() {
     if (!stored) { navigate('/sessions'); return; }
     try {
       const parsed = JSON.parse(stored);
-      setSessions(Array.isArray(parsed) ? parsed.map(normaliseSession) : []);
+      const normalised = Array.isArray(parsed) ? parsed.map(normaliseSession) : [];
+      setSessions(normalised);
+      // Request-mode sessions only accept credits (coach approval must
+      // happen before any real money changes hands) — force the method and
+      // stop the user reaching a card checkout for them.
+      if (normalised.some((s) => s.bookingMode === 'request')) setPaymentMethod('credits');
     } catch {
       navigate('/sessions');
       return;
@@ -67,6 +73,7 @@ export default function Checkout() {
 
   const totalCredits = sessions.reduce((sum, s) => sum + (s.credits || 0), 0);
   const totalPrice = sessions.reduce((sum, s) => sum + (s.price || 0), 0);
+  const hasRequestMode = sessions.some((s) => s.bookingMode === 'request');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -92,9 +99,11 @@ export default function Checkout() {
         }
       }
 
-      // Credits payment — booking already confirmed
+      // Credits payment — either confirmed instantly, or (request-mode
+      // sessions) left pending for the coach to review.
       const bookingIds = Array.isArray(res.bookingIds) ? res.bookingIds : [];
-      navigate(`/payment/result?status=success&bookingIds=${bookingIds.join(',')}`);
+      const resultStatus = res.status === 'pending' ? 'pending' : 'success';
+      navigate(`/payment/result?status=${resultStatus}&bookingIds=${bookingIds.join(',')}`);
     } catch (err) {
       const body = err.responseBody;
       if (body?.step && body?.message) {
@@ -185,9 +194,17 @@ export default function Checkout() {
           <h2 className="font-bold text-foreground mb-4 flex items-center gap-2">
             <CreditCard size={18} className="text-primary" />Payment Method
           </h2>
+          {hasRequestMode && (
+            <div className="mb-3 flex items-start gap-2 bg-warning/10 border border-warning/30 rounded-xl p-3">
+              <AlertTriangle size={14} className="text-warning flex-shrink-0 mt-0.5" />
+              <p className="text-warning text-xs">
+                This session requires coach approval, so it can only be requested with credits. Card payment isn't available until a place is confirmed.
+              </p>
+            </div>
+          )}
           <div className="space-y-2">
-            <label className={radioItem(paymentMethod === 'card')}>
-              <input type="radio" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="accent-primary" />
+            <label className={`${radioItem(paymentMethod === 'card')} ${hasRequestMode ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              <input type="radio" disabled={hasRequestMode} checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} className="accent-primary" />
               <div>
                 <p className="font-semibold text-foreground text-sm">Pay by card</p>
                 <p className="text-muted-foreground text-xs text-label-mono">Secure card payment — €{totalPrice.toFixed(2)} EUR</p>
@@ -206,11 +223,19 @@ export default function Checkout() {
           </div>
         </div>
 
+        {hasRequestMode && (
+          <div className="bg-warning/10 border border-warning/30 rounded-xl p-4">
+            <p className="text-warning text-sm">
+              Submitting this request does not guarantee a place. The coach will review the player pool and confirm the final session roster. Your credit is reserved now and returned in full if you're not selected.
+            </p>
+          </div>
+        )}
+
         <div className={sectionCls}>
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 accent-primary" />
             <span className="text-foreground text-sm leading-relaxed">
-              I confirm this booking for the selected player and agree to the{' '}
+              I confirm this {hasRequestMode ? 'request' : 'booking'} for the selected player and agree to the{' '}
               <Link to="/terms" target="_blank" className="text-primary hover:underline">booking terms</Link>.
               I understand that amendments are limited to once per 7-day period per booking.
             </span>
@@ -222,7 +247,11 @@ export default function Checkout() {
           disabled={loading || !selectedPlayer || !agreed}
           className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed text-foreground font-bold py-4 rounded-xl text-base transition-colors flex items-center justify-center gap-2"
         >
-          {loading ? <><Loader2 size={18} className="animate-spin" /> Processing…</> : `Confirm Booking${paymentMethod === 'card' ? ` · €${totalPrice.toFixed(2)}` : ` · ${totalCredits} credits`}`}
+          {loading
+            ? <><Loader2 size={18} className="animate-spin" /> Processing…</>
+            : hasRequestMode
+              ? `Submit Request · ${totalCredits} credits`
+              : `Confirm Booking${paymentMethod === 'card' ? ` · €${totalPrice.toFixed(2)}` : ` · ${totalCredits} credits`}`}
         </button>
       </form>
     </div>

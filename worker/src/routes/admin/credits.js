@@ -96,15 +96,17 @@ export async function handleAdminCredits(request, env, ctx, params) {
     const amountInt = parseInt(amount);
     if (isNaN(amountInt)) return Response.json({ message: 'amount must be an integer' }, { status: 400 });
 
-    // Validate the client exists
-    const client = await queryOne(env, 'SELECT id FROM users WHERE id = ?', [clientId]);
+    // Validate the client exists and is active
+    const client = await queryOne(env, 'SELECT id, active FROM users WHERE id = ?', [clientId]);
     if (!client) return Response.json({ message: 'Selected client does not exist' }, { status: 400 });
+    if (!client.active) return Response.json({ message: 'Cannot grant credits to an inactive client' }, { status: 400 });
 
-    // If a playerId is supplied, validate it exists and belongs to that client
+    // If a playerId is supplied, validate it exists, belongs to that client, and is active
     if (playerId) {
-      const player = await queryOne(env, 'SELECT id, client_id FROM players WHERE id = ?', [playerId]);
+      const player = await queryOne(env, 'SELECT id, client_id, status FROM players WHERE id = ?', [playerId]);
       if (!player) return Response.json({ message: 'Selected player does not exist' }, { status: 400 });
       if (player.client_id !== clientId) return Response.json({ message: 'Player does not belong to the selected client' }, { status: 400 });
+      if (player.status !== 'active') return Response.json({ message: 'Cannot grant credits for an inactive player' }, { status: 400 });
     }
 
     // Calculate current balance

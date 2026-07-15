@@ -14,9 +14,9 @@ export async function handleVerifyEmail(request, env) {
     return Response.json({ message: 'token is required' }, { status: 400 });
   }
 
-  const user = await queryOne(env, 'SELECT id, first_name, last_name, email FROM users WHERE email_verify_token = ?', [token]);
+  const user = await queryOne(env, 'SELECT id, first_name, last_name, email, active FROM users WHERE email_verify_token = ?', [token]);
 
-  if (!user) {
+  if (!user || !user.active) {
     return Response.json({ message: 'Invalid or already used verification token' }, { status: 400 });
   }
 

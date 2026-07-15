@@ -6,12 +6,23 @@ import { apiClient, unwrap } from '@/services/apiClient';
 const statusColor = {
   confirmed: 'bg-success/20 text-success',
   pending_payment: 'bg-warning/20 text-warning',
+  pending: 'bg-warning/20 text-warning',
+  backup: 'bg-warning/20 text-warning',
+  declined: 'bg-destructive/20 text-destructive',
   cancelled_by_client: 'bg-destructive/20 text-destructive',
   cancelled_by_admin: 'bg-destructive/20 text-destructive',
   rescheduled: 'bg-info/20 text-info',
   attended: 'bg-accent text-muted-foreground',
   absent: 'bg-orange-500/20 text-orange-400',
   payment_failed: 'bg-destructive/20 text-destructive',
+};
+
+// Friendlier copy for the new roster statuses — everything else falls back
+// to the raw status with underscores replaced by spaces (existing behaviour).
+const statusLabel = {
+  pending: 'Awaiting coach confirmation',
+  backup: 'Backup',
+  declined: 'Declined',
 };
 
 // Default optional display fields — the API contract guarantees camelCase keys
@@ -107,7 +118,7 @@ export default function UpcomingBookings() {
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <p className="font-bold text-foreground text-sm truncate">{b.sessionName}</p>
                   <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${statusColor[b.status] || 'bg-accent text-muted-foreground'}`}>
-                    {b.status?.replace(/_/g, ' ')}
+                    {statusLabel[b.status] || b.status?.replace(/_/g, ' ')}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-muted-foreground text-xs">

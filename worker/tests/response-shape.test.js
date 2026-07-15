@@ -35,6 +35,7 @@ function genericRow() {
     id: 'row-1',
     title: 'GK Session',
     status: 'confirmed',
+    active: 1, // requireAuth()'s active-status re-check
     first_name: 'Ada',
     last_name: 'Keeper',
     date_of_birth: '2014-03-01',

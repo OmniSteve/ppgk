@@ -2,6 +2,7 @@
  * JWT-based authentication helpers for Cloudflare Worker.
  * Uses the Web Crypto API (available in Workers runtime).
  */
+import { queryOne } from './db.js';
 
 const ALG = { name: 'HMAC', hash: 'SHA-256' };
 
@@ -58,7 +59,10 @@ export async function verifyJwt(token, secret) {
 }
 
 /**
- * Extract and verify the Bearer token from a request.
+ * Extract and verify the Bearer token from a request, then re-check the
+ * account's active status against the DB (a signed JWT alone can't reflect
+ * an account being disabled after it was issued — there is no server-side
+ * session/refresh-token store to revoke instead).
  * Returns the decoded payload or throws.
  */
 export async function requireAuth(request, env) {
@@ -66,7 +70,17 @@ export async function requireAuth(request, env) {
   if (!authHeader.startsWith('Bearer ')) throw Object.assign(new Error('Unauthorized'), { status: 401 });
 
   const token = authHeader.slice(7);
-  return verifyJwt(token, env.JWT_SECRET);
+  const payload = await verifyJwt(token, env.JWT_SECRET);
+
+  const user = await queryOne(env, 'SELECT active FROM users WHERE id = ?', [payload.sub]);
+  if (!user || user.active !== 1) {
+    throw Object.assign(new Error('This account has been disabled. Please contact Premier Performance GK.'), {
+      status: 403,
+      code: 'ACCOUNT_INACTIVE',
+    });
+  }
+
+  return payload;
 }
 
 /**
