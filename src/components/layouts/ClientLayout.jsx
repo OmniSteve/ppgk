@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ClientErrorBoundary from '@/components/ClientErrorBoundary';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
+import BrandLogo from '@/components/BrandLogo';
 import {
   LayoutDashboard, Calendar, Users, CreditCard, ShoppingBag,
   Bell, User, LogOut, Menu, Shield, Briefcase, ShoppingCart, Package
@@ -28,15 +29,7 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <span className="text-foreground font-bold text-sm">GK</span>
-          </div>
-          <div>
-            <p className="text-foreground font-bold text-sm leading-tight">Premier Performance</p>
-            <p className="text-primary text-xs font-medium">Goalkeeping</p>
-          </div>
-        </div>
+        <BrandLogo variant="sidebar" onClick={onLinkClick} />
       </div>
 
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -131,12 +124,7 @@ export default function ClientLayout({ children }) {
       <div className="flex-1 min-w-0 lg:ml-64 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile Header */}
         <header className="lg:hidden print:hidden bg-sidebar px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-border">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-foreground font-bold text-xs">GK</span>
-            </div>
-            <span className="text-foreground font-bold text-sm">Premier Performance</span>
-          </div>
+          <BrandLogo variant="compact" />
           <button onClick={() => setSidebarOpen(true)} className="text-foreground hover:text-foreground p-1">
             <Menu size={22} />
           </button>

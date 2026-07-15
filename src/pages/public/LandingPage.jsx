@@ -21,6 +21,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DotGridCanvas from '@/components/landing/DotGridCanvas';
 import RotatingWord from '@/components/landing/RotatingWord';
 import PPGKHeroLogo from '@/components/landing/PPGKHeroLogo';
+import BrandLogo from '@/components/BrandLogo';
 import './LandingPage.css';
 
 const ROTATING_WORDS = ['Technique', 'Confidence', 'Reactions', 'Positioning', 'Performance'];
@@ -127,7 +128,9 @@ export default function LandingPage() {
         transition={{ duration: shouldReduceMotion ? 0 : 0.25, ease: [0.16, 1, 0.3, 1] }}
       >
         <nav className="nav" aria-label="Main">
-          <a className="logo" href="#top">PP<span>GK</span></a>
+          <a className="logo" href="#top" aria-label="Premier Performance Goalkeeping">
+            <BrandLogo to={null} variant="header" />
+          </a>
 
           <ul className="nav-links">
             {NAV_LINKS.map((link) => (

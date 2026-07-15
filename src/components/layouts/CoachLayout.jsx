@@ -3,7 +3,8 @@ import { Outlet } from 'react-router-dom';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
-import { LayoutDashboard, Calendar, LogOut, Menu, Briefcase } from 'lucide-react';
+import { LayoutDashboard, Calendar, LogOut, Menu } from 'lucide-react';
+import BrandLogo from '@/components/BrandLogo';
 
 const navItems = [
   { label: 'Dashboard', icon: LayoutDashboard, href: '/coach' },
@@ -16,15 +17,8 @@ function SidebarNav({ user, location, onLinkClick, onSignOut }) {
   return (
     <div className="flex flex-col h-full">
       <div className="p-6 border-b border-border">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
-            <Briefcase size={18} className="text-foreground" />
-          </div>
-          <div>
-            <p className="text-foreground font-bold text-sm">Coach Portal</p>
-            <p className="text-primary text-xs">Premier Performance GK</p>
-          </div>
-        </div>
+        <BrandLogo variant="sidebar" onClick={onLinkClick} />
+        <p className="text-foreground font-bold text-sm mt-3">Coach Portal</p>
       </div>
 
       <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
@@ -90,9 +84,9 @@ export default function CoachLayout({ children }) {
 
       <div className="flex-1 min-w-0 lg:ml-64 print:ml-0 flex flex-col min-h-screen">
         <header className="lg:hidden print:hidden bg-sidebar px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Briefcase size={16} className="text-primary" />
-            <span className="text-foreground font-semibold text-sm">Coach Portal</span>
+          <div className="flex items-center gap-3 min-w-0">
+            <BrandLogo variant="compact" />
+            <span className="text-foreground font-semibold text-sm truncate">Coach Portal</span>
           </div>
           <button onClick={() => setSidebarOpen(true)} className="text-foreground hover:text-foreground p-1">
             <Menu size={22} />

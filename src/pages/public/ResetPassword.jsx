@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import BrandLogo from '@/components/BrandLogo';
 import { Loader2, CheckCircle } from 'lucide-react';
 
 export default function ResetPassword() {
@@ -39,9 +40,7 @@ export default function ResetPassword() {
     <div className="min-h-screen bg-sidebar flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-foreground font-black text-xl">GK</span>
-          </div>
+          <BrandLogo variant="auth" className="mb-4" />
           <h1 className="text-foreground font-black text-3xl mb-2 text-display">New password</h1>
           <p className="text-muted-foreground">Choose a strong password</p>
         </div>

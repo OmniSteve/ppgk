@@ -75,7 +75,7 @@
 .ppgk-landing section { padding: clamp(4.5rem, 10vw, 8.5rem) 0; }
 /* keep the sticky header from covering a section heading on anchor-jump */
 .ppgk-landing section[id],
-.ppgk-landing footer[id] { scroll-margin-top: 84px; }
+.ppgk-landing footer[id] { scroll-margin-top: 112px; }
 .ppgk-landing .section-head {
   margin-bottom: clamp(2.5rem, 5vw, 4rem);
   display: grid;
@@ -94,10 +94,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.9rem clamp(1.25rem, 5vw, 3rem);
+  /* tighter vertical padding than the old text-logo header — the image
+     logo is taller, this keeps the sticky bar from growing too much */
+  padding: 0.5rem clamp(1.25rem, 5vw, 3rem);
   max-width: 1180px;
   margin: 0 auto;
 }
+/* text lockup still used by the footer brand block */
 .ppgk-landing .logo {
   font-family: var(--font-display);
   font-weight: 800;
@@ -107,6 +110,12 @@
   text-transform: uppercase;
 }
 .ppgk-landing .logo span { color: hsl(var(--primary)); }
+/* header instance holds the image logo; keep it centred in the bar */
+.ppgk-landing .nav .logo {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
 .ppgk-landing .nav-links {
   display: flex;
   gap: 2rem;
@@ -232,7 +241,7 @@
 
 /* ── hero ───────────────────────────────────────────────────────────────── */
 .ppgk-landing .hero {
-  min-height: calc(100svh - 62px);
+  min-height: calc(100svh - 104px);
   display: grid;
   align-items: center;
   padding: clamp(3rem, 7vw, 5rem) 0;

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import BrandLogo from '@/components/BrandLogo';
 import { Eye, EyeOff, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
 
 export default function Register() {
@@ -106,9 +107,7 @@ export default function Register() {
     <div className="min-h-screen bg-sidebar flex items-center justify-center p-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4">
-            <span className="text-foreground font-black text-xl">GK</span>
-          </div>
+          <BrandLogo variant="auth" className="mb-4" />
           <h1 className="text-foreground font-black text-3xl mb-2 text-display">Create account</h1>
           <p className="text-muted-foreground">Join Premier Performance Goalkeeping</p>
         </div>

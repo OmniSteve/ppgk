@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ShoppingCart, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import BrandLogo from '@/components/BrandLogo';
 
 /**
  * Shared header for the public storefront pages. Uses the same Tailwind
@@ -19,7 +20,7 @@ export default function StoreHeader({ backTo, backLabel }) {
     <header className="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
         <div className="flex items-center gap-4 min-w-0">
-          <Link to="/" className="font-black text-lg text-foreground flex-shrink-0">PP<span className="text-primary">GK</span></Link>
+          <BrandLogo variant="compact" className="flex-shrink-0" />
           {backTo ? (
             <Link to={backTo} className="hidden sm:flex items-center gap-1 text-muted-foreground hover:text-foreground text-sm transition-colors">
               <ArrowLeft size={14} />{backLabel || 'Back'}

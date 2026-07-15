@@ -5,10 +5,11 @@ import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import CollapsibleNavGroup from './CollapsibleNavGroup';
+import BrandLogo from '@/components/BrandLogo';
 import {
   LayoutDashboard, Users, UserCheck, Dumbbell, MapPin, Tag,
   Package, BookOpen, ClipboardList, CreditCard, Bell, BarChart2,
-  FileText, Settings, LogOut, Menu, Shield, Calendar,
+  FileText, Settings, LogOut, Menu, Calendar,
   ShoppingBag, Layers, ClipboardCheck, Boxes
 } from 'lucide-react';
 
@@ -110,15 +111,8 @@ function SidebarNav({ user, location, openGroups, onOpenGroupsChange, onLinkClic
   return (
     <div className="flex flex-col h-full">
       <div className="p-5 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center">
-            <Shield size={16} className="text-foreground" />
-          </div>
-          <div>
-            <p className="text-foreground font-bold text-sm leading-tight">Admin Panel</p>
-            <p className="text-primary text-xs">PPGK</p>
-          </div>
-        </div>
+        <BrandLogo variant="sidebar" onClick={onLinkClick} />
+        <p className="text-foreground font-bold text-sm leading-tight mt-3">Admin Panel</p>
       </div>
 
       <nav className="flex-1 overflow-y-auto">
@@ -246,9 +240,9 @@ export default function AdminLayout({ children = <Outlet /> }) {
       <div className="flex-1 min-w-0 lg:ml-56 print:ml-0 flex flex-col min-h-screen">
         {/* Mobile header */}
         <header className="lg:hidden print:hidden bg-sidebar px-4 py-3 flex items-center justify-between sticky top-0 z-30 border-b border-border">
-          <div className="flex items-center gap-2">
-            <Shield size={16} className="text-primary" />
-            <span className="text-foreground font-semibold text-sm">Admin Panel</span>
+          <div className="flex items-center gap-3 min-w-0">
+            <BrandLogo variant="compact" />
+            <span className="text-foreground font-semibold text-sm truncate">Admin Panel</span>
           </div>
           <button onClick={() => setSidebarOpen(true)} className="text-muted-foreground hover:text-foreground p-1">
             <Menu size={22} />

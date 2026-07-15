@@ -17,7 +17,7 @@
 import { Router }          from './lib/router.js';
 import { corsHeaders }     from './lib/cors.js';
 import { handleScheduled } from './scheduled.js';
-import { handleFaviconAsset } from './routes/assets.js';
+import { handleFaviconAsset, handleBrandLogoAsset } from './routes/assets.js';
 
 // Auth routes
 import { handleRegister }       from './routes/auth/register.js';
@@ -111,6 +111,7 @@ export default {
 
       // ── Static assets (no auth) ──────────────────────────────────────────
       router.get('/api/assets/favicon.png', handleFaviconAsset);
+      router.get('/api/assets/logo_small.png', handleBrandLogoAsset);
 
       // ── Auth ────────────────────────────────────────────────────────────
       router.post('/api/auth/register',        handleRegister);
