@@ -33,7 +33,7 @@ export default function Shop() {
       <StoreHeader />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div>
-          <h1 className="text-3xl font-black text-foreground">Buy Goalkeeping Gear</h1>
+          <h1 className="text-3xl font-black text-foreground">Goalkeeping Gear</h1>
           <p className="text-muted-foreground text-sm mt-1">{total} products · Gloves, clothing, accessories &amp; equipment.</p>
         </div>
 
