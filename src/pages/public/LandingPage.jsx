@@ -589,7 +589,7 @@ export default function LandingPage() {
               </Link>
               <Link className="btn btn-ghost" to="/shop">
                 <ShoppingBag size={16} aria-hidden="true" />
-                Shop Goalkeeping Gear
+                Buy Goalkeeping Gear
               </Link>
               <Link className="btn btn-ghost" to="/register">
                 <UserPlus size={16} aria-hidden="true" />
