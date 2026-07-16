@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 export default function TermsPage() {
   return (
-    <div className="min-h-screen bg-sidebar text-foreground">
+    <div className="min-h-screen text-foreground">
       <div className="max-w-3xl mx-auto px-6 py-16">
         <Link to="/" className="text-primary text-sm hover:underline mb-8 block">← Back to home</Link>
         <h1 className="text-4xl font-black mb-4 text-display">Terms and Conditions</h1>

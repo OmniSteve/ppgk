@@ -69,7 +69,7 @@ export default function StoreCheckout() {
   if (lines.length === 0) return null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <StoreHeader backTo="/cart" backLabel="Back to cart" />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8">
         <h1 className="text-2xl font-black text-foreground mb-6">Checkout</h1>

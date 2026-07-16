@@ -104,7 +104,7 @@ export default function ClientLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 bg-sidebar fixed inset-y-0 left-0 z-30 print:hidden">
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />

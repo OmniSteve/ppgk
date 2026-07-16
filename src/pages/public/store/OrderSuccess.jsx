@@ -40,7 +40,7 @@ export default function OrderSuccess() {
   }, [orderId, user]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <StoreHeader />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-12 text-center space-y-6">
         <CheckCircle size={56} className="text-success mx-auto" />

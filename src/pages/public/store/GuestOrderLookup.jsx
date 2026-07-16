@@ -24,7 +24,7 @@ export default function GuestOrderLookup() {
   }, [token]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <StoreHeader />
       <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10 space-y-6">
         {loading ? (

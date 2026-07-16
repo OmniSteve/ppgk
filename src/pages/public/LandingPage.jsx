@@ -18,7 +18,6 @@ import {
   ShoppingBag,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import DotGridCanvas from '@/components/landing/DotGridCanvas';
 import RotatingWord from '@/components/landing/RotatingWord';
 import PPGKHeroLogo from '@/components/landing/PPGKHeroLogo';
 import BrandLogo from '@/components/BrandLogo';
@@ -197,8 +196,7 @@ export default function LandingPage() {
 
         {/* ── HERO ────────────────────────────────────────────────────────── */}
         <section className="hero" aria-label="Introduction">
-          <DotGridCanvas className="hero-canvas" />
-          <div className="hero-canvas-fade" aria-hidden="true" />
+          {/* Dot grid comes from the app-wide GlobalDotGrid layer */}
           <div className="hero-glow" aria-hidden="true" />
           <div className="wrap hero-stack">
 

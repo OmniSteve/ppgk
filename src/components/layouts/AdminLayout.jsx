@@ -207,7 +207,7 @@ export default function AdminLayout({ children = <Outlet /> }) {
   };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-56 bg-sidebar fixed inset-y-0 left-0 z-30 border-r border-sidebar-border print:hidden">
         <SidebarNav

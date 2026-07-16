@@ -68,7 +68,7 @@ export default function CoachLayout({ children }) {
   const handleSignOut = () => { signOut(); navigate('/signin'); };
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex">
       <aside className="hidden lg:flex flex-col w-64 bg-sidebar fixed inset-y-0 left-0 z-30 print:hidden">
         <SidebarNav user={user} location={location} onLinkClick={() => {}} onSignOut={handleSignOut} />
       </aside>

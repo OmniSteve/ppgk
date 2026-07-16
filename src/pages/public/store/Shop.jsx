@@ -29,7 +29,7 @@ export default function Shop() {
   }, [search, category, inStockOnly, sort]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <StoreHeader />
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <div>

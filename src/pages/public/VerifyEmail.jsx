@@ -55,7 +55,7 @@ export default function VerifyEmail() {
   };
 
   return (
-    <div className="min-h-screen bg-sidebar flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center bg-card rounded-2xl p-10 border border-border shadow-xl">
 
         {status === 'loading' && (

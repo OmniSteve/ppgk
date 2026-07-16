@@ -8,7 +8,8 @@
 /* ── wrapper (replaces body-level styles from the reference) ────────────── */
 .ppgk-landing {
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
-  background: hsl(var(--background));
+  /* no background — the page sits on the body bg so the app-wide
+     GlobalDotGrid layer shows through */
   color: hsl(var(--foreground));
   font-family: var(--font-body);
   font-size: 17px;
@@ -297,23 +298,8 @@
   .ppgk-landing .hero-actions .btn     { justify-content: center; }
 }
 
-/* interactive dot-grid background + fade so it never competes with text */
-.ppgk-landing .hero-canvas {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  opacity: 0.9;
-}
-.ppgk-landing .hero-canvas-fade {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(to bottom, transparent 0%, hsl(var(--background)) 92%),
-    radial-gradient(ellipse at center, transparent 35%, hsl(var(--background)) 96%);
-}
+/* interactive dot-grid background is now provided app-wide by
+   GlobalDotGrid (fixed layer behind all content) */
 
 /* ambient background glow behind hero / final CTA */
 .ppgk-landing .hero-glow {

@@ -9,7 +9,7 @@ export default function Cart() {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <StoreHeader backTo="/shop" backLabel="Continue shopping" />
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
         <h1 className="text-2xl font-black text-foreground">Your Cart</h1>

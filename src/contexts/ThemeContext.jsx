@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useLayoutEffect, useState } from 'react';
 
 const ThemeContext = createContext({ theme: 'midnight', setTheme: () => {} });
 
@@ -10,7 +10,9 @@ export function ThemeProvider({ children }) {
     }
   );
 
-  useEffect(() => {
+  // Layout effect so data-theme is applied before any child's passive
+  // effect reads theme CSS variables (GlobalDotGrid samples --primary).
+  useLayoutEffect(() => {
     document.documentElement.dataset.theme = theme;
     try { localStorage.setItem('ppgk-theme', theme); } catch (_) {}
   }, [theme]);

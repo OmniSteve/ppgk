@@ -13,9 +13,10 @@ const RADIUS_BOOST = 2;
 const GRID_CELL_SIZE = Math.max(50, Math.floor(INTERACTION_RADIUS / 1.5));
 
 /**
- * Decorative animated dot grid for the hero background. Dots idle-pulse and
- * brighten near the pointer, coloured from the active theme's --primary so
- * it follows Classic / Floodlit / Midnight automatically.
+ * Decorative animated dot grid, rendered app-wide by GlobalDotGrid as a
+ * fixed background layer. Dots idle-pulse and brighten near the pointer,
+ * coloured from the active theme's --primary so it follows Classic /
+ * Floodlit / Midnight automatically. Sizes itself to its parent element.
  *
  * Renders a single static frame (no RAF loop, no pointer tracking) when the
  * user prefers reduced motion, and pauses the loop whenever the tab is

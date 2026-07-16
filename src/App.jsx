@@ -22,6 +22,7 @@ import { CartProvider } from '@/contexts/CartContext';
 import ScrollToTop from '@/components/ScrollToTop';
 import AppProtectedRoute from '@/components/AppProtectedRoute';
 import EnvironmentBadge from '@/components/EnvironmentBadge';
+import GlobalDotGrid from '@/components/GlobalDotGrid';
 
 // Public pages
 import LandingPage from '@/pages/public/LandingPage';
@@ -102,7 +103,7 @@ const AppRoutes = () => {
 
   if (isLoading) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center bg-background">
+      <div className="fixed inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" />
       </div>
     );
@@ -201,6 +202,7 @@ function App() {
         <CartProvider>
           <QueryClientProvider client={queryClientInstance}>
             <Router>
+              <GlobalDotGrid />
               <ScrollToTop />
               <AppRoutes />
             </Router>

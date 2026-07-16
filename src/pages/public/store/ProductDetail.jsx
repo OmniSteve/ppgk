@@ -27,7 +27,7 @@ export default function ProductDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <StoreHeader backTo="/shop" backLabel="Back to shop" />
         <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-border border-t-primary rounded-full animate-spin" /></div>
       </div>
@@ -36,7 +36,7 @@ export default function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen">
         <StoreHeader backTo="/shop" backLabel="Back to shop" />
         <div className="max-w-3xl mx-auto px-6 py-16 text-center">
           <p className="text-destructive">{error || 'Product not found'}</p>
@@ -66,7 +66,7 @@ export default function ProductDetail() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen">
       <StoreHeader backTo="/shop" backLabel="Back to shop" />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="space-y-3">
